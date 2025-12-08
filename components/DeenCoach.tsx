@@ -1,5 +1,6 @@
+
 import React, { useState } from 'react';
-import { Sparkles, MessageCircle, Loader2, Lock, CheckCircle2, Crown } from 'lucide-react';
+import { Sparkles, MessageCircle, Loader2, Crown, CheckCircle2, X } from 'lucide-react';
 import { Habit, HabitLog, PrayerLog, UserProfile } from '../types';
 import { generateCoachingAdvice } from '../services/geminiService';
 
@@ -15,78 +16,22 @@ interface DeenCoachProps {
 const DeenCoach: React.FC<DeenCoachProps> = ({ habits, logs, prayerLogs, currentDate, userProfile, onSubscribe }) => {
   const [advice, setAdvice] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [showPaywall, setShowPaywall] = useState(false);
 
   const handleGetAdvice = async () => {
+    if (!userProfile.isPremium) {
+        setShowPaywall(true);
+        return;
+    }
+
     setLoading(true);
     const result = await generateCoachingAdvice(habits, logs, prayerLogs, currentDate);
     setAdvice(result);
     setLoading(false);
   };
 
-  if (!userProfile.isPremium) {
-    return (
-      <div className="relative overflow-hidden rounded-2xl bg-white border border-slate-200 shadow-sm">
-        {/* Blured Content Preview */}
-        <div className="p-8 filter blur-sm select-none opacity-50">
-            <div className="bg-gradient-to-br from-emerald-900 to-slate-900 rounded-2xl p-8 text-white h-64">
-                <h2 className="text-2xl font-bold mb-2 flex items-center gap-2">Coach Deen AI</h2>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
-                {[1,2,3].map(i => <div key={i} className="bg-slate-100 h-24 rounded-xl"></div>)}
-            </div>
-        </div>
-
-        {/* Paywall Overlay */}
-        <div className="absolute inset-0 flex items-center justify-center p-6 bg-gradient-to-t from-white via-white/90 to-transparent">
-          <div className="max-w-md w-full bg-white rounded-3xl shadow-2xl p-8 border border-slate-100 text-center relative overflow-hidden">
-             <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-emerald-400 via-yellow-400 to-emerald-400"></div>
-             
-             <div className="w-16 h-16 bg-gradient-to-br from-yellow-100 to-yellow-50 text-yellow-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner">
-                <Crown className="w-8 h-8" />
-             </div>
-
-             <h2 className="text-2xl font-bold text-slate-900 mb-2">Débloquez le Coach IA</h2>
-             <p className="text-slate-500 mb-6">
-               Obtenez des conseils spirituels personnalisés chaque jour pour améliorer votre pratique.
-             </p>
-
-             <ul className="text-left space-y-3 mb-8 bg-slate-50 p-4 rounded-xl">
-               <li className="flex items-center gap-3 text-sm text-slate-700">
-                  <CheckCircle2 className="w-5 h-5 text-emerald-500 flex-shrink-0" />
-                  Analyse détaillée de vos progrès
-               </li>
-               <li className="flex items-center gap-3 text-sm text-slate-700">
-                  <CheckCircle2 className="w-5 h-5 text-emerald-500 flex-shrink-0" />
-                  Conseils basés sur le Coran & la Sunna
-               </li>
-               <li className="flex items-center gap-3 text-sm text-slate-700">
-                  <CheckCircle2 className="w-5 h-5 text-emerald-500 flex-shrink-0" />
-                  Support prioritaire
-               </li>
-             </ul>
-
-             <div className="mb-6">
-               <span className="text-3xl font-bold text-slate-900">4,94 €</span>
-               <span className="text-slate-500"> / mois</span>
-               <p className="text-xs text-emerald-600 font-medium mt-1">3 jours d'essai gratuit • Sans engagement</p>
-             </div>
-
-             <button 
-               onClick={onSubscribe}
-               className="w-full py-4 bg-emerald-600 text-white rounded-xl font-bold text-lg hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-200 flex items-center justify-center gap-2 group"
-             >
-               <Sparkles className="w-5 h-5 text-yellow-300 group-hover:scale-110 transition-transform" />
-               Commencer l'essai gratuit
-             </button>
-             <p className="text-xs text-slate-400 mt-4">Paiement sécurisé. Résiliable à tout moment.</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 relative">
       <div className="bg-gradient-to-br from-emerald-900 to-slate-900 rounded-2xl p-8 text-white relative overflow-hidden shadow-xl">
         <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500 rounded-full mix-blend-overlay filter blur-3xl opacity-20 -translate-y-1/2 translate-x-1/2"></div>
         
@@ -157,6 +102,65 @@ const DeenCoach: React.FC<DeenCoachProps> = ({ habits, logs, prayerLogs, current
              <p className="text-sm text-slate-500 mt-1">Visez le progrès, pas la perfection. Chaque jour est une nouvelle chance.</p>
           </div>
       </div>
+
+      {/* Paywall Modal */}
+      {showPaywall && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in">
+          <div className="relative max-w-md w-full bg-white rounded-3xl shadow-2xl p-8 border border-slate-100 text-center overflow-hidden animate-in zoom-in-95 duration-200">
+             
+             <button 
+                onClick={() => setShowPaywall(false)}
+                className="absolute top-4 right-4 p-2 text-slate-400 hover:bg-slate-100 rounded-full transition-colors"
+             >
+                <X className="w-5 h-5" />
+             </button>
+
+             <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-emerald-400 via-yellow-400 to-emerald-400"></div>
+             
+             <div className="w-16 h-16 bg-gradient-to-br from-yellow-100 to-yellow-50 text-yellow-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner">
+                <Crown className="w-8 h-8" />
+             </div>
+
+             <h2 className="text-2xl font-bold text-slate-900 mb-2">Débloquez le Coach IA</h2>
+             <p className="text-slate-500 mb-6">
+               Pour recevoir ce conseil personnalisé, passez au mode Premium.
+             </p>
+
+             <ul className="text-left space-y-3 mb-8 bg-slate-50 p-4 rounded-xl">
+               <li className="flex items-center gap-3 text-sm text-slate-700">
+                  <CheckCircle2 className="w-5 h-5 text-emerald-500 flex-shrink-0" />
+                  Analyses spirituelles quotidiennes
+               </li>
+               <li className="flex items-center gap-3 text-sm text-slate-700">
+                  <CheckCircle2 className="w-5 h-5 text-emerald-500 flex-shrink-0" />
+                  Conseils basés sur vos données
+               </li>
+               <li className="flex items-center gap-3 text-sm text-slate-700">
+                  <CheckCircle2 className="w-5 h-5 text-emerald-500 flex-shrink-0" />
+                  3 jours d'essai gratuit
+               </li>
+             </ul>
+
+             <div className="mb-6">
+               <span className="text-3xl font-bold text-slate-900">4,95 €</span>
+               <span className="text-slate-500"> / mois</span>
+               <p className="text-xs text-emerald-600 font-medium mt-1">Essai gratuit • Sans engagement</p>
+             </div>
+
+             <button 
+               onClick={() => {
+                   setShowPaywall(false);
+                   onSubscribe();
+               }}
+               className="w-full py-4 bg-emerald-600 text-white rounded-xl font-bold text-lg hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-200 flex items-center justify-center gap-2 group"
+             >
+               <Sparkles className="w-5 h-5 text-yellow-300 group-hover:scale-110 transition-transform" />
+               Commencer l'essai gratuit
+             </button>
+             <p className="text-xs text-slate-400 mt-4">Paiement sécurisé. Résiliable à tout moment.</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

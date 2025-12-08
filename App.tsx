@@ -237,9 +237,6 @@ const App: React.FC = () => {
                      ></div>
                  </div>
              </div>
-             <button onClick={() => setView('profile')} className="bg-slate-50 p-2 rounded-full text-slate-600 border border-slate-200">
-                <User className="w-4 h-4" />
-             </button>
          </div>
       </div>
 

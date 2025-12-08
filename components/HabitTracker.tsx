@@ -28,7 +28,7 @@ const DAYS = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
 const HabitTracker: React.FC<HabitTrackerProps> = ({ habits, logs, setHabits, setLogs, currentDate, onUpdateXP }) => {
   const [isAdding, setIsAdding] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const [showAllHabits, setShowAllHabits] = useState(false); // New toggle for filtering
+  const [showAllHabits, setShowAllHabits] = useState(false);
   
   const [newHabitTitle, setNewHabitTitle] = useState('');
   const [newHabitCategory, setNewHabitCategory] = useState<Habit['category']>('deen');
@@ -75,19 +75,18 @@ const HabitTracker: React.FC<HabitTrackerProps> = ({ habits, logs, setHabits, se
 
     setHabits(prev => [...prev, newHabit]);
     
-    // Reset form
     setNewHabitTitle('');
     setNewHabitXP(10);
     setFrequency([]);
     setIsAdding(false);
     setShowSuggestions(false);
     
-    // Feedback
     alert(`Habitude "${title}" ajoutée avec succès !`);
   };
 
-  const deleteHabit = (id: string) => {
-    if (window.confirm('Voulez-vous vraiment supprimer cette habitude ?')) {
+  const deleteHabit = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation(); // Double check propagation stop
+    if (window.confirm('Êtes-vous sûr de vouloir supprimer définitivement cette habitude ?')) {
       setHabits(prev => prev.filter(h => h.id !== id));
     }
   };
@@ -149,9 +148,9 @@ const HabitTracker: React.FC<HabitTrackerProps> = ({ habits, logs, setHabits, se
               key={habit.id} 
               className={`group relative flex items-center justify-between p-4 rounded-xl border transition-all duration-200 overflow-hidden ${isCompleted ? 'bg-emerald-50/50 border-emerald-200' : 'bg-white border-slate-100 shadow-sm'}`}
             >
-              {/* Main Click Area */}
+              {/* Zone principale cliquable pour cocher */}
               <div 
-                className="flex items-center gap-4 flex-1 cursor-pointer" 
+                className="flex items-center gap-4 flex-1 cursor-pointer pr-12" 
                 onClick={() => toggleHabit(habit.id, habit.xp)}
               >
                 <div className={`w-12 h-12 rounded-full flex items-center justify-center transition-all flex-shrink-0 ${isCompleted ? 'bg-emerald-500 text-white scale-110' : 'bg-slate-100 text-slate-300 hover:bg-slate-200'}`}>
@@ -178,18 +177,20 @@ const HabitTracker: React.FC<HabitTrackerProps> = ({ habits, logs, setHabits, se
                 </div>
               </div>
 
-              {/* Explicit Delete Button isolated from main click area */}
-              <button 
-                type="button"
-                onClick={(e) => {
-                    e.stopPropagation();
-                    deleteHabit(habit.id);
-                }}
-                className="ml-2 p-3 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all z-20"
-                title="Supprimer l'habitude"
+              {/* Bouton Supprimer isolé avec un Z-index élevé pour garantir le clic */}
+              <div 
+                 className="absolute right-2 top-1/2 -translate-y-1/2 z-50 p-2"
+                 onClick={(e) => e.stopPropagation()} 
               >
-                <Trash2 className="w-5 h-5" />
-              </button>
+                  <button 
+                    type="button"
+                    onClick={(e) => deleteHabit(habit.id, e)}
+                    className="p-2 text-slate-400 hover:text-red-600 bg-white/50 hover:bg-red-50 rounded-xl transition-all cursor-pointer shadow-sm border border-slate-100 hover:border-red-100"
+                    title="Supprimer l'habitude"
+                  >
+                    <Trash2 className="w-5 h-5" />
+                  </button>
+              </div>
             </div>
           );
         })}
@@ -248,7 +249,6 @@ const HabitTracker: React.FC<HabitTrackerProps> = ({ habits, logs, setHabits, se
                         className="w-full pl-10 p-3 border border-slate-200 bg-white text-slate-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
                     />
                 </div>
-                <p className="text-xs text-slate-400 mt-1">Gagnez ces points à chaque fois que vous validez l'habitude.</p>
             </div>
 
             <div>
@@ -296,7 +296,6 @@ const HabitTracker: React.FC<HabitTrackerProps> = ({ habits, logs, setHabits, se
         </button>
       )}
 
-      {/* Sunnah Suggestions Modal */}
       {showSuggestions && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in">
           <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl max-h-[80vh] flex flex-col">
