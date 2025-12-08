@@ -6,6 +6,7 @@ export interface Habit {
   icon: string;
   createdAt: number;
   frequency: number[]; // 0 (Dimanche) à 6 (Samedi). Si vide = tous les jours.
+  xp: number;
 }
 
 export type PrayerStatus = 'none' | 'on_time' | 'late' | 'missed';

@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Plus, Trash2, Check, X, Calendar, Sparkles, ScrollText } from 'lucide-react';
+import { Plus, Trash2, Check, X, Calendar, Sparkles, ScrollText, Trophy } from 'lucide-react';
 import { Habit, HabitLog, CATEGORY_ICONS, CATEGORY_COLORS } from '../types';
 
 interface HabitTrackerProps {
@@ -13,14 +13,14 @@ interface HabitTrackerProps {
 }
 
 const SUNNAH_HABITS = [
-  { title: 'Siwak', category: 'deen', icon: '🪵', description: "Utiliser le Siwak avant chaque prière." },
-  { title: 'Prière de Duha', category: 'deen', icon: '☀️', description: "La prière de la matinée (2 rak'at minimum)." },
-  { title: 'Jeûner Lundi/Jeudi', category: 'deen', icon: 'dates', description: "Jeûner comme le Prophète (sws)." },
-  { title: 'Witr avant de dormir', category: 'deen', icon: '🌙', description: "Clôturer la journée avec la prière impaire." },
-  { title: 'Lire Sourate Al-Mulk', category: 'deen', icon: '📖', description: "Chaque soir pour la protection de la tombe." },
-  { title: 'Dhikr du Matin', category: 'deen', icon: '📿', description: "Invocations de protection du matin." },
-  { title: 'Sourire (Sadaqa)', category: 'general', icon: '😊', description: "Sourire est une aumône." },
-  { title: 'Visiter un malade', category: 'general', icon: '🏥', description: "Un devoir du musulman envers son frère." },
+  { title: 'Siwak', category: 'deen', icon: '🪵', description: "Utiliser le Siwak avant chaque prière.", xp: 10 },
+  { title: 'Prière de Duha', category: 'deen', icon: '☀️', description: "La prière de la matinée (2 rak'at minimum).", xp: 30 },
+  { title: 'Jeûner Lundi/Jeudi', category: 'deen', icon: 'dates', description: "Jeûner comme le Prophète (sws).", xp: 50 },
+  { title: 'Witr avant de dormir', category: 'deen', icon: '🌙', description: "Clôturer la journée avec la prière impaire.", xp: 25 },
+  { title: 'Lire Sourate Al-Mulk', category: 'deen', icon: '📖', description: "Chaque soir pour la protection de la tombe.", xp: 20 },
+  { title: 'Dhikr du Matin', category: 'deen', icon: '📿', description: "Invocations de protection du matin.", xp: 15 },
+  { title: 'Sourire (Sadaqa)', category: 'general', icon: '😊', description: "Sourire est une aumône.", xp: 5 },
+  { title: 'Visiter un malade', category: 'general', icon: '🏥', description: "Un devoir du musulman envers son frère.", xp: 40 },
 ];
 
 const DAYS = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
@@ -28,17 +28,19 @@ const DAYS = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
 const HabitTracker: React.FC<HabitTrackerProps> = ({ habits, logs, setHabits, setLogs, currentDate, onUpdateXP }) => {
   const [isAdding, setIsAdding] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [showAllHabits, setShowAllHabits] = useState(false); // New toggle for filtering
   
   const [newHabitTitle, setNewHabitTitle] = useState('');
   const [newHabitCategory, setNewHabitCategory] = useState<Habit['category']>('deen');
+  const [newHabitXP, setNewHabitXP] = useState(10);
   const [frequency, setFrequency] = useState<number[]>([]); 
 
-  const toggleHabit = (habitId: string) => {
+  const toggleHabit = (habitId: string, xpValue: number) => {
     const isCompleted = logs[currentDate]?.[habitId];
     if (!isCompleted) {
-        onUpdateXP(10);
+        onUpdateXP(xpValue);
     } else {
-        onUpdateXP(-10);
+        onUpdateXP(-xpValue);
     }
 
     setLogs(prev => {
@@ -53,10 +55,11 @@ const HabitTracker: React.FC<HabitTrackerProps> = ({ habits, logs, setHabits, se
     });
   };
 
-  const addHabit = (e?: React.FormEvent, suggestion?: {title: string, category: string}) => {
+  const addHabit = (e?: React.FormEvent, suggestion?: {title: string, category: string, xp: number}) => {
     if (e) e.preventDefault();
     const title = suggestion ? suggestion.title : newHabitTitle;
     const category = suggestion ? suggestion.category as any : newHabitCategory;
+    const xp = suggestion ? suggestion.xp : newHabitXP;
 
     if (!title.trim()) return;
 
@@ -66,19 +69,24 @@ const HabitTracker: React.FC<HabitTrackerProps> = ({ habits, logs, setHabits, se
       category: category,
       icon: CATEGORY_ICONS[category as keyof typeof CATEGORY_ICONS] || '✨',
       createdAt: Date.now(),
-      frequency: frequency
+      frequency: frequency,
+      xp: xp
     };
 
     setHabits(prev => [...prev, newHabit]);
+    
+    // Reset form
     setNewHabitTitle('');
+    setNewHabitXP(10);
     setFrequency([]);
     setIsAdding(false);
     setShowSuggestions(false);
+    
+    // Feedback
+    alert(`Habitude "${title}" ajoutée avec succès !`);
   };
 
-  const deleteHabit = (id: string, e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const deleteHabit = (id: string) => {
     if (window.confirm('Voulez-vous vraiment supprimer cette habitude ?')) {
       setHabits(prev => prev.filter(h => h.id !== id));
     }
@@ -93,12 +101,30 @@ const HabitTracker: React.FC<HabitTrackerProps> = ({ habits, logs, setHabits, se
   };
 
   const currentDayIndex = new Date(currentDate).getDay();
-  const visibleHabits = habits.filter(h => h.frequency.length === 0 || h.frequency.includes(currentDayIndex));
+  const visibleHabits = showAllHabits 
+    ? habits 
+    : habits.filter(h => h.frequency.length === 0 || h.frequency.includes(currentDayIndex));
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-bold text-slate-800">Vos Habitudes</h2>
+        <div>
+            <h2 className="text-xl font-bold text-slate-800">Vos Habitudes</h2>
+            <div className="flex gap-2 mt-2">
+                <button 
+                    onClick={() => setShowAllHabits(false)}
+                    className={`text-xs px-3 py-1 rounded-full border transition-colors ${!showAllHabits ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-white text-slate-500 border-slate-200'}`}
+                >
+                    Aujourd'hui
+                </button>
+                <button 
+                    onClick={() => setShowAllHabits(true)}
+                    className={`text-xs px-3 py-1 rounded-full border transition-colors ${showAllHabits ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-white text-slate-500 border-slate-200'}`}
+                >
+                    Toutes
+                </button>
+            </div>
+        </div>
         <span className="text-sm text-slate-500 bg-white px-3 py-1 rounded-full border shadow-sm">
            {new Date(currentDate).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}
         </span>
@@ -106,7 +132,7 @@ const HabitTracker: React.FC<HabitTrackerProps> = ({ habits, logs, setHabits, se
 
       <div className="grid grid-cols-1 gap-3">
         {visibleHabits.length === 0 && habits.length > 0 && (
-            <p className="text-center text-slate-400 py-4 text-sm">Pas d'habitudes programmées pour aujourd'hui.</p>
+            <p className="text-center text-slate-400 py-4 text-sm">Pas d'habitudes prévues pour ce jour.</p>
         )}
         
         {habits.length === 0 && (
@@ -121,15 +147,16 @@ const HabitTracker: React.FC<HabitTrackerProps> = ({ habits, logs, setHabits, se
           return (
             <div 
               key={habit.id} 
-              className={`group flex items-center justify-between p-4 rounded-xl border transition-all duration-200 ${isCompleted ? 'bg-emerald-50/50 border-emerald-200' : 'bg-white border-slate-100 shadow-sm'}`}
+              className={`group relative flex items-center justify-between p-4 rounded-xl border transition-all duration-200 overflow-hidden ${isCompleted ? 'bg-emerald-50/50 border-emerald-200' : 'bg-white border-slate-100 shadow-sm'}`}
             >
-              <div className="flex items-center gap-4 flex-1">
-                <button 
-                  onClick={() => toggleHabit(habit.id)}
-                  className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${isCompleted ? 'bg-emerald-500 text-white scale-110' : 'bg-slate-100 text-slate-300 hover:bg-slate-200'}`}
-                >
+              {/* Main Click Area */}
+              <div 
+                className="flex items-center gap-4 flex-1 cursor-pointer" 
+                onClick={() => toggleHabit(habit.id, habit.xp)}
+              >
+                <div className={`w-12 h-12 rounded-full flex items-center justify-center transition-all flex-shrink-0 ${isCompleted ? 'bg-emerald-500 text-white scale-110' : 'bg-slate-100 text-slate-300 hover:bg-slate-200'}`}>
                   <Check className={`w-6 h-6 ${isCompleted ? 'opacity-100' : 'opacity-0'} transition-opacity`} />
-                </button>
+                </div>
                 <div>
                   <h3 className={`font-semibold text-lg transition-all ${isCompleted ? 'text-slate-400 line-through' : 'text-slate-800'}`}>
                     {habit.title}
@@ -138,8 +165,11 @@ const HabitTracker: React.FC<HabitTrackerProps> = ({ habits, logs, setHabits, se
                     <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] uppercase font-bold tracking-wider ${CATEGORY_COLORS[habit.category]}`}>
                         {habit.category === 'deen' ? 'Deen' : habit.category === 'health' ? 'Santé' : 'Autre'}
                     </span>
+                    <span className="text-xs text-slate-400 flex items-center gap-1">
+                        <Trophy className="w-3 h-3" /> {habit.xp || 10} XP
+                    </span>
                     {habit.frequency.length > 0 && (
-                        <span className="text-xs text-slate-400 flex items-center gap-1">
+                        <span className="text-xs text-slate-400 flex items-center gap-1 border-l pl-2 border-slate-200">
                             <Calendar className="w-3 h-3" />
                             {habit.frequency.map(d => DAYS[d]).join(', ')}
                         </span>
@@ -147,10 +177,15 @@ const HabitTracker: React.FC<HabitTrackerProps> = ({ habits, logs, setHabits, se
                   </div>
                 </div>
               </div>
+
+              {/* Explicit Delete Button isolated from main click area */}
               <button 
                 type="button"
-                onClick={(e) => deleteHabit(habit.id, e)} 
-                className="p-3 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors relative z-10"
+                onClick={(e) => {
+                    e.stopPropagation();
+                    deleteHabit(habit.id);
+                }}
+                className="ml-2 p-3 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all z-20"
                 title="Supprimer l'habitude"
               >
                 <Trash2 className="w-5 h-5" />
@@ -179,7 +214,7 @@ const HabitTracker: React.FC<HabitTrackerProps> = ({ habits, logs, setHabits, se
                 value={newHabitTitle}
                 onChange={(e) => setNewHabitTitle(e.target.value)}
                 placeholder="Ex: Lire Sourate Al-Kahf" 
-                className="w-full p-3 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="w-full p-3 border border-slate-200 bg-white text-slate-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 autoFocus
               />
             </div>
@@ -198,6 +233,22 @@ const HabitTracker: React.FC<HabitTrackerProps> = ({ habits, logs, setHabits, se
                   </button>
                 ))}
               </div>
+            </div>
+
+            <div>
+                <label className="block text-sm font-medium text-slate-600 mb-1">Points d'XP (Récompense)</label>
+                <div className="relative">
+                    <Trophy className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                    <input 
+                        type="number" 
+                        min="1"
+                        max="100"
+                        value={newHabitXP}
+                        onChange={(e) => setNewHabitXP(parseInt(e.target.value) || 0)}
+                        className="w-full pl-10 p-3 border border-slate-200 bg-white text-slate-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    />
+                </div>
+                <p className="text-xs text-slate-400 mt-1">Gagnez ces points à chaque fois que vous validez l'habitude.</p>
             </div>
 
             <div>
@@ -220,6 +271,7 @@ const HabitTracker: React.FC<HabitTrackerProps> = ({ habits, logs, setHabits, se
                         </button>
                     ))}
                 </div>
+                <p className="text-xs text-slate-400 mt-1">Si aucun jour n'est sélectionné, l'habitude sera quotidienne.</p>
             </div>
 
             <div className="flex gap-3 pt-2">
@@ -266,9 +318,12 @@ const HabitTracker: React.FC<HabitTrackerProps> = ({ habits, logs, setHabits, se
                   className="w-full flex items-start gap-4 p-4 rounded-xl border border-slate-100 hover:border-emerald-200 hover:bg-emerald-50/30 transition-all text-left group"
                 >
                   <span className="text-2xl bg-white p-2 rounded-lg shadow-sm">{habit.icon}</span>
-                  <div>
+                  <div className="flex-1">
                     <span className="font-bold text-slate-800 block group-hover:text-emerald-800">{habit.title}</span>
                     <span className="text-xs text-slate-500">{habit.description}</span>
+                  </div>
+                  <div className="text-xs font-bold text-emerald-600 bg-emerald-100 px-2 py-1 rounded-md whitespace-nowrap">
+                    +{habit.xp} XP
                   </div>
                 </button>
               ))}

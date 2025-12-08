@@ -13,8 +13,8 @@ import InvocationLibrary from './components/InvocationLibrary';
 
 // Initial Data
 const DEFAULT_HABITS: Habit[] = [
-  { id: '1', title: 'Lecture Coran (1 page)', category: 'deen', icon: '📖', createdAt: Date.now(), frequency: [] },
-  { id: '2', title: 'Boire 2L Eau', category: 'health', icon: '💧', createdAt: Date.now(), frequency: [] },
+  { id: '1', title: 'Lecture Coran (1 page)', category: 'deen', icon: '📖', createdAt: Date.now(), frequency: [], xp: 15 },
+  { id: '2', title: 'Boire 2L Eau', category: 'health', icon: '💧', createdAt: Date.now(), frequency: [], xp: 5 },
 ];
 
 const HADITHS = [
@@ -204,7 +204,7 @@ const App: React.FC = () => {
                             required
                             value={authName}
                             onChange={(e) => setAuthName(e.target.value)}
-                            className="w-full p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                            className="w-full p-3 border border-slate-200 bg-white text-slate-800 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none"
                             placeholder="Ex: Bilal"
                         />
                     </div>
