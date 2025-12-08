@@ -102,7 +102,7 @@ const App: React.FC = () => {
     }
   };
 
-  const handleToggleNotifications = () => {
+  const handleToggleNotifications = async () => {
     if (!userProfile) return;
     
     // Si déjà activé, on désactive
@@ -111,31 +111,27 @@ const App: React.FC = () => {
       return;
     }
 
-    // Vérification de la compatibilité navigateur
     if (!("Notification" in window)) {
         alert("Ce navigateur ne supporte pas les notifications.");
         return;
     }
 
-    // Demande de permission
-    if (Notification.permission === "granted") {
-        setUserProfile(prev => prev ? { ...prev, notificationsEnabled: true } : null);
-        new Notification("Deen Habits", { body: "Rappels activés ! Barakallahu fik." });
-    } else if (Notification.permission !== "denied") {
-        Notification.requestPermission().then((permission) => {
-            if (permission === "granted") {
-                setUserProfile(prev => prev ? { ...prev, notificationsEnabled: true } : null);
-                new Notification("Deen Habits", { body: "Rappels activés ! Barakallahu fik." });
-            }
-        });
-    } else {
-        alert("Les notifications sont bloquées. Veuillez les autoriser dans les paramètres de votre navigateur.");
+    try {
+        const permission = await Notification.requestPermission();
+        if (permission === "granted") {
+            setUserProfile(prev => prev ? { ...prev, notificationsEnabled: true } : null);
+            new Notification("Deen Habits", { body: "Rappels activés ! Barakallahu fik." });
+        } else {
+            // Permission refusée
+        }
+    } catch (e) {
+        console.error("Erreur notification", e);
     }
   };
 
   const handleSubscribe = () => {
     if (!userProfile) return;
-    if (window.confirm("Simuler le paiement de 4,94€ (Essai gratuit 3 jours) ?")) {
+    if (window.confirm("Simuler le paiement de 4,95€ (Essai gratuit 3 jours) ?")) {
         setUserProfile({ ...userProfile, isPremium: true });
         alert("Abonnement activé ! Bienvenue dans le club Premium.");
     }

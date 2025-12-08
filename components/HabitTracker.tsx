@@ -85,7 +85,10 @@ const HabitTracker: React.FC<HabitTrackerProps> = ({ habits, logs, setHabits, se
   };
 
   const deleteHabit = (id: string, e: React.MouseEvent) => {
-    e.stopPropagation(); // Double check propagation stop
+    // Stop propagation to prevent triggering the toggleHabit on the parent
+    e.stopPropagation();
+    e.preventDefault();
+    
     if (window.confirm('Êtes-vous sûr de vouloir supprimer définitivement cette habitude ?')) {
       setHabits(prev => prev.filter(h => h.id !== id));
     }
@@ -146,21 +149,21 @@ const HabitTracker: React.FC<HabitTrackerProps> = ({ habits, logs, setHabits, se
           return (
             <div 
               key={habit.id} 
-              className={`group relative flex items-center justify-between p-4 rounded-xl border transition-all duration-200 overflow-hidden ${isCompleted ? 'bg-emerald-50/50 border-emerald-200' : 'bg-white border-slate-100 shadow-sm'}`}
+              className={`group flex items-center justify-between p-4 rounded-xl border transition-all duration-200 ${isCompleted ? 'bg-emerald-50/50 border-emerald-200' : 'bg-white border-slate-100 shadow-sm'}`}
             >
               {/* Zone principale cliquable pour cocher */}
               <div 
-                className="flex items-center gap-4 flex-1 cursor-pointer pr-12" 
+                className="flex items-center gap-4 flex-1 cursor-pointer min-w-0" 
                 onClick={() => toggleHabit(habit.id, habit.xp)}
               >
                 <div className={`w-12 h-12 rounded-full flex items-center justify-center transition-all flex-shrink-0 ${isCompleted ? 'bg-emerald-500 text-white scale-110' : 'bg-slate-100 text-slate-300 hover:bg-slate-200'}`}>
                   <Check className={`w-6 h-6 ${isCompleted ? 'opacity-100' : 'opacity-0'} transition-opacity`} />
                 </div>
-                <div>
-                  <h3 className={`font-semibold text-lg transition-all ${isCompleted ? 'text-slate-400 line-through' : 'text-slate-800'}`}>
+                <div className="min-w-0 flex-1">
+                  <h3 className={`font-semibold text-lg transition-all truncate ${isCompleted ? 'text-slate-400 line-through' : 'text-slate-800'}`}>
                     {habit.title}
                   </h3>
-                  <div className="flex items-center gap-2 mt-1">
+                  <div className="flex items-center gap-2 mt-1 flex-wrap">
                     <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] uppercase font-bold tracking-wider ${CATEGORY_COLORS[habit.category]}`}>
                         {habit.category === 'deen' ? 'Deen' : habit.category === 'health' ? 'Santé' : 'Autre'}
                     </span>
@@ -177,20 +180,16 @@ const HabitTracker: React.FC<HabitTrackerProps> = ({ habits, logs, setHabits, se
                 </div>
               </div>
 
-              {/* Bouton Supprimer isolé avec un Z-index élevé pour garantir le clic */}
-              <div 
-                 className="absolute right-2 top-1/2 -translate-y-1/2 z-50 p-2"
-                 onClick={(e) => e.stopPropagation()} 
+              {/* Bouton Supprimer isolé dans le flux flexbox (pas d'absolute positioning) pour garantir le clic */}
+              <button 
+                type="button"
+                onClick={(e) => deleteHabit(habit.id, e)}
+                className="ml-3 p-3 text-slate-300 hover:text-red-600 bg-transparent hover:bg-red-50 rounded-xl transition-all flex-shrink-0"
+                title="Supprimer l'habitude"
+                aria-label="Supprimer"
               >
-                  <button 
-                    type="button"
-                    onClick={(e) => deleteHabit(habit.id, e)}
-                    className="p-2 text-slate-400 hover:text-red-600 bg-white/50 hover:bg-red-50 rounded-xl transition-all cursor-pointer shadow-sm border border-slate-100 hover:border-red-100"
-                    title="Supprimer l'habitude"
-                  >
-                    <Trash2 className="w-5 h-5" />
-                  </button>
-              </div>
+                <Trash2 className="w-5 h-5" />
+              </button>
             </div>
           );
         })}
