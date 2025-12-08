@@ -1,0 +1,7 @@
+{
+  "name": "Deen Habits AI",
+  "description": "Un tracker d'habitudes spirituelles et de productivité avec coaching IA, horaires de prières et invocations.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
