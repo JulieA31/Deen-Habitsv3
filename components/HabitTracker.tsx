@@ -252,7 +252,7 @@ const HabitTracker: React.FC<HabitTrackerProps> = ({
             onClick={() => setShowSuggestions(true)}
             className="absolute top-6 right-6 text-sm text-emerald-600 font-medium flex items-center gap-1 hover:text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-100"
           >
-            <Sparkles className="w-4 h-4" /> Suggestions Sunna
+            <Sparkles className="w-4 h-4" /> Suggestions
           </button>
 
           <h3 className="text-lg font-bold text-slate-800 mb-4">Nouvelle Habitude</h3>
