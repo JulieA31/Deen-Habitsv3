@@ -22,7 +22,7 @@ const SUNNAH_HABITS = [
   { title: 'Visiter un malade', category: 'general', icon: '🏥', description: "Un devoir du musulman envers son frère.", xp: 40 },
 ];
 
-// JS: getDay() → 0 = Dimanche, 1 = Lundi, ...
+// getDay() : 0 = Dim, 1 = Lun…
 const DAYS = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
 
 const HabitTracker: React.FC<HabitTrackerProps> = ({
@@ -44,11 +44,7 @@ const HabitTracker: React.FC<HabitTrackerProps> = ({
 
   const toggleHabit = (habitId: string, xpValue: number) => {
     const isCompleted = logs[currentDate]?.[habitId];
-    if (!isCompleted) {
-      onUpdateXP(xpValue);
-    } else {
-      onUpdateXP(-xpValue);
-    }
+    onUpdateXP(isCompleted ? -xpValue : xpValue);
 
     setLogs((prev) => {
       const todayLogs = prev[currentDate] || {};
@@ -249,9 +245,169 @@ const HabitTracker: React.FC<HabitTrackerProps> = ({
       {isAdding ? (
         <form
           onSubmit={(e) => addHabit(e)}
-          className="bg-white p-6 rounded-2xl shadow-lg border border-emerald-100 animate-in fade-in slide-in-from-bottom-4 relative"
+          className="bg-white p-6 rounded-2xl shadow-lg border border-emerald-100 relative"
         >
           <button
             type="button"
             onClick={() => setShowSuggestions(true)}
-            className="absolute top-6 right-6 text-sm text-emerald-600 font-medium flex items-center gap-1 hover:text-
+            className="absolute top-6 right-6 text-sm text-emerald-600 font-medium flex items-center gap-1 hover:text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-100"
+          >
+            <Sparkles className="w-4 h-4" /> Suggestions Sunna
+          </button>
+
+          <h3 className="text-lg font-bold text-slate-800 mb-4">Nouvelle Habitude</h3>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-600 mb-1">Titre</label>
+              <input
+                type="text"
+                value={newHabitTitle}
+                onChange={(e) => setNewHabitTitle(e.target.value)}
+                placeholder="Ex: Lire Sourate Al-Kahf"
+                className="w-full p-3 border border-slate-200 bg-white text-slate-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                autoFocus
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-600 mb-1">Catégorie</label>
+              <div className="flex gap-2 flex-wrap">
+                {(['deen', 'health', 'productivity', 'general'] as const).map((cat) => (
+                  <button
+                    key={cat}
+                    type="button"
+                    onClick={() => setNewHabitCategory(cat)}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      newHabitCategory === cat
+                        ? 'bg-emerald-600 text-white'
+                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                    }`}
+                  >
+                    {CATEGORY_ICONS[cat]}{' '}
+                    {cat === 'deen'
+                      ? 'Religion'
+                      : cat === 'health'
+                      ? 'Santé'
+                      : cat === 'productivity'
+                      ? 'Prod.'
+                      : 'Autre'}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-600 mb-1">
+                Points d&apos;XP (Récompense)
+              </label>
+              <div className="relative">
+                <Trophy className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <input
+                  type="number"
+                  min={1}
+                  max={100}
+                  value={newHabitXP}
+                  onChange={(e) => setNewHabitXP(parseInt(e.target.value) || 0)}
+                  className="w-full pl-10 p-3 border border-slate-200 bg-white text-slate-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-600 mb-1">Fréquence</label>
+              <div className="flex justify-between gap-1">
+                {DAYS.map((day, index) => (
+                  <button
+                    key={day}
+                    type="button"
+                    onClick={() => toggleDay(index)}
+                    className={`w-10 h-10 rounded-full text-xs font-bold transition-all ${
+                      frequency.includes(index)
+                        ? 'bg-emerald-600 text-white shadow-md scale-105'
+                        : frequency.length === 0
+                        ? 'bg-slate-100 text-slate-400'
+                        : 'bg-slate-50 text-slate-400'
+                    }`}
+                  >
+                    {day.charAt(0)}
+                  </button>
+                ))}
+              </div>
+              <p className="text-xs text-slate-400 mt-1">
+                Si aucun jour n&apos;est sélectionné, l&apos;habitude sera quotidienne.
+              </p>
+            </div>
+
+            <div className="flex gap-3 pt-2">
+              <button
+                type="submit"
+                className="flex-1 bg-emerald-600 text-white py-3 rounded-xl font-bold hover:bg-emerald-700 transition-colors shadow-lg shadow-emerald-200"
+              >
+                Sauvegarder
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsAdding(false)}
+                className="px-6 bg-slate-100 text-slate-600 rounded-xl font-medium hover:bg-slate-200"
+              >
+                Annuler
+              </button>
+            </div>
+          </div>
+        </form>
+      ) : (
+        <button
+          onClick={() => setIsAdding(true)}
+          className="w-full py-4 border-2 border-dashed border-slate-300 rounded-xl text-slate-500 font-medium hover:border-emerald-500 hover:text-emerald-600 transition-all flex items-center justify-center gap-2 group"
+        >
+          <div className="w-8 h-8 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center group-hover:bg-emerald-100 group-hover:text-emerald-600 transition-colors">
+            <Plus className="w-5 h-5" />
+          </div>
+          Ajouter une habitude
+        </button>
+      )}
+
+      {showSuggestions && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+          <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl max-h-[80vh] flex flex-col">
+            <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-emerald-50/50 rounded-t-2xl">
+              <h3 className="font-bold text-lg text-emerald-900 flex items-center gap-2">
+                <ScrollText className="w-5 h-5 text-emerald-600" />
+                Suggestions Sunna
+              </h3>
+              <button
+                onClick={() => setShowSuggestions(false)}
+                className="p-2 hover:bg-slate-100 rounded-full transition-colors"
+              >
+                <X className="w-5 h-5 text-slate-500" />
+              </button>
+            </div>
+
+            <div className="overflow-y-auto p-4 space-y-3">
+              {SUNNAH_HABITS.map((habit, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => addHabit(undefined, habit)}
+                  className="w-full flex items-start gap-4 p-4 rounded-xl border border-slate-100 hover:border-emerald-200 hover:bg-emerald-50/30 transition-all text-left group"
+                >
+                  <span className="text-2xl bg-white p-2 rounded-lg shadow-sm">{habit.icon}</span>
+                  <div className="flex-1">
+                    <span className="font-bold text-slate-800 block group-hover:text-emerald-800">
+                      {habit.title}
+                    </span>
+                    <span className="text-xs text-slate-500">{habit.description}</span>
+                  </div>
+                  <div className="text-xs font-bold text-emerald-600 bg-emerald-100 px-2 py-1 rounded-md whitespace-nowrap">
+                    +{habit.xp} XP
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default HabitTracker;
