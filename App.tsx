@@ -11,14 +11,14 @@ import InvocationLibrary from './components/InvocationLibrary';
 
 // Audio Assets
 const SOUND_URLS = {
-  beep: 'https://actions.google.com/sounds/v1/alarms/beep_short.ogg',
-  adhan: 'https://www.islamcan.com/audio/adhan/azan2.mp3' // Placeholder pour Adhan court/moyen
+  beep: '/sounds/beep.mp3',
+  adhan: '/sounds/Adhan_Medine.mp3' 
 };
 
 // Initial Data
 const DEFAULT_HABITS: Habit[] = [
   { id: '1', title: 'Lecture Coran (1 page)', category: 'deen', icon: '📖', createdAt: Date.now(), frequency: [], xp: 15 },
-  { id: '2', title: 'Boire 2L Eau', category: 'health', icon: '💧', createdAt: Date.now(), frequency: [], xp: 5 },
+  { id: '2', title: 'Boire 1,5L Eau', category: 'health', icon: '💧', createdAt: Date.now(), frequency: [], xp: 5 },
 ];
 
 const HADITHS = [
