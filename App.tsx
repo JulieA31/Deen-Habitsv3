@@ -1,8 +1,6 @@
 
-import React, { useState, useEffect } from 'react';
-import { format } from 'date-fns';
-import { fr } from 'date-fns/locale';
-import { LayoutGrid, BarChart3, MessageSquare, BookOpen, Home, Trophy, Star, LogIn, ArrowRight, User, Trash2, Bell, Shield } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { LayoutGrid, BarChart3, MessageSquare, BookOpen, Home, Trophy, Star, LogIn, ArrowRight, User, Trash2, Bell, Shield, Volume2, Play, CreditCard, Loader2 } from 'lucide-react';
 
 import { Habit, HabitLog, ViewMode, PrayerLog, UserProfile } from './types';
 import HabitTracker from './components/HabitTracker';
@@ -10,6 +8,12 @@ import DeenCoach from './components/DeenCoach';
 import Analytics from './components/Analytics';
 import PrayerTracker from './components/PrayerTracker';
 import InvocationLibrary from './components/InvocationLibrary';
+
+// Audio Assets
+const SOUND_URLS = {
+  beep: 'https://actions.google.com/sounds/v1/alarms/beep_short.ogg',
+  adhan: 'https://www.islamcan.com/audio/adhan/azan2.mp3' // Placeholder pour Adhan court/moyen
+};
 
 // Initial Data
 const DEFAULT_HABITS: Habit[] = [
@@ -28,6 +32,9 @@ const HADITHS = [
 
 const App: React.FC = () => {
   const [currentHadith, setCurrentHadith] = useState('');
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [isPlayingSound, setIsPlayingSound] = useState(false);
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   
   // State
   const [habits, setHabits] = useState<Habit[]>(() => {
@@ -52,7 +59,9 @@ const App: React.FC = () => {
   // Auth State (Local for the form)
   const [authName, setAuthName] = useState('');
 
-  const currentDate = format(new Date(), 'yyyy-MM-dd');
+  // Native date formatting instead of date-fns to avoid import errors
+  const now = new Date();
+  const currentDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
 
   // Load Random Hadith
   useEffect(() => {
@@ -68,6 +77,36 @@ const App: React.FC = () => {
     if (userProfile) localStorage.setItem('dh_profile_v2', JSON.stringify(userProfile)); 
   }, [userProfile]);
 
+  // Audio Handler
+  const playSound = (soundType: 'beep' | 'adhan') => {
+    if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+    }
+
+    const audio = new Audio(SOUND_URLS[soundType]);
+    audioRef.current = audio;
+    
+    setIsPlayingSound(true);
+    
+    // Si Adhan, on ne joue que 5 secondes pour le "court" dans la démo si le fichier est long
+    if (soundType === 'adhan') {
+        audio.currentTime = 0;
+    }
+
+    audio.play().catch(e => console.error("Erreur lecture audio", e));
+    
+    audio.onended = () => setIsPlayingSound(false);
+  };
+
+  const stopSound = () => {
+    if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+        setIsPlayingSound(false);
+    }
+  };
+
   // Handlers
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -79,7 +118,8 @@ const App: React.FC = () => {
       level: 1,
       isPremium: false,
       joinedAt: Date.now(),
-      notificationsEnabled: false
+      notificationsEnabled: false,
+      notificationSound: 'beep'
     };
     setUserProfile(newProfile);
     setView('home');
@@ -121,8 +161,7 @@ const App: React.FC = () => {
         if (permission === "granted") {
             setUserProfile(prev => prev ? { ...prev, notificationsEnabled: true } : null);
             new Notification("Deen Habits", { body: "Rappels activés ! Barakallahu fik." });
-        } else {
-            // Permission refusée
+            playSound(userProfile.notificationSound || 'beep');
         }
     } catch (e) {
         console.error("Erreur notification", e);
@@ -131,10 +170,21 @@ const App: React.FC = () => {
 
   const handleSubscribe = () => {
     if (!userProfile) return;
-    if (window.confirm("Simuler le paiement de 4,95€ (Essai gratuit 3 jours) ?")) {
-        setUserProfile({ ...userProfile, isPremium: true });
-        alert("Abonnement activé ! Bienvenue dans le club Premium.");
-    }
+    
+    // Simulation Stripe
+    setIsProcessingPayment(true);
+    
+    // Simuler le délai réseau de Stripe
+    setTimeout(() => {
+        setIsProcessingPayment(false);
+        const confirmed = window.confirm("Simulation Stripe :\n\nConfirmer le paiement de 4,95€ via Stripe Checkout (Mode Test) ?");
+        
+        if (confirmed) {
+            setUserProfile({ ...userProfile, isPremium: true });
+            alert("Paiement réussi ! Bienvenue dans le club Premium.");
+            new Audio(SOUND_URLS.beep).play(); // Petit son de succès
+        }
+    }, 1500);
   };
 
   // Gamification Logic
@@ -176,6 +226,20 @@ const App: React.FC = () => {
       <span className="text-[10px] font-medium">{label}</span>
     </button>
   );
+
+  // Loading Screen for Payment
+  if (isProcessingPayment) {
+    return (
+        <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6 text-center">
+            <div className="w-16 h-16 bg-white rounded-2xl shadow-xl flex items-center justify-center mb-6 animate-bounce">
+                <CreditCard className="w-8 h-8 text-[#635BFF]" />
+            </div>
+            <h2 className="text-xl font-bold text-slate-800 mb-2">Connexion à Stripe...</h2>
+            <p className="text-slate-500 text-sm mb-8">Veuillez patienter pendant que nous sécurisons votre transaction.</p>
+            <Loader2 className="w-8 h-8 text-[#635BFF] animate-spin" />
+        </div>
+    );
+  }
 
   // Auth Screen
   if (!userProfile || view === 'auth') {
@@ -386,7 +450,10 @@ const App: React.FC = () => {
                         </div>
                     </div>
                     {!userProfile.isPremium && (
-                        <button onClick={handleSubscribe} className="text-sm bg-emerald-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-emerald-700">
+                        <button 
+                            onClick={handleSubscribe} 
+                            className="text-sm bg-emerald-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-emerald-700 shadow-md shadow-emerald-200"
+                        >
                             Passer Premium
                         </button>
                     )}
@@ -410,6 +477,38 @@ const App: React.FC = () => {
                         </div>
                     </button>
                     
+                    {/* Audio Settings */}
+                    <div className="p-4 border-b border-slate-50">
+                        <div className="flex items-center gap-3 mb-3">
+                             <div className="p-2 bg-orange-50 text-orange-600 rounded-lg"><Volume2 className="w-5 h-5" /></div>
+                             <div className="text-left">
+                                <div className="font-semibold text-slate-700">Son de notification</div>
+                                <div className="text-xs text-slate-400">Choisissez votre alerte préférée</div>
+                            </div>
+                        </div>
+                        
+                        <div className="ml-12 flex gap-2">
+                            <button
+                                onClick={() => setUserProfile({ ...userProfile, notificationSound: 'beep' })}
+                                className={`flex-1 px-3 py-2 text-sm rounded-lg border transition-all ${userProfile.notificationSound === 'beep' ? 'bg-orange-50 border-orange-200 text-orange-700 font-medium' : 'bg-white border-slate-200 text-slate-600'}`}
+                            >
+                                Beep
+                            </button>
+                            <button
+                                onClick={() => setUserProfile({ ...userProfile, notificationSound: 'adhan' })}
+                                className={`flex-1 px-3 py-2 text-sm rounded-lg border transition-all ${userProfile.notificationSound === 'adhan' ? 'bg-orange-50 border-orange-200 text-orange-700 font-medium' : 'bg-white border-slate-200 text-slate-600'}`}
+                            >
+                                Adhan (Court)
+                            </button>
+                            <button
+                                onClick={() => isPlayingSound ? stopSound() : playSound(userProfile.notificationSound || 'beep')}
+                                className="px-3 py-2 text-sm rounded-lg border border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100 flex items-center justify-center min-w-[44px]"
+                            >
+                                {isPlayingSound ? <div className="w-2 h-2 bg-slate-400 rounded-sm animate-pulse"></div> : <Play className="w-4 h-4 fill-current" />}
+                            </button>
+                        </div>
+                    </div>
+
                     <button className="w-full flex items-center gap-3 p-4 hover:bg-slate-50 transition-colors border-b border-slate-50">
                         <div className="p-2 bg-purple-50 text-purple-600 rounded-lg"><Shield className="w-5 h-5" /></div>
                         <span className="font-semibold text-slate-700">Politique de confidentialité</span>

@@ -1,8 +1,6 @@
 import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { Habit, HabitLog } from '../types';
-import { subDays, format } from 'date-fns';
-import { fr } from 'date-fns/locale';
 
 interface AnalyticsProps {
   habits: Habit[];
@@ -11,13 +9,19 @@ interface AnalyticsProps {
 
 const Analytics: React.FC<AnalyticsProps> = ({ habits, logs }) => {
   const data = Array.from({ length: 7 }).map((_, i) => {
-    const date = subDays(new Date(), 6 - i);
-    const dateStr = format(date, 'yyyy-MM-dd');
+    const date = new Date();
+    date.setDate(date.getDate() - (6 - i));
+    
+    const yyyy = date.getFullYear();
+    const mm = String(date.getMonth() + 1).padStart(2, '0');
+    const dd = String(date.getDate()).padStart(2, '0');
+    const dateStr = `${yyyy}-${mm}-${dd}`;
+    
     const dayLogs = logs[dateStr] || {};
     const completed = Object.values(dayLogs).filter(Boolean).length;
     
     return {
-      name: format(date, 'EEE', { locale: fr }),
+      name: date.toLocaleDateString('fr-FR', { weekday: 'short' }),
       completed: completed,
       date: dateStr
     };

@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Sparkles, MessageCircle, Loader2, Crown, CheckCircle2, X } from 'lucide-react';
+import { Sparkles, MessageCircle, Loader2, Crown, CheckCircle2, X, CreditCard, Lock } from 'lucide-react';
 import { Habit, HabitLog, PrayerLog, UserProfile } from '../types';
 import { generateCoachingAdvice } from '../services/geminiService';
 
@@ -152,12 +152,14 @@ const DeenCoach: React.FC<DeenCoachProps> = ({ habits, logs, prayerLogs, current
                    setShowPaywall(false);
                    onSubscribe();
                }}
-               className="w-full py-4 bg-emerald-600 text-white rounded-xl font-bold text-lg hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-200 flex items-center justify-center gap-2 group"
+               className="w-full py-4 bg-[#635BFF] text-white rounded-xl font-bold text-lg hover:bg-[#5851df] transition-all shadow-lg shadow-indigo-200 flex items-center justify-center gap-2 group"
              >
-               <Sparkles className="w-5 h-5 text-yellow-300 group-hover:scale-110 transition-transform" />
-               Commencer l'essai gratuit
+               <CreditCard className="w-5 h-5 text-white/80" />
+               Payer avec Stripe
              </button>
-             <p className="text-xs text-slate-400 mt-4">Paiement sécurisé. Résiliable à tout moment.</p>
+             <p className="text-[10px] text-slate-400 mt-4 flex items-center justify-center gap-1">
+               <Lock className="w-3 h-3" /> Paiement sécurisé et crypté
+             </p>
           </div>
         </div>
       )}

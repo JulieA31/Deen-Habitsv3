@@ -31,15 +31,16 @@ export interface UserProfile {
   isPremium: boolean;
   joinedAt: number;
   notificationsEnabled: boolean;
+  notificationSound: 'beep' | 'adhan';
 }
 
 export interface Invocation {
   id: string;
   title: string;
+  category: string;
   arabic: string;
   phonetic: string;
   translation: string;
-  category: string;
 }
 
 export type ViewMode = 'auth' | 'home' | 'tracker' | 'invocations' | 'stats' | 'coach' | 'profile';
