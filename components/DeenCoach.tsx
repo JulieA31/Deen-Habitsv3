@@ -1,168 +1,191 @@
-
-import React, { useState } from 'react';
-import { Sparkles, MessageCircle, Loader2, Crown, CheckCircle2, X, CreditCard, Lock } from 'lucide-react';
-import { Habit, HabitLog, PrayerLog, UserProfile } from '../types';
-import { generateCoachingAdvice } from '../services/geminiService';
+import React, { useState, useEffect, useRef } from 'react';
+import { Sparkles, Send, Loader2, Crown, User, Bot } from 'lucide-react';
+import { UserProfile, ChatMessage } from '../types';
+import { createChatSession } from '../services/geminiService';
+import { Chat } from '@google/genai';
 
 interface DeenCoachProps {
-  habits: Habit[];
-  logs: HabitLog;
-  prayerLogs: PrayerLog;
-  currentDate: string;
   userProfile: UserProfile;
   onSubscribe: () => void;
+  habits?: any;
+  logs?: any;
+  prayerLogs?: any;
+  currentDate?: string;
 }
 
-const DeenCoach: React.FC<DeenCoachProps> = ({ habits, logs, prayerLogs, currentDate, userProfile, onSubscribe }) => {
-  const [advice, setAdvice] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [showPaywall, setShowPaywall] = useState(false);
-
-  const handleGetAdvice = async () => {
-    if (!userProfile.isPremium) {
-        setShowPaywall(true);
-        return;
+const DeenCoach: React.FC<DeenCoachProps> = ({ userProfile, onSubscribe }) => {
+  const [messages, setMessages] = useState<ChatMessage[]>([
+    {
+      id: 'welcome',
+      role: 'model',
+      text: `As-salamu alaykum ${userProfile.name} ! Je suis ton Coach Spirituel IA. Comment puis-je t'aider aujourd'hui dans ton cheminement ?`,
+      timestamp: Date.now()
     }
+  ]);
+  const [inputValue, setInputValue] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  
+  const chatSessionRef = useRef<Chat | null>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
-    setLoading(true);
-    const result = await generateCoachingAdvice(habits, logs, prayerLogs, currentDate);
-    setAdvice(result);
-    setLoading(false);
+  // Initialisation du chat pour TOUS les utilisateurs (Mode Test)
+  useEffect(() => {
+    if (!chatSessionRef.current) {
+      chatSessionRef.current = createChatSession(userProfile.name);
+    }
+  }, [userProfile.name]);
+
+  // Scroll automatique vers le bas
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
+  const handleSendMessage = async (e?: React.FormEvent) => {
+    e?.preventDefault();
+
+    if (!inputValue.trim()) return;
+    
+    // Restriction Premium désactivée pour le test
+    /* 
+    if (!userProfile.isPremium) {
+      setShowPaywall(true);
+      return;
+    } 
+    */
+
+    const newUserMessage: ChatMessage = {
+      id: Date.now().toString(),
+      role: 'user',
+      text: inputValue,
+      timestamp: Date.now()
+    };
+
+    setMessages(prev => [...prev, newUserMessage]);
+    setInputValue('');
+    setIsLoading(true);
+
+    try {
+      if (chatSessionRef.current) {
+        const result = await chatSessionRef.current.sendMessage({ message: newUserMessage.text });
+        
+        const aiResponseText = result.text || "Désolé, je n'ai pas pu formuler de réponse. Réessayez plus tard.";
+
+        const newAiMessage: ChatMessage = {
+          id: (Date.now() + 1).toString(),
+          role: 'model',
+          text: aiResponseText,
+          timestamp: Date.now()
+        };
+
+        setMessages(prev => [...prev, newAiMessage]);
+      }
+    } catch (error) {
+      console.error("Erreur Chat:", error);
+      const errorMessage: ChatMessage = {
+        id: (Date.now() + 1).toString(),
+        role: 'model',
+        text: "Une erreur est survenue lors de la connexion au service. Veuillez réessayer.",
+        timestamp: Date.now()
+      };
+      setMessages(prev => [...prev, errorMessage]);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
-    <div className="space-y-6 relative">
-      <div className="bg-gradient-to-br from-emerald-900 to-slate-900 rounded-2xl p-8 text-white relative overflow-hidden shadow-xl">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500 rounded-full mix-blend-overlay filter blur-3xl opacity-20 -translate-y-1/2 translate-x-1/2"></div>
-        
-        <div className="relative z-10">
-          <div className="flex justify-between items-start">
-             <h2 className="text-2xl font-bold mb-2 flex items-center gap-2">
-                <Sparkles className="w-6 h-6 text-yellow-400" /> 
-                Coach Deen AI
-             </h2>
-             <span className="bg-yellow-400/20 text-yellow-400 text-xs px-2 py-1 rounded border border-yellow-400/30 font-bold uppercase tracking-wider flex items-center gap-1">
-                <Crown className="w-3 h-3" /> Premium
-             </span>
+    <div className="flex flex-col h-[calc(100vh-120px)] md:h-[600px] md:max-h-[800px] bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-200 relative">
+      
+      {/* Header */}
+      <div className="bg-emerald-900 p-4 flex items-center justify-between shadow-md z-10">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-emerald-700 rounded-full flex items-center justify-center border-2 border-emerald-500">
+            <Sparkles className="w-5 h-5 text-yellow-300" />
           </div>
-          
-          <p className="text-slate-300 mb-6 max-w-lg">
-            Salam {userProfile.name}, prêt pour votre bilan spirituel du jour ?
-          </p>
+          <div>
+            <h2 className="text-white font-bold flex items-center gap-2">
+              Coach Deen IA
+              <span className="bg-emerald-600/50 text-emerald-100 text-[10px] px-1.5 py-0.5 rounded border border-emerald-500/30 uppercase tracking-wider">
+                Test Gratuit
+              </span>
+            </h2>
+            <p className="text-emerald-200 text-xs">Basé sur le Coran & la Sunna</p>
+          </div>
+        </div>
+        {!userProfile.isPremium && (
+          <button onClick={onSubscribe} className="text-xs bg-yellow-400 text-emerald-900 px-3 py-1.5 rounded-full font-bold flex items-center gap-1 hover:bg-yellow-300 transition-colors opacity-80" title="Abonnement optionnel">
+            <Crown className="w-3 h-3" /> Soutenir
+          </button>
+        )}
+      </div>
 
-          {!advice && !loading && (
-            <button 
-              onClick={handleGetAdvice}
-              className="bg-white text-emerald-900 px-6 py-3 rounded-lg font-bold hover:bg-emerald-50 transition-all flex items-center gap-2 shadow-lg shadow-emerald-900/50"
-            >
-              <MessageCircle className="w-5 h-5" />
-              Obtenir la Sagesse du Jour
-            </button>
-          )}
-
-          {loading && (
-            <div className="flex items-center gap-3 text-emerald-200 animate-pulse bg-white/5 p-4 rounded-lg inline-flex">
-              <Loader2 className="w-5 h-5 animate-spin" />
-              <span>Analyse de vos progrès...</span>
-            </div>
-          )}
-
-          {advice && (
-            <div className="bg-white/10 backdrop-blur-md rounded-xl p-6 border border-white/20 animate-in fade-in slide-in-from-bottom-2">
-              <p className="text-lg leading-relaxed text-emerald-50 italic font-serif">
-                "{advice}"
-              </p>
-              <div className="mt-4 flex gap-4">
-                 <button onClick={handleGetAdvice} className="text-sm font-medium text-emerald-300 hover:text-white underline underline-offset-4">
-                    Nouveau conseil
-                 </button>
-                 <button onClick={() => setAdvice(null)} className="text-sm font-medium text-slate-400 hover:text-white">
-                    Fermer
-                 </button>
+      {/* Messages Area */}
+      <div className="flex-1 overflow-y-auto p-4 bg-slate-50 space-y-4">
+        {messages.map((msg) => {
+          const isUser = msg.role === 'user';
+          return (
+            <div key={msg.id} className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
+              <div className={`flex max-w-[85%] md:max-w-[75%] gap-2 ${isUser ? 'flex-row-reverse' : 'flex-row'}`}>
+                <div className={`w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center mt-1 ${isUser ? 'bg-slate-200' : 'bg-emerald-100'}`}>
+                   {isUser ? <User className="w-5 h-5 text-slate-500" /> : <Bot className="w-5 h-5 text-emerald-600" />}
+                </div>
+                
+                <div className={`p-3.5 rounded-2xl text-sm leading-relaxed shadow-sm ${
+                  isUser 
+                    ? 'bg-slate-800 text-white rounded-tr-none' 
+                    : 'bg-white text-slate-800 border border-slate-100 rounded-tl-none'
+                }`}>
+                  {msg.text}
+                </div>
               </div>
             </div>
-          )}
-        </div>
+          );
+        })}
+        
+        {isLoading && (
+          <div className="flex justify-start">
+            <div className="flex max-w-[75%] gap-2">
+              <div className="w-8 h-8 rounded-full bg-emerald-100 flex-shrink-0 flex items-center justify-center mt-1">
+                 <Bot className="w-5 h-5 text-emerald-600" />
+              </div>
+              <div className="bg-white p-4 rounded-2xl rounded-tl-none border border-slate-100 shadow-sm">
+                <div className="flex gap-1">
+                  <span className="w-2 h-2 bg-emerald-400 rounded-full animate-bounce [animation-delay:-0.3s]"></span>
+                  <span className="w-2 h-2 bg-emerald-400 rounded-full animate-bounce [animation-delay:-0.15s]"></span>
+                  <span className="w-2 h-2 bg-emerald-400 rounded-full animate-bounce"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+        <div ref={messagesEndRef} />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-white p-5 rounded-xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
-             <div className="text-2xl mb-2">🤲</div>
-             <h3 className="font-bold text-slate-800">Niyyah (Intention)</h3>
-             <p className="text-sm text-slate-500 mt-1">Commencez chaque action avec une intention sincère pour Allah.</p>
-          </div>
-          <div className="bg-white p-5 rounded-xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
-             <div className="text-2xl mb-2">⚡</div>
-             <h3 className="font-bold text-slate-800">Istiqamah (Constance)</h3>
-             <p className="text-sm text-slate-500 mt-1">"Les actions les plus aimées d'Allah sont les plus constantes."</p>
-          </div>
-          <div className="bg-white p-5 rounded-xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
-             <div className="text-2xl mb-2">🌱</div>
-             <h3 className="font-bold text-slate-800">Croissance</h3>
-             <p className="text-sm text-slate-500 mt-1">Visez le progrès, pas la perfection. Chaque jour est une nouvelle chance.</p>
-          </div>
+      {/* Input Area */}
+      <div className="p-4 bg-white border-t border-slate-100">
+        <form onSubmit={handleSendMessage} className="flex gap-2 relative">
+          <input
+            type="text"
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            placeholder="Posez une question spirituelle..."
+            disabled={isLoading}
+            className="flex-1 p-3 pr-12 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed text-slate-800 placeholder:text-slate-400"
+          />
+          <button
+            type="submit"
+            disabled={isLoading || !inputValue.trim()}
+            className="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 disabled:bg-slate-300 disabled:cursor-not-allowed transition-colors"
+          >
+            {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+          </button>
+        </form>
+        <p className="text-[10px] text-center text-slate-400 mt-2">
+          L'IA peut commettre des erreurs. Vérifiez toujours les informations importantes auprès d'un savant.
+        </p>
       </div>
 
-      {/* Paywall Modal */}
-      {showPaywall && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in">
-          <div className="relative max-w-md w-full bg-white rounded-3xl shadow-2xl p-8 border border-slate-100 text-center overflow-hidden animate-in zoom-in-95 duration-200">
-             
-             <button 
-                onClick={() => setShowPaywall(false)}
-                className="absolute top-4 right-4 p-2 text-slate-400 hover:bg-slate-100 rounded-full transition-colors"
-             >
-                <X className="w-5 h-5" />
-             </button>
-
-             <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-emerald-400 via-yellow-400 to-emerald-400"></div>
-             
-             <div className="w-16 h-16 bg-gradient-to-br from-yellow-100 to-yellow-50 text-yellow-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner">
-                <Crown className="w-8 h-8" />
-             </div>
-
-             <h2 className="text-2xl font-bold text-slate-900 mb-2">Débloquez le Coach IA</h2>
-             <p className="text-slate-500 mb-6">
-               Pour recevoir ce conseil personnalisé, passez au mode Premium.
-             </p>
-
-             <ul className="text-left space-y-3 mb-8 bg-slate-50 p-4 rounded-xl">
-               <li className="flex items-center gap-3 text-sm text-slate-700">
-                  <CheckCircle2 className="w-5 h-5 text-emerald-500 flex-shrink-0" />
-                  Analyses spirituelles quotidiennes
-               </li>
-               <li className="flex items-center gap-3 text-sm text-slate-700">
-                  <CheckCircle2 className="w-5 h-5 text-emerald-500 flex-shrink-0" />
-                  Conseils basés sur vos données
-               </li>
-               <li className="flex items-center gap-3 text-sm text-slate-700">
-                  <CheckCircle2 className="w-5 h-5 text-emerald-500 flex-shrink-0" />
-                  3 jours d'essai gratuit
-               </li>
-             </ul>
-
-             <div className="mb-6">
-               <span className="text-3xl font-bold text-slate-900">4,95 €</span>
-               <span className="text-slate-500"> / mois</span>
-               <p className="text-xs text-emerald-600 font-medium mt-1">Essai gratuit • Sans engagement</p>
-             </div>
-
-             <button 
-               onClick={() => {
-                   setShowPaywall(false);
-                   onSubscribe();
-               }}
-               className="w-full py-4 bg-[#635BFF] text-white rounded-xl font-bold text-lg hover:bg-[#5851df] transition-all shadow-lg shadow-indigo-200 flex items-center justify-center gap-2 group"
-             >
-               <CreditCard className="w-5 h-5 text-white/80" />
-               Payer avec Stripe
-             </button>
-             <p className="text-[10px] text-slate-400 mt-4 flex items-center justify-center gap-1">
-               <Lock className="w-3 h-3" /> Paiement sécurisé et crypté
-             </p>
-          </div>
-        </div>
-      )}
+      {/* Paywall Overlay REMOVED FOR TESTING */}
     </div>
   );
 };

@@ -1,56 +1,35 @@
-import { GoogleGenAI } from "@google/genai";
-import { Habit, HabitLog, PrayerLog } from "../types";
+import { GoogleGenAI, Chat } from "@google/genai";
 
 const getClient = () => {
   return new GoogleGenAI({ apiKey: process.env.API_KEY });
 };
 
-export const generateCoachingAdvice = async (
-  habits: Habit[],
-  logs: HabitLog,
-  prayerLogs: PrayerLog,
-  today: string
-): Promise<string> => {
+export const createChatSession = (userName: string): Chat => {
   const ai = getClient();
   
-  // Stats rapides
-  const todayLog = logs[today] || {};
-  const completedCount = Object.values(todayLog).filter(Boolean).length;
-  
-  const todayPrayers = prayerLogs[today] || {};
-  const prayersOnTime = Object.values(todayPrayers).filter(s => s === 'on_time').length;
-  const prayersLate = Object.values(todayPrayers).filter(s => s === 'late').length;
+  const systemInstruction = `
+    Tu es "Coach Deen", un assistant spirituel musulman bienveillant, sage et empathique.
+    Ton objectif est d'aider l'utilisateur (qui s'appelle ${userName}) à se rapprocher d'Allah, à améliorer ses habitudes et à trouver du réconfort.
 
-  const habitList = habits.map(h => `- ${h.title} (${h.category})`).join('\n');
-  
-  const prompt = `
-    Tu es un "Deen & Life Coach" sage, bienveillant et motivant.
-    L'utilisateur suit ses habitudes et ses prières.
-    
-    Contexte :
-    - Date : ${today}
-    - Habitudes complétées aujourd'hui : ${completedCount}
-    - Prières à l'heure : ${prayersOnTime}
-    - Prières rattrapées : ${prayersLate}
-    - Liste des habitudes suivies :
-    ${habitList}
+    Règles de comportement :
+    1. Base tes réponses sur le Coran, la Sunnah authentique et la sagesse islamique générale.
+    2. Sois encourageant, jamais jugeant. Utilise la douceur (Hikmah).
+    3. Tes réponses doivent être concises, claires et adaptées au monde moderne.
+    4. Si l'utilisateur pose une question de jurisprudence complexe (Fiqh) qui nécessite une Fatwa (ex: divorce, héritage complexe), réponds par les principes généraux mais conseille-lui humblement de consulter un savant ou un imam local pour un avis spécifique.
+    5. Exprime-toi en Français courant, avec parfois des termes islamiques courants (Insha'Allah, SubhanAllah) si approprié.
+    6. Tu peux utiliser des émojis pour rendre la conversation chaleureuse.
 
-    Tâche :
-    Donne un message court et encourageant (max 3 phrases) en FRANÇAIS.
-    Si l'utilisateur a été assidu (Istiqamah), félicite-le.
-    S'il a eu des difficultés, rappelle-lui la patience (Sabr) et l'importance de l'intention (Niyyah).
-    Inclus un petit conseil pratique basé sur ses habitudes.
-    Reste spirituel, moderne et pratique. Évite les discours théologiques trop complexes.
+    Sujets typiques :
+    - Motivation pour la prière et les habitudes.
+    - Gestion du stress et de la tristesse par la foi.
+    - Explications simples de concepts religieux.
+    - Conseils pour l'équilibre vie pro/vie spirituelle.
   `;
 
-  try {
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
-      contents: prompt,
-    });
-    return response.text || "Continuez vos efforts, chaque petit pas compte auprès d'Allah.";
-  } catch (error) {
-    console.error("Gemini API Error:", error);
-    return "Je n'arrive pas à me connecter à la source de sagesse pour le moment. Réessayez plus tard.";
-  }
+  return ai.chats.create({
+    model: 'gemini-2.5-flash',
+    config: {
+      systemInstruction: systemInstruction,
+    },
+  });
 };

@@ -43,6 +43,13 @@ export interface Invocation {
   translation: string;
 }
 
+export interface ChatMessage {
+  id: string;
+  role: 'user' | 'model';
+  text: string;
+  timestamp: number;
+}
+
 export type ViewMode = 'auth' | 'home' | 'tracker' | 'invocations' | 'stats' | 'coach' | 'profile';
 
 export const CATEGORY_COLORS = {
