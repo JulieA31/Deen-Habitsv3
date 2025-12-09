@@ -23,7 +23,7 @@ const SUNNAH_HABITS = [
 ];
 
 // getDay() : 0 = Dim, 1 = Lun…
-const DAYS = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
+const DAYS = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam','Dim'];
 
 const HabitTracker: React.FC<HabitTrackerProps> = ({
   habits,
