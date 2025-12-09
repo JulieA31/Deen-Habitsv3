@@ -11,8 +11,8 @@ import InvocationLibrary from './components/InvocationLibrary';
 
 // Audio Assets
 const SOUND_URLS = {
-  beep: '/sounds/beep.ogg',
-  adhan: '/sounds/Adhan_Medine.ogg' 
+  beep: '/sounds/beep.wav',
+  adhan: '/sounds/Adhan_Medine.wav' 
 };
 
 // Initial Data
