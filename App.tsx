@@ -13,7 +13,7 @@ import { getPrayerTimes, PrayerTimes } from './services/prayerService';
 
 // Audio Assets
 const SOUND_URLS = {
-  beep: 'C:\Users\Julie Alatrach\Downloads\beep.wav',
+  beep: 'Deen-Habitsv3/public/sounds/beep.wav',
   adhan: '/sounds/Adhan_Medine.wav' 
 };
 
