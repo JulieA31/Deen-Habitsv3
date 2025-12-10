@@ -13,7 +13,7 @@ import { getPrayerTimes, PrayerTimes } from './services/prayerService';
 
 // Audio Assets
 const SOUND_URLS = {
-  beep: 'https://soundcloud.com/kalykafree/stand-back-up?in=kalykafree/sets/apocalypses&si=ae36c9bcb176453b8eb3daa775306ad6&utm_source=clipboard&utm_medium=text&utm_campaign=social_sharing',
+  beep: 'C:\Users\Julie Alatrach\Downloads\beep.wav',
   adhan: '/sounds/Adhan_Medine.wav' 
 };
 
