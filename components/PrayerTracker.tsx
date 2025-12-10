@@ -1,44 +1,34 @@
 
-import React, { useEffect, useState } from 'react';
-import { MapPin, Clock, CheckCircle2, AlertCircle, XCircle } from 'lucide-react';
-import { PrayerStatus, PrayerLog, PRAYER_NAMES } from '../types';
-import { getPrayerTimes, PrayerTimes } from '../services/prayerService';
+import React from 'react';
+import { MapPin, Clock, CheckCircle2, AlertCircle, XCircle, Bell, BellOff } from 'lucide-react';
+import { PrayerStatus, PrayerLog, PRAYER_NAMES, UserProfile } from '../types';
+import { PrayerTimes } from '../services/prayerService';
 
 interface PrayerTrackerProps {
   logs: PrayerLog;
   setLogs: React.Dispatch<React.SetStateAction<PrayerLog>>;
   currentDate: string;
   onUpdateXP: (points: number) => void;
+  // New Props from App lifting
+  prayerTimes: PrayerTimes | null;
+  prayerLoading: boolean;
+  prayerError: string | null;
+  userProfile: UserProfile | null;
+  onToggleNotification: (prayer: string) => void;
 }
 
-const PrayerTracker: React.FC<PrayerTrackerProps> = ({ logs, setLogs, currentDate, onUpdateXP }) => {
-  const [times, setTimes] = useState<PrayerTimes | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (navigator.geolocation) {
-      setLoading(true);
-      navigator.geolocation.getCurrentPosition(
-        async (position) => {
-          const fetchedTimes = await getPrayerTimes(position.coords.latitude, position.coords.longitude);
-          if (fetchedTimes) {
-            setTimes(fetchedTimes);
-          } else {
-            setError("Impossible de charger les horaires.");
-          }
-          setLoading(false);
-        },
-        (err) => {
-          console.error(err);
-          setError("Activez la localisation pour les horaires.");
-          setLoading(false);
-        }
-      );
-    } else {
-      setError("Géolocalisation non supportée.");
-    }
-  }, []);
+const PrayerTracker: React.FC<PrayerTrackerProps> = ({ 
+  logs, 
+  setLogs, 
+  currentDate, 
+  onUpdateXP, 
+  prayerTimes, 
+  prayerLoading, 
+  prayerError,
+  userProfile,
+  onToggleNotification
+}) => {
+  // Removing internal effect since it is now in App.tsx
 
   const handlePrayerAction = (prayer: string, status: PrayerStatus) => {
     const currentStatus = logs[currentDate]?.[prayer] || 'none';
@@ -76,15 +66,16 @@ const PrayerTracker: React.FC<PrayerTrackerProps> = ({ logs, setLogs, currentDat
         <h3 className="font-bold text-slate-800 flex items-center gap-2">
           <Clock className="w-5 h-5 text-emerald-600" /> Horaires de Prière
         </h3>
-        {loading && <span className="text-xs text-slate-400 animate-pulse">Localisation...</span>}
-        {error && !loading && <span className="text-xs text-red-400 flex items-center gap-1"><MapPin className="w-3 h-3" /> {error}</span>}
-        {times && !loading && <span className="text-xs text-emerald-600 font-medium flex items-center gap-1"><MapPin className="w-3 h-3" /> Localisé</span>}
+        {prayerLoading && <span className="text-xs text-slate-400 animate-pulse">Localisation...</span>}
+        {prayerError && !prayerLoading && <span className="text-xs text-red-400 flex items-center gap-1"><MapPin className="w-3 h-3" /> {prayerError}</span>}
+        {prayerTimes && !prayerLoading && <span className="text-xs text-emerald-600 font-medium flex items-center gap-1"><MapPin className="w-3 h-3" /> Localisé</span>}
       </div>
 
       <div className="space-y-3">
         {PRAYER_NAMES.map((prayer) => {
           const status = logs[currentDate]?.[prayer] || 'none';
-          const time = times ? times[prayer] : '--:--';
+          const time = prayerTimes ? prayerTimes[prayer] : '--:--';
+          const isNotificationEnabled = userProfile?.prayerNotifications?.[prayer] || false;
 
           return (
             <div key={prayer} className="flex flex-col gap-3 p-3 rounded-xl bg-slate-50 border border-slate-100">
@@ -93,6 +84,13 @@ const PrayerTracker: React.FC<PrayerTrackerProps> = ({ logs, setLogs, currentDat
                     <span className="font-semibold text-slate-700 block">{prayer}</span>
                     <span className="text-sm text-slate-400 font-mono">{time}</span>
                   </div>
+                  <button 
+                    onClick={() => onToggleNotification(prayer)}
+                    className={`p-2 rounded-full transition-colors ${isNotificationEnabled ? 'bg-emerald-100 text-emerald-600' : 'bg-white text-slate-300 hover:bg-slate-100'}`}
+                    title={isNotificationEnabled ? "Désactiver le rappel" : "Activer le rappel"}
+                  >
+                    {isNotificationEnabled ? <Bell className="w-4 h-4 fill-current" /> : <BellOff className="w-4 h-4" />}
+                  </button>
               </div>
               
               <div className="grid grid-cols-3 gap-2 w-full">

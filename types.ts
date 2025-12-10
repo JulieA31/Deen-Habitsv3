@@ -30,7 +30,8 @@ export interface UserProfile {
   level: number;
   isPremium: boolean;
   joinedAt: number;
-  notificationsEnabled: boolean;
+  notificationsEnabled: boolean; // Global toggle
+  prayerNotifications: Record<string, boolean>; // Per prayer toggle (e.g. { Fajr: true, Dhuhr: false })
   notificationSound: 'beep' | 'adhan';
 }
 

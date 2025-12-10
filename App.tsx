@@ -2,13 +2,14 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { LayoutGrid, BarChart3, MessageSquare, BookOpen, Home, Trophy, Star, LogIn, ArrowRight, User, Trash2, Bell, Shield, Volume2, Play, CreditCard, Loader2, GripHorizontal } from 'lucide-react';
 
-import { Habit, HabitLog, ViewMode, PrayerLog, UserProfile } from './types';
+import { Habit, HabitLog, ViewMode, PrayerLog, UserProfile, PRAYER_NAMES } from './types';
 import HabitTracker from './components/HabitTracker';
 import DeenCoach from './components/DeenCoach';
 import Analytics from './components/Analytics';
 import PrayerTracker from './components/PrayerTracker';
 import InvocationLibrary from './components/InvocationLibrary';
 import TasbihCounter from './components/TasbihCounter';
+import { getPrayerTimes, PrayerTimes } from './services/prayerService';
 
 // Audio Assets
 const SOUND_URLS = {
@@ -57,6 +58,12 @@ const App: React.FC = () => {
 
   const [view, setView] = useState<ViewMode>(userProfile ? 'home' : 'auth');
 
+  // Lifted Prayer State
+  const [prayerTimes, setPrayerTimes] = useState<PrayerTimes | null>(null);
+  const [prayerLoading, setPrayerLoading] = useState(false);
+  const [prayerError, setPrayerError] = useState<string | null>(null);
+  const notifiedPrayersRef = useRef<Set<string>>(new Set());
+
   // Auth State (Local for the form)
   const [authName, setAuthName] = useState('');
 
@@ -69,6 +76,78 @@ const App: React.FC = () => {
     const random = HADITHS[Math.floor(Math.random() * HADITHS.length)];
     setCurrentHadith(random);
   }, []);
+
+  // Fetch Prayer Times Globally
+  useEffect(() => {
+    if (navigator.geolocation) {
+      setPrayerLoading(true);
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const fetchedTimes = await getPrayerTimes(position.coords.latitude, position.coords.longitude);
+          if (fetchedTimes) {
+            setPrayerTimes(fetchedTimes);
+          } else {
+            setPrayerError("Impossible de charger les horaires.");
+          }
+          setPrayerLoading(false);
+        },
+        (err) => {
+          console.error(err);
+          setPrayerError("Activez la localisation pour les horaires.");
+          setPrayerLoading(false);
+        }
+      );
+    } else {
+      setPrayerError("Géolocalisation non supportée.");
+    }
+  }, []);
+
+  // Check Prayer Times Loop (Notification Trigger)
+  useEffect(() => {
+    if (!prayerTimes || !userProfile?.notificationsEnabled) return;
+
+    const intervalId = setInterval(() => {
+      const now = new Date();
+      // Format HH:MM like "14:30"
+      const currentHM = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+      
+      // Reset notified set at midnight
+      if (currentHM === '00:00') {
+        notifiedPrayersRef.current.clear();
+      }
+
+      PRAYER_NAMES.forEach(prayer => {
+        // Check if user enabled notification for this specific prayer
+        // Defaulting to true if undefined for backward compatibility or UX choice, 
+        // but here we check explicit true.
+        const isEnabled = userProfile.prayerNotifications?.[prayer];
+        const time = prayerTimes[prayer];
+        
+        // Clean time string (sometimes APIs return "05:30 (WET)")
+        const cleanTime = time ? time.split(' ')[0] : '';
+
+        if (isEnabled && cleanTime === currentHM && !notifiedPrayersRef.current.has(prayer)) {
+          // TRIGGER NOTIFICATION
+          notifiedPrayersRef.current.add(prayer);
+          
+          // 1. Play Sound
+          playSound(userProfile.notificationSound || 'beep');
+
+          // 2. Show System Notification
+          if (Notification.permission === 'granted') {
+             new Notification(`C'est l'heure de ${prayer}`, {
+                body: "Hayya 'ala Salah (Venez à la prière)",
+                icon: '/logo192.png' // Fallback icon
+             });
+          }
+        }
+      });
+
+    }, 10000); // Check every 10 seconds
+
+    return () => clearInterval(intervalId);
+  }, [prayerTimes, userProfile]);
+
 
   // Persistence
   useEffect(() => { localStorage.setItem('dh_habits', JSON.stringify(habits)); }, [habits]);
@@ -120,6 +199,7 @@ const App: React.FC = () => {
       isPremium: false,
       joinedAt: Date.now(),
       notificationsEnabled: false,
+      prayerNotifications: {}, // Init empty
       notificationSound: 'beep'
     };
     setUserProfile(newProfile);
@@ -143,30 +223,54 @@ const App: React.FC = () => {
     }
   };
 
-  const handleToggleNotifications = async () => {
+  const requestNotificationPermission = async (): Promise<boolean> => {
+    if (!("Notification" in window)) {
+        alert("Ce navigateur ne supporte pas les notifications.");
+        return false;
+    }
+    const permission = await Notification.requestPermission();
+    return permission === "granted";
+  };
+
+  const handleToggleGlobalNotifications = async () => {
     if (!userProfile) return;
     
-    // Si déjà activé, on désactive
     if (userProfile.notificationsEnabled) {
       setUserProfile({ ...userProfile, notificationsEnabled: false });
       return;
     }
 
-    if (!("Notification" in window)) {
-        alert("Ce navigateur ne supporte pas les notifications.");
-        return;
+    const granted = await requestNotificationPermission();
+    if (granted) {
+        setUserProfile(prev => prev ? { ...prev, notificationsEnabled: true } : null);
+        new Notification("Deen Habits", { body: "Rappels activés ! Barakallahu fik." });
+        playSound(userProfile.notificationSound || 'beep');
     }
+  };
 
-    try {
-        const permission = await Notification.requestPermission();
-        if (permission === "granted") {
-            setUserProfile(prev => prev ? { ...prev, notificationsEnabled: true } : null);
-            new Notification("Deen Habits", { body: "Rappels activés ! Barakallahu fik." });
-            playSound(userProfile.notificationSound || 'beep');
-        }
-    } catch (e) {
-        console.error("Erreur notification", e);
-    }
+  const handleTogglePrayerNotification = async (prayerName: string) => {
+      if (!userProfile) return;
+
+      // Ensure global permissions are asked if not already
+      if (Notification.permission !== 'granted') {
+          const granted = await requestNotificationPermission();
+          if (!granted) return;
+      }
+
+      setUserProfile(prev => {
+          if (!prev) return null;
+          const currentSettings = prev.prayerNotifications || {};
+          const newValue = !currentSettings[prayerName];
+          
+          return {
+              ...prev,
+              notificationsEnabled: true, // Auto-enable global if a prayer is checked
+              prayerNotifications: {
+                  ...currentSettings,
+                  [prayerName]: newValue
+              }
+          };
+      });
   };
 
   const handleSubscribe = () => {
@@ -394,6 +498,12 @@ const App: React.FC = () => {
                 setLogs={setPrayerLogs} 
                 currentDate={currentDate} 
                 onUpdateXP={handleUpdateXP}
+                // Props ajoutées pour le support remonté
+                prayerTimes={prayerTimes}
+                prayerLoading={prayerLoading}
+                prayerError={prayerError}
+                userProfile={userProfile}
+                onToggleNotification={handleTogglePrayerNotification}
             />
 
           </div>
@@ -479,14 +589,14 @@ const App: React.FC = () => {
                 {/* Settings List */}
                 <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
                     <button 
-                        onClick={handleToggleNotifications}
+                        onClick={handleToggleGlobalNotifications}
                         className="w-full flex items-center justify-between p-4 hover:bg-slate-50 transition-colors border-b border-slate-50"
                     >
                         <div className="flex items-center gap-3">
                             <div className="p-2 bg-blue-50 text-blue-600 rounded-lg"><Bell className="w-5 h-5" /></div>
                             <div className="text-left">
                                 <div className="font-semibold text-slate-700">Rappel Quotidien</div>
-                                <div className="text-xs text-slate-400">Recevoir une notification de rappel</div>
+                                <div className="text-xs text-slate-400">Recevoir une notification générale</div>
                             </div>
                         </div>
                         <div className={`w-12 h-6 rounded-full p-1 transition-colors ${userProfile.notificationsEnabled ? 'bg-emerald-500' : 'bg-slate-200'}`}>
