@@ -11,10 +11,10 @@ import InvocationLibrary from './components/InvocationLibrary';
 import TasbihCounter from './components/TasbihCounter';
 import { getPrayerTimes, PrayerTimes } from './services/prayerService';
 
-// Audio Assets
+// Audio Assets - Utilisation d'URLs externes fiables
 const SOUND_URLS = {
-  beep: 'Deen-Habitsv3/public/sounds/beep.wav',
-  adhan: '/sounds/Adhan_Medine.wav' 
+  beep: 'https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3',
+  adhan: 'https://www.islamcan.com/audio/adhan/azan1.mp3' 
 };
 
 // Initial Data
@@ -159,22 +159,50 @@ const App: React.FC = () => {
 
   // Audio Handler
   const playSound = (soundType: 'beep' | 'adhan') => {
+    // Stop any currently playing audio
     if (audioRef.current) {
         audioRef.current.pause();
-        audioRef.current = null;
+        audioRef.current.currentTime = 0;
     }
 
     const audio = new Audio(SOUND_URLS[soundType]);
     audioRef.current = audio;
     
+    // Set initial state
     setIsPlayingSound(true);
     
-    // Si Adhan, on ne joue que 5 secondes pour le "court" dans la démo si le fichier est long
-    if (soundType === 'adhan') {
-        audio.currentTime = 0;
-    }
+    // Play with error handling
+    const playPromise = audio.play();
 
-    audio.play().catch(e => console.error("Erreur lecture audio", e));
+    if (playPromise !== undefined) {
+      playPromise.then(() => {
+        // Playback started successfully
+        
+        // Logic for "Adhan court" (short adhan)
+        // Since we are using an external URL which might be long, we cut it after 20 seconds
+        if (soundType === 'adhan') {
+            setTimeout(() => {
+                if (audioRef.current === audio) { // Ensure we are still playing the same audio
+                    const fadeOut = setInterval(() => {
+                        if (audio.volume > 0.1) {
+                            audio.volume -= 0.1;
+                        } else {
+                            clearInterval(fadeOut);
+                            audio.pause();
+                            audio.currentTime = 0;
+                            setIsPlayingSound(false);
+                        }
+                    }, 200);
+                }
+            }, 20000); // 20 seconds duration for Adhan
+        }
+
+      }).catch(error => {
+        console.error("Erreur lecture audio:", error);
+        setIsPlayingSound(false);
+        // Fallback or alert if needed
+      });
+    }
     
     audio.onended = () => setIsPlayingSound(false);
   };
@@ -287,7 +315,7 @@ const App: React.FC = () => {
         if (confirmed) {
             setUserProfile({ ...userProfile, isPremium: true });
             alert("Paiement réussi ! Bienvenue dans le club Premium.");
-            new Audio(SOUND_URLS.beep).play(); // Petit son de succès
+            playSound('beep'); // Petit son de succès
         }
     }, 1500);
   };
