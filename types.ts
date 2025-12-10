@@ -50,7 +50,7 @@ export interface ChatMessage {
   timestamp: number;
 }
 
-export type ViewMode = 'auth' | 'home' | 'tracker' | 'invocations' | 'stats' | 'coach' | 'profile';
+export type ViewMode = 'auth' | 'home' | 'tracker' | 'invocations' | 'tasbih' | 'stats' | 'coach' | 'profile';
 
 export const CATEGORY_COLORS = {
   deen: 'bg-emerald-100 text-emerald-800 border-emerald-200',

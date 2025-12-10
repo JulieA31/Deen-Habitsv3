@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { LayoutGrid, BarChart3, MessageSquare, BookOpen, Home, Trophy, Star, LogIn, ArrowRight, User, Trash2, Bell, Shield, Volume2, Play, CreditCard, Loader2 } from 'lucide-react';
+import { LayoutGrid, BarChart3, MessageSquare, BookOpen, Home, Trophy, Star, LogIn, ArrowRight, User, Trash2, Bell, Shield, Volume2, Play, CreditCard, Loader2, GripHorizontal } from 'lucide-react';
 
 import { Habit, HabitLog, ViewMode, PrayerLog, UserProfile } from './types';
 import HabitTracker from './components/HabitTracker';
@@ -8,6 +8,7 @@ import DeenCoach from './components/DeenCoach';
 import Analytics from './components/Analytics';
 import PrayerTracker from './components/PrayerTracker';
 import InvocationLibrary from './components/InvocationLibrary';
+import TasbihCounter from './components/TasbihCounter';
 
 // Audio Assets
 const SOUND_URLS = {
@@ -283,26 +284,34 @@ const App: React.FC = () => {
       
       {/* Mobile Top Bar / Gamification */}
       <div className="bg-white p-4 sticky top-0 z-20 border-b border-slate-100 flex justify-between items-center md:hidden shadow-sm">
-         <div className="flex items-center gap-2">
+         <div className="flex items-center gap-2" onClick={() => setView('home')}>
             <div className="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center text-white font-bold shadow-md">D</div>
-            <span className="font-bold text-slate-800">DeenHabits</span>
          </div>
-         <div className="flex items-center gap-3">
+         <div className="flex items-center gap-4">
+             {/* XP Bar */}
              <div className="flex flex-col items-end">
                  <span className="text-xs text-slate-400 font-bold uppercase">Niveau {userProfile.level}</span>
-                 <div className="w-24 h-2 bg-slate-100 rounded-full mt-1 overflow-hidden">
+                 <div className="w-20 h-1.5 bg-slate-100 rounded-full mt-1 overflow-hidden">
                      <div 
                         className="h-full bg-yellow-400 rounded-full transition-all duration-500" 
                         style={{ width: `${(userProfile.xp % 100)}%` }} 
                      ></div>
                  </div>
              </div>
+             
+             {/* Profile Button (Moved here) */}
+             <button 
+                onClick={() => setView('profile')}
+                className={`w-9 h-9 rounded-full flex items-center justify-center border transition-all ${view === 'profile' ? 'bg-slate-800 text-white border-slate-800' : 'bg-slate-50 text-slate-600 border-slate-200'}`}
+             >
+                 <User className="w-5 h-5" />
+             </button>
          </div>
       </div>
 
       {/* Desktop Sidebar */}
       <aside className="hidden md:flex flex-col w-64 fixed left-0 top-0 bottom-0 bg-white border-r border-slate-200 px-4 py-8 z-50">
-        <div className="flex items-center gap-3 px-4 mb-12">
+        <div className="flex items-center gap-3 px-4 mb-12 cursor-pointer" onClick={() => setView('home')}>
           <div className="w-10 h-10 bg-emerald-600 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-emerald-200">D</div>
           <span className="text-xl font-bold tracking-tight text-slate-800">DeenHabits</span>
         </div>
@@ -332,6 +341,7 @@ const App: React.FC = () => {
             { id: 'home', icon: Home, label: 'Accueil' },
             { id: 'tracker', icon: LayoutGrid, label: 'Habitudes' },
             { id: 'invocations', icon: BookOpen, label: 'Invocations' },
+            { id: 'tasbih', icon: GripHorizontal, label: 'Tasbih' },
             { id: 'stats', icon: BarChart3, label: 'Statistiques' },
             { id: 'coach', icon: MessageSquare, label: 'Coach IA' },
             { id: 'profile', icon: User, label: 'Mon Profil' }
@@ -407,6 +417,13 @@ const App: React.FC = () => {
           <div className="animate-in fade-in zoom-in-95 duration-300">
              <h2 className="text-2xl font-bold text-slate-800 mb-6">Bibliothèque</h2>
              <InvocationLibrary />
+          </div>
+        )}
+
+        {view === 'tasbih' && (
+          <div className="animate-in fade-in zoom-in-95 duration-300">
+            <h2 className="text-2xl font-bold text-slate-800 mb-6">Tasbih & Dhikr</h2>
+            <TasbihCounter />
           </div>
         )}
 
@@ -542,8 +559,8 @@ const App: React.FC = () => {
          <NavButton target="home" icon={Home} label="Accueil" />
          <NavButton target="tracker" icon={LayoutGrid} label="Habitudes" />
          <NavButton target="invocations" icon={BookOpen} label="Douas" />
+         <NavButton target="tasbih" icon={GripHorizontal} label="Tasbih" />
          <NavButton target="coach" icon={MessageSquare} label="Coach" />
-         <NavButton target="profile" icon={User} label="Profil" />
       </nav>
 
     </div>
