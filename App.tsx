@@ -13,7 +13,7 @@ import { getPrayerTimes, PrayerTimes } from './services/prayerService';
 
 // Audio Assets
 const SOUND_URLS = {
-  beep: 'https://github.com/JulieA31/Deen-Habitsv3/blob/main/public/sounds/beep.mp3.mp3',
+  beep: 'https://soundcloud.com/kalykafree/stand-back-up?in=kalykafree/sets/apocalypses&si=ae36c9bcb176453b8eb3daa775306ad6&utm_source=clipboard&utm_medium=text&utm_campaign=social_sharing',
   adhan: '/sounds/Adhan_Medine.wav' 
 };
 
