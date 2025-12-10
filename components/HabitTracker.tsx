@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Plus, Trash2, Check, X, Calendar, Sparkles, ScrollText, Trophy } from 'lucide-react';
 import { Habit, HabitLog, CATEGORY_ICONS, CATEGORY_COLORS } from '../types';
@@ -12,14 +13,51 @@ interface HabitTrackerProps {
 }
 
 const SUNNAH_HABITS = [
-  { title: 'Siwak', category: 'deen', icon: '🦷', description: "Utiliser le Siwak avant chaque prière.", xp: 10 },
+  // Prières & Actes d'adoration
   { title: 'Prière de Duha', category: 'deen', icon: '☀️', description: "La prière de la matinée (2 rakʿat minimum).", xp: 30 },
-  { title: 'Jeûner Lundi/Jeudi', category: 'deen', icon: '📅', description: "Jeûner comme le Prophète (sws).", xp: 50 },
+  { title: 'Rawâtib (Surérogatoires)', category: 'deen', icon: '🕌', description: "Les 12 unités de prière liées aux prières obligatoires.", xp: 25 },
   { title: 'Witr avant de dormir', category: 'deen', icon: '🌙', description: "Clôturer la journée avec la prière impaire.", xp: 25 },
-  { title: 'Lire Sourate Al-Mulk', category: 'deen', icon: '📖', description: "Chaque soir pour la protection de la tombe.", xp: 20 },
   { title: 'Dhikr du Matin', category: 'deen', icon: '📿', description: "Invocations de protection du matin.", xp: 15 },
+  { title: 'Dhikr du Soir', category: 'deen', icon: '🌇', description: "Invocations de protection du soir.", xp: 15 },
+  { title: 'Tasbih post-prière', category: 'deen', icon: '☝️', description: "33x SubhanAllah, Alhamdulillah, Allahu Akbar.", xp: 10 },
+  { title: 'Istighfar quotidien', category: 'deen', icon: '💧', description: "Demander pardon à Allah régulièrement.", xp: 10 },
+  { title: 'Lire Sourate Al-Mulk', category: 'deen', icon: '📖', description: "Chaque soir pour la protection de la tombe.", xp: 20 },
+  { title: 'Lire Sourate Al-Kahf', category: 'deen', icon: '🔦', description: "Le Vendredi (Lumière entre deux vendredis).", xp: 50 },
+  { title: 'Jeûner Lundi/Jeudi', category: 'deen', icon: '📅', description: "Jeûner comme le Prophète (sws).", xp: 50 },
+  { title: 'Jeûner Jours Blancs', category: 'deen', icon: '🌕', description: "13, 14 et 15ème jour du mois lunaire.", xp: 50 },
+  
+  // Hygiène de vie & Sunnah Quotidienne
+  { title: 'Siwak', category: 'deen', icon: '🦷', description: "Utiliser le Siwak avant chaque prière.", xp: 10 },
+  { title: 'Ablutions avant dormir', category: 'deen', icon: '🚿', description: "Dormir en état de pureté.", xp: 15 },
+  { title: 'Dormir côté droit', category: 'health', icon: '💤', description: "Sounnah du sommeil.", xp: 5 },
+  { title: 'Manger main droite', category: 'deen', icon: '🥣', description: "Manger avec la main droite.", xp: 5 },
+  { title: 'Boire assis (3 gorgées)', category: 'health', icon: '🥤', description: "Ne pas boire debout, respirer hors du récipient.", xp: 5 },
+  { title: 'Ne pas souffler (repas)', category: 'health', icon: '🌬️', description: "Attendre que ça refroidisse.", xp: 5 },
+  { title: 'Couper les ongles', category: 'health', icon: '✂️', description: "Hygiène naturelle (Fitra) hebdomadaire.", xp: 10 },
+  { title: 'Se parfumer (Hommes)', category: 'general', icon: '🌺', description: "Sentir bon est une Sunnah aimée.", xp: 5 },
+  { title: 'Ghusl du Vendredi', category: 'deen', icon: '🚿', description: "Grandes ablutions pour Jumu'a.", xp: 20 },
+  
+  // Entrées / Sorties & Etiquette (Adab)
+  { title: 'Entrer toilettes (PG)', category: 'deen', icon: '🦶', description: "Pied gauche + 'Bismillah, Allahoumma...'", xp: 5 },
+  { title: 'Sortir toilettes (PD)', category: 'deen', icon: '🦶', description: "Pied droit + 'Ghufrânaka'.", xp: 5 },
+  { title: 'Entrer maison (Bismillah)', category: 'deen', icon: '🏠', description: "Dire Bismillah en entrant.", xp: 5 },
+  { title: 'Sortir maison (Doua)', category: 'deen', icon: '🚪', description: "'Bismillahi tawakkaltu...'", xp: 5 },
+  { title: 'Chaussures (PD/PG)', category: 'deen', icon: '👟', description: "Mettre pied droit, retirer pied gauche.", xp: 5 },
+  
+  // Protection & Sommeil
+  { title: 'Ayat al-Kursi (Soir)', category: 'deen', icon: '🛡️', description: "Protection avant de dormir.", xp: 10 },
+  { title: '3 Quls + Souffler', category: 'deen', icon: '🤲', description: "Ikhlass, Falaq, Nas dans les mains.", xp: 10 },
+  { title: 'Doua du coucher', category: 'deen', icon: '🛌', description: "'Bismika Allahumma amutu wa ahya'.", xp: 5 },
+
+  // Comportement & Social
   { title: 'Sourire (Sadaqa)', category: 'general', icon: '😊', description: "Sourire est une aumône.", xp: 5 },
+  { title: 'Passer le Salam', category: 'general', icon: '🤝', description: "Même aux inconnus.", xp: 10 },
   { title: 'Visiter un malade', category: 'general', icon: '🏥', description: "Un devoir du musulman envers son frère.", xp: 40 },
+  { title: 'Pardonner', category: 'general', icon: '❤️', description: "Pardonner à quelqu'un qui nous a blessé.", xp: 20 },
+  { title: 'Ne pas mentir', category: 'general', icon: '🙊', description: "Dire la vérité même si c'est dur.", xp: 20 },
+  { title: 'Aider par une parole', category: 'general', icon: '🗣️', description: "Réconforter ou guider quelqu'un.", xp: 5 },
+  { title: 'Faire un cadeau', category: 'general', icon: '🎁', description: "Tahadaw tahabbaw (Offrez des cadeaux, vous vous aimerez).", xp: 10 },
+  { title: 'Soutenir un opprimé', category: 'general', icon: '✊', description: "Aider physiquement ou moralement.", xp: 15 },
 ];
 
 // getDay() : 0 = Dim, 1 = Lun…
@@ -76,7 +114,7 @@ const HabitTracker: React.FC<HabitTrackerProps> = ({
           : Date.now().toString() + Math.random().toString().slice(2),
       title,
       category,
-      icon: CATEGORY_ICONS[category as keyof typeof CATEGORY_ICONS] || '✨',
+      icon: CATEGORY_ICONS[category as keyof typeof CATEGORY_ICONS] || (suggestion?.icon ?? '✨'),
       createdAt: Date.now(),
       frequency,
       xp,
@@ -199,11 +237,11 @@ const HabitTracker: React.FC<HabitTrackerProps> = ({
                 </div>
                 <div className="min-w-0 flex-1">
                   <h3
-                    className={`font-semibold text-lg transition-all truncate ${
+                    className={`font-semibold text-lg transition-all truncate flex items-center gap-2 ${
                       isCompleted ? 'text-slate-400 line-through' : 'text-slate-800'
                     }`}
                   >
-                    {habit.title}
+                    <span>{habit.icon}</span> {habit.title}
                   </h3>
                   <div className="flex items-center gap-2 mt-1 flex-wrap">
                     <span
@@ -213,6 +251,8 @@ const HabitTracker: React.FC<HabitTrackerProps> = ({
                         ? 'Deen'
                         : habit.category === 'health'
                         ? 'Santé'
+                        : habit.category === 'productivity'
+                        ? 'Prod.'
                         : 'Autre'}
                     </span>
                     <span className="text-xs text-slate-400 flex items-center gap-1">
@@ -373,7 +413,7 @@ const HabitTracker: React.FC<HabitTrackerProps> = ({
             <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-emerald-50/50 rounded-t-2xl">
               <h3 className="font-bold text-lg text-emerald-900 flex items-center gap-2">
                 <ScrollText className="w-5 h-5 text-emerald-600" />
-                Suggestions Sunna
+                Bibliothèque d&apos;habitudes
               </h3>
               <button
                 onClick={() => setShowSuggestions(false)}
@@ -390,15 +430,17 @@ const HabitTracker: React.FC<HabitTrackerProps> = ({
                   onClick={() => addHabit(undefined, habit)}
                   className="w-full flex items-start gap-4 p-4 rounded-xl border border-slate-100 hover:border-emerald-200 hover:bg-emerald-50/30 transition-all text-left group"
                 >
-                  <span className="text-2xl bg-white p-2 rounded-lg shadow-sm">{habit.icon}</span>
-                  <div className="flex-1">
-                    <span className="font-bold text-slate-800 block group-hover:text-emerald-800">
-                      {habit.title}
-                    </span>
-                    <span className="text-xs text-slate-500">{habit.description}</span>
-                  </div>
-                  <div className="text-xs font-bold text-emerald-600 bg-emerald-100 px-2 py-1 rounded-md whitespace-nowrap">
-                    +{habit.xp} XP
+                  <span className="text-2xl bg-white p-2 rounded-lg shadow-sm flex-shrink-0">{habit.icon}</span>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex justify-between items-center mb-0.5">
+                       <span className="font-bold text-slate-800 block group-hover:text-emerald-800 truncate pr-2">
+                        {habit.title}
+                       </span>
+                       <span className="text-[10px] font-bold text-emerald-600 bg-emerald-100 px-1.5 py-0.5 rounded flex-shrink-0">
+                        +{habit.xp} XP
+                       </span>
+                    </div>
+                    <span className="text-xs text-slate-500 line-clamp-2 leading-snug">{habit.description}</span>
                   </div>
                 </button>
               ))}

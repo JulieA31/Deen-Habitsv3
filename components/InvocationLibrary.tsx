@@ -87,7 +87,8 @@ const INVOCATIONS_DATA: Invocation[] = [
 ];
 
 const InvocationLibrary: React.FC = () => {
-  const [openCategories, setOpenCategories] = useState<string[]>(['Protection']);
+  // Modification : Array vide par défaut pour que toutes les catégories soient fermées
+  const [openCategories, setOpenCategories] = useState<string[]>([]);
 
   const toggleCategory = (category: string) => {
     setOpenCategories(prev => 
