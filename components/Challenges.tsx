@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Trophy, CheckCircle2, Star, Target, Users, Heart } from 'lucide-react';
+import { Trophy, CheckCircle2, Star, RefreshCw } from 'lucide-react';
 import { Challenge, UserProfile } from '../types';
 
 interface ChallengesProps {
@@ -240,8 +240,8 @@ const Challenges: React.FC<ChallengesProps> = ({ userProfile, onUpdateXP, onTogg
     const isCompleted = completedIds.includes(challenge.id);
     
     if (isCompleted) {
-        if (window.confirm(`Voulez-vous annuler le défi "${challenge.title}" et retirer ${challenge.xp} XP ?`)) {
-            onUpdateXP(-challenge.xp);
+        if (window.confirm(`Voulez-vous recommencer le défi "${challenge.title}" ?\n\nCela réinitialisera son statut pour que vous puissiez le valider à nouveau (demain par exemple).`)) {
+            // Note: On ne retire PAS l'XP pour permettre le cumul si le défi est refait.
             onToggleChallenge(challenge.id);
         }
     } else {
@@ -326,11 +326,17 @@ const Challenges: React.FC<ChallengesProps> = ({ userProfile, onUpdateXP, onTogg
                     onClick={() => handleClaim(challenge)}
                     className={`w-full py-2.5 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 ${
                         isCompleted
-                        ? 'bg-white text-slate-400 border border-slate-200 hover:text-red-500 hover:border-red-200 hover:bg-red-50'
+                        ? 'bg-white text-emerald-600 border border-emerald-200 hover:bg-emerald-50'
                         : 'bg-slate-900 text-white hover:bg-emerald-600 shadow-lg shadow-slate-200 hover:shadow-emerald-200'
                     }`}
                 >
-                    {isCompleted ? 'Validé (Annuler ?)' : 'Valider le défi'}
+                    {isCompleted ? (
+                        <>
+                            <RefreshCw className="w-4 h-4" /> Recommencer
+                        </>
+                    ) : (
+                        'Valider le défi'
+                    )}
                 </button>
             </div>
           );
