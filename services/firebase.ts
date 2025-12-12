@@ -34,17 +34,24 @@ let app;
 let auth;
 let db;
 
-try {
-    // Vérification que les clés sont bien chargées
-    if (!firebaseConfig.apiKey) {
-      console.warn("⚠️ Firebase non configuré. Avez-vous ajouté les variables VITE_FIREBASE_* dans Vercel ?");
-    } else {
+// Vérification détaillée pour le débogage
+const missingKeys = Object.entries(firebaseConfig)
+  .filter(([_, value]) => !value)
+  .map(([key]) => key);
+
+if (missingKeys.length > 0) {
+  console.error("🔴 Erreur Configuration Firebase : Variables manquantes.");
+  console.error("Il manque les clés suivantes (assurez-vous qu'elles commencent par VITE_ dans Vercel) :", missingKeys);
+  console.warn("Config actuelle (partielle) :", firebaseConfig);
+} else {
+  try {
       app = initializeApp(firebaseConfig);
       auth = getAuth(app);
       db = getFirestore(app);
-    }
-} catch (error) {
-    console.error("Erreur d'initialisation Firebase:", error);
+      console.log("✅ Firebase initialisé avec succès sur :", firebaseConfig.authDomain);
+  } catch (error) {
+      console.error("Erreur d'initialisation Firebase:", error);
+  }
 }
 
 export { auth, db };
