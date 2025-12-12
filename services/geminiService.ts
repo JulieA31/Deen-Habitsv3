@@ -7,7 +7,7 @@ const getApiKey = (): string | undefined => {
   // @ts-ignore
   if (typeof import.meta !== 'undefined' && import.meta.env) {
     // @ts-ignore
-    const viteKey = import.meta.env.VITE_API_KEY || import.meta.env.VITE_GEMINI_API_KEY;
+    const viteKey = import.meta.env.VITE_API_KEY || import.meta.env.VITE_API_KEY;
     if (viteKey) return viteKey;
     // @ts-ignore
     const plainKey = import.meta.env.API_KEY; // Au cas où configuré via define
