@@ -1,21 +1,29 @@
+
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
-// Fonction utilitaire pour lire les variables d'environnement
-// Vercel/Vite ne transmettent au navigateur que les variables commençant par VITE_
+// Fonction utilitaire ultra-robuste pour lire les variables d'environnement
+// Elle tente tous les préfixes possibles (VITE_, NEXT_PUBLIC_, REACT_APP_)
 const getEnv = (key: string) => {
+  const prefixes = ['VITE_', 'NEXT_PUBLIC_', 'REACT_APP_', ''];
+  
   // 1. Essayer via import.meta.env (Standard Vite)
   // @ts-ignore
   if (typeof import.meta !== 'undefined' && import.meta.env) {
-    // @ts-ignore
-    const val = import.meta.env[`VITE_${key}`] || import.meta.env[key];
-    if (val) return val;
+    for (const prefix of prefixes) {
+      // @ts-ignore
+      const val = import.meta.env[`${prefix}${key}`];
+      if (val) return val;
+    }
   }
   
-  // 2. Fallback pour compatibilité (Node/CRA)
+  // 2. Fallback pour compatibilité (Node/CRA/Vercel System Env)
   if (typeof process !== 'undefined' && process.env) {
-    return process.env[`VITE_${key}`] || process.env[`REACT_APP_${key}`] || process.env[key];
+    for (const prefix of prefixes) {
+      const val = process.env[`${prefix}${key}`];
+      if (val) return val;
+    }
   }
   
   return undefined;
@@ -41,16 +49,19 @@ const missingKeys = Object.entries(firebaseConfig)
 
 if (missingKeys.length > 0) {
   console.error("🔴 Erreur Configuration Firebase : Variables manquantes.");
-  console.error("Il manque les clés suivantes (assurez-vous qu'elles commencent par VITE_ dans Vercel) :", missingKeys);
+  console.error("Il manque les clés suivantes (Vérifiez vos variables d'environnement Vercel) :", missingKeys);
   console.warn("Config actuelle (partielle) :", firebaseConfig);
 } else {
   try {
+      // Vérifie qu'il n'y a pas de valeurs "undefined" explicites
+      if (!firebaseConfig.apiKey) throw new Error("API Key is missing/undefined");
+      
       app = initializeApp(firebaseConfig);
       auth = getAuth(app);
       db = getFirestore(app);
-      console.log("✅ Firebase initialisé avec succès sur :", firebaseConfig.authDomain);
+      console.log("✅ Firebase initialisé avec succès ! Domaine:", firebaseConfig.authDomain);
   } catch (error) {
-      console.error("Erreur d'initialisation Firebase:", error);
+      console.error("Erreur critique d'initialisation Firebase:", error);
   }
 }
 
