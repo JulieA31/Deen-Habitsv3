@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { LayoutGrid, BarChart3, MessageSquare, BookOpen, Home, Trophy, Star, LogIn, ArrowRight, User, Trash2, Bell, Shield, Volume2, Play, CreditCard, Loader2, GripHorizontal, CloudOff, Cloud } from 'lucide-react';
+import { LayoutGrid, BarChart3, MessageSquare, BookOpen, Home, Trophy, Star, LogIn, ArrowRight, User, Trash2, Bell, Shield, Volume2, Play, CreditCard, Loader2, GripHorizontal, CloudOff, Cloud, Mail, Lock, AlertCircle, ChevronLeft } from 'lucide-react';
 
 import { Habit, HabitLog, ViewMode, PrayerLog, UserProfile, PRAYER_NAMES } from './types';
 import HabitTracker from './components/HabitTracker';
@@ -14,13 +14,33 @@ import { getPrayerTimes, PrayerTimes } from './services/prayerService';
 
 // Firebase Imports
 import { auth, db } from './services/firebase';
-import { signInAnonymously, onAuthStateChanged, signOut, deleteUser } from 'firebase/auth';
+import { 
+  createUserWithEmailAndPassword, 
+  signInWithEmailAndPassword, 
+  updateProfile, 
+  onAuthStateChanged, 
+  signOut, 
+  deleteUser 
+} from 'firebase/auth';
 import { doc, getDoc, setDoc, deleteDoc } from 'firebase/firestore';
 
 // Audio Assets - Utilisation d'URLs externes fiables
 const SOUND_URLS = {
   beep: 'https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3',
   adhan: 'https://www.islamcan.com/audio/adhan/azan1.mp3' 
+};
+
+// Helper pour récupérer les variables d'environnement (Compatible Vite)
+const getEnv = (key: string) => {
+  // @ts-ignore
+  if (typeof import.meta !== 'undefined' && import.meta.env) {
+    // @ts-ignore
+    return import.meta.env[`VITE_${key}`] || import.meta.env[key];
+  }
+  if (typeof process !== 'undefined' && process.env) {
+    return process.env[`VITE_${key}`] || process.env[key];
+  }
+  return undefined;
 };
 
 // Initial Data
@@ -57,7 +77,14 @@ const App: React.FC = () => {
   const [view, setView] = useState<ViewMode>('auth');
   const [isDataLoading, setIsDataLoading] = useState(true); // Loading screen for Firebase
   const [isSaving, setIsSaving] = useState(false); // Saving indicator
+  
+  // Auth Form State
+  const [showWelcomeScreen, setShowWelcomeScreen] = useState(true); // NEW: Controls the "First Name" screen
+  const [isSignUpMode, setIsSignUpMode] = useState(false);
   const [authName, setAuthName] = useState('');
+  const [authEmail, setAuthEmail] = useState('');
+  const [authPassword, setAuthPassword] = useState('');
+  const [authError, setAuthError] = useState('');
 
   // Lifted Prayer State
   const [prayerTimes, setPrayerTimes] = useState<PrayerTimes | null>(null);
@@ -173,17 +200,18 @@ const App: React.FC = () => {
             setPrayerLogs(data.prayerLogs || {});
             setView('home'); // Go to app
           } else {
-            // New user case
-            if (!userProfile) setView('auth');
+             // Cas rare où l'user est auth mais pas de doc (ex: erreur lors de l'inscription précédente)
+             // On ne fait rien
           }
         } catch (error) {
           console.error("Error fetching user data:", error);
-          alert("Erreur de connexion à la base de données.");
+          setAuthError("Erreur de connexion à la base de données.");
         }
       } else {
         // User is signed out
         setUserProfile(null);
         setView('auth');
+        setShowWelcomeScreen(true); // Reset to welcome screen on logout
       }
       setIsDataLoading(false);
     });
@@ -264,47 +292,102 @@ const App: React.FC = () => {
     }
   };
 
-  const handleLogin = async (e: React.FormEvent) => {
+  // --- AUTH HANDLERS ---
+
+  const handleWelcomeSubmit = (e: React.FormEvent) => {
+      e.preventDefault();
+      if (authName.trim()) {
+          setShowWelcomeScreen(false);
+          setIsSignUpMode(true); // Assume sign up after giving name
+          setAuthError('');
+      }
+  };
+
+  const handleSkipToLogin = () => {
+      setShowWelcomeScreen(false);
+      setIsSignUpMode(false); // Go to login
+      setAuthError('');
+  };
+
+  const handleAuthAction = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!authName.trim()) return;
+    setAuthError('');
+    
     if (!auth) {
-        alert("Firebase n'est pas configuré. Vérifiez services/firebase.ts");
+        alert("Firebase n'est pas configuré. Vérifiez vos variables d'environnement Vercel (VITE_FIREBASE_*).");
+        return;
+    }
+
+    if (!authEmail || !authPassword) {
+        setAuthError("Veuillez remplir tous les champs.");
+        return;
+    }
+
+    if (isSignUpMode && !authName) {
+        setAuthError("Le prénom est obligatoire pour l'inscription.");
         return;
     }
 
     setIsDataLoading(true);
     try {
-        const result = await signInAnonymously(auth);
-        const user = result.user;
+        let user;
+        
+        if (isSignUpMode) {
+            // --- INSCRIPTION ---
+            const userCredential = await createUserWithEmailAndPassword(auth, authEmail, authPassword);
+            user = userCredential.user;
+            
+            // Mise à jour du profil Auth
+            await updateProfile(user, { displayName: authName });
 
-        const newProfile: UserProfile = {
-            uid: user.uid,
-            name: authName,
-            xp: 0,
-            level: 1,
-            isPremium: false,
-            joinedAt: Date.now(),
-            notificationsEnabled: false,
-            prayerNotifications: {},
-            notificationSound: 'beep'
-        };
+            // Création document Firestore
+            const newProfile: UserProfile = {
+                uid: user.uid,
+                name: authName,
+                email: authEmail,
+                xp: 0,
+                level: 1,
+                isPremium: false,
+                joinedAt: Date.now(),
+                notificationsEnabled: false,
+                prayerNotifications: {},
+                notificationSound: 'beep'
+            };
 
-        if (db) {
-            await setDoc(doc(db, "users", user.uid), {
-                profile: newProfile,
-                habits: DEFAULT_HABITS,
-                logs: {},
-                prayerLogs: {}
-            });
+            if (db) {
+                await setDoc(doc(db, "users", user.uid), {
+                    profile: newProfile,
+                    habits: DEFAULT_HABITS,
+                    logs: {},
+                    prayerLogs: {}
+                });
+            }
+            
+            setUserProfile(newProfile);
+            setHabits(DEFAULT_HABITS);
+
+        } else {
+            // --- CONNEXION ---
+            const userCredential = await signInWithEmailAndPassword(auth, authEmail, authPassword);
+            user = userCredential.user;
+            // Le useEffect onAuthStateChanged se chargera de récupérer les données Firestore
         }
-
-        setUserProfile(newProfile);
-        setHabits(DEFAULT_HABITS);
+        
         setView('home');
 
-    } catch (error) {
-        console.error("Login error:", error);
-        alert("Erreur lors de la connexion. Veuillez réessayer.");
+    } catch (error: any) {
+        console.error("Auth error:", error);
+        if (error.code === 'auth/email-already-in-use') {
+            setAuthError("Cet email est déjà utilisé.");
+        } else if (error.code === 'auth/wrong-password') {
+            setAuthError("Mot de passe incorrect.");
+        } else if (error.code === 'auth/user-not-found') {
+            setAuthError("Aucun compte trouvé avec cet email.");
+        } else if (error.code === 'auth/weak-password') {
+            setAuthError("Le mot de passe doit contenir au moins 6 caractères.");
+        } else {
+            setAuthError("Une erreur est survenue. Vérifiez vos identifiants.");
+        }
     } finally {
         setIsDataLoading(false);
     }
@@ -313,6 +396,10 @@ const App: React.FC = () => {
   const handleLogout = async () => {
     if (auth) {
         await signOut(auth);
+        setAuthName('');
+        setAuthEmail('');
+        setAuthPassword('');
+        setAuthError('');
     }
   };
 
@@ -384,15 +471,17 @@ const App: React.FC = () => {
     setIsProcessingPayment(true);
     
     // 1. Méthode Réelle : Lien de Paiement Stripe
-    // Configuré via process.env.STRIPE_PAYMENT_LINK dans Vercel
-    if (process.env.STRIPE_PAYMENT_LINK) {
+    // Configuré via VITE_STRIPE_PAYMENT_LINK dans Vercel
+    const stripeLink = getEnv('STRIPE_PAYMENT_LINK');
+    
+    if (stripeLink) {
         // Redirection vers la page de paiement Stripe hébergée
-        window.location.href = process.env.STRIPE_PAYMENT_LINK;
+        window.location.href = stripeLink;
         return;
     }
 
     // 2. Fallback : Mode Simulation (pour le test)
-    console.warn("Aucun lien de paiement Stripe configuré. Mode simulation activé.");
+    console.warn("Aucun lien de paiement Stripe configuré (VITE_STRIPE_PAYMENT_LINK). Mode simulation activé.");
     setTimeout(() => {
         setIsProcessingPayment(false);
         const confirmed = window.confirm("Simulation (Pas de lien configuré) :\n\nConfirmer le paiement fictif de 4,95€ ?");
@@ -450,38 +539,146 @@ const App: React.FC = () => {
      );
   }
 
-  // Auth Screen
+  // Auth Screen Wrapper
   if (!userProfile || view === 'auth') {
     return (
         <div className="min-h-screen bg-white flex flex-col items-center justify-center p-6 relative overflow-hidden">
             <div className="absolute top-0 left-0 w-full h-1/2 bg-emerald-600 rounded-b-[3rem] z-0"></div>
             
-            <div className="z-10 bg-white p-8 rounded-3xl shadow-2xl w-full max-w-sm border border-slate-100">
-                <div className="flex justify-center mb-6">
-                    <div className="w-16 h-16 bg-emerald-100 rounded-2xl flex items-center justify-center text-emerald-600 font-bold text-3xl shadow-sm">
-                        D
+            {/* --- SCREEN 1: WELCOME / NAME --- */}
+            {showWelcomeScreen ? (
+                 <div className="z-10 bg-white p-8 rounded-3xl shadow-2xl w-full max-w-sm border border-slate-100 animate-in fade-in zoom-in-95 duration-500">
+                    <div className="flex justify-center mb-6">
+                        <div className="w-16 h-16 bg-emerald-100 rounded-2xl flex items-center justify-center text-emerald-600 font-bold text-3xl shadow-sm transform rotate-3">
+                            D
+                        </div>
+                    </div>
+                    <h1 className="text-2xl font-bold text-center text-slate-800 mb-2">Salam !</h1>
+                    <p className="text-center text-slate-500 mb-8 text-sm">Comment t'appelles-tu ?</p>
+
+                    <form onSubmit={handleWelcomeSubmit} className="space-y-4">
+                        <div>
+                            <div className="relative">
+                                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                                <input 
+                                    type="text" 
+                                    required
+                                    value={authName}
+                                    onChange={(e) => setAuthName(e.target.value)}
+                                    className="w-full pl-10 p-3 border border-slate-200 bg-white text-slate-800 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                                    placeholder="Ton Prénom"
+                                    autoFocus
+                                />
+                            </div>
+                        </div>
+                        <button type="submit" className="w-full bg-emerald-600 text-white py-3 rounded-xl font-bold hover:bg-emerald-700 transition-colors shadow-lg shadow-emerald-200 flex items-center justify-center gap-2">
+                            C'est parti <ArrowRight className="w-4 h-4" />
+                        </button>
+                    </form>
+
+                    <div className="mt-6 text-center">
+                        <button 
+                            onClick={handleSkipToLogin}
+                            className="text-sm text-slate-400 hover:text-emerald-600 font-medium transition-colors"
+                        >
+                            J'ai déjà un compte
+                        </button>
+                    </div>
+                 </div>
+            ) : (
+                /* --- SCREEN 2: AUTH FORM (Login or Signup) --- */
+                <div className="z-10 bg-white p-8 rounded-3xl shadow-2xl w-full max-w-sm border border-slate-100 animate-in slide-in-from-right duration-300">
+                    <button 
+                        onClick={() => setShowWelcomeScreen(true)}
+                        className="mb-4 text-slate-400 hover:text-emerald-600 transition-colors flex items-center gap-1 text-xs font-bold uppercase tracking-wider"
+                    >
+                        <ChevronLeft className="w-4 h-4" /> Retour
+                    </button>
+
+                    <h1 className="text-2xl font-bold text-slate-800 mb-2">
+                        {isSignUpMode ? `Enchanté ${authName} !` : 'Bon retour !'}
+                    </h1>
+                    <p className="text-slate-500 mb-6 text-sm">
+                        {isSignUpMode ? 'Crée un mot de passe pour sauvegarder ta progression.' : 'Connecte-toi pour retrouver tes habitudes.'}
+                    </p>
+
+                    {authError && (
+                        <div className="mb-4 p-3 bg-red-50 text-red-600 rounded-lg text-sm flex items-center gap-2">
+                            <AlertCircle className="w-4 h-4 shrink-0" />
+                            {authError}
+                        </div>
+                    )}
+
+                    <form onSubmit={handleAuthAction} className="space-y-4">
+                        
+                        {/* Hidden Name field for consistency if needed or edit */}
+                        {isSignUpMode && (
+                            <div>
+                                <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Prénom</label>
+                                <div className="relative">
+                                    <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                                    <input 
+                                        type="text" 
+                                        required
+                                        value={authName}
+                                        onChange={(e) => setAuthName(e.target.value)}
+                                        className="w-full pl-10 p-3 border border-slate-200 bg-white text-slate-800 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                                    />
+                                </div>
+                            </div>
+                        )}
+
+                        <div>
+                            <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Email</label>
+                            <div className="relative">
+                                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                                <input 
+                                    type="email" 
+                                    required
+                                    value={authEmail}
+                                    onChange={(e) => setAuthEmail(e.target.value)}
+                                    className="w-full pl-10 p-3 border border-slate-200 bg-white text-slate-800 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                                    placeholder="votre@email.com"
+                                />
+                            </div>
+                        </div>
+
+                        <div>
+                            <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Mot de passe</label>
+                            <div className="relative">
+                                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                                <input 
+                                    type="password" 
+                                    required
+                                    value={authPassword}
+                                    onChange={(e) => setAuthPassword(e.target.value)}
+                                    className="w-full pl-10 p-3 border border-slate-200 bg-white text-slate-800 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                                    placeholder="******"
+                                    minLength={6}
+                                />
+                            </div>
+                        </div>
+
+                        <button type="submit" className="w-full bg-emerald-600 text-white py-3 rounded-xl font-bold hover:bg-emerald-700 transition-colors shadow-lg shadow-emerald-200 flex items-center justify-center gap-2">
+                            {isSignUpMode ? 'Terminer l\'inscription' : 'Se connecter'} <ArrowRight className="w-4 h-4" />
+                        </button>
+                    </form>
+
+                    <div className="mt-6 text-center">
+                        <button 
+                            onClick={() => {
+                                setIsSignUpMode(!isSignUpMode);
+                                setAuthError('');
+                            }}
+                            className="text-sm text-slate-500 hover:text-emerald-600 font-medium transition-colors"
+                        >
+                            {isSignUpMode 
+                                ? "J'ai déjà un compte" 
+                                : "Je veux créer un nouveau compte"}
+                        </button>
                     </div>
                 </div>
-                <h1 className="text-2xl font-bold text-center text-slate-800 mb-2">Deen Habits</h1>
-                <p className="text-center text-slate-500 mb-8 text-sm">Votre compagnon quotidien synchronisé dans le cloud.</p>
-
-                <form onSubmit={handleLogin} className="space-y-4">
-                    <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-1">Votre Prénom</label>
-                        <input 
-                            type="text" 
-                            required
-                            value={authName}
-                            onChange={(e) => setAuthName(e.target.value)}
-                            className="w-full p-3 border border-slate-200 bg-white text-slate-800 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none"
-                            placeholder="Ex: Bilal"
-                        />
-                    </div>
-                    <button type="submit" className="w-full bg-emerald-600 text-white py-3 rounded-xl font-bold hover:bg-emerald-700 transition-colors shadow-lg shadow-emerald-200 flex items-center justify-center gap-2">
-                        Commencer <ArrowRight className="w-4 h-4" />
-                    </button>
-                </form>
-            </div>
+            )}
         </div>
     );
   }
@@ -677,7 +874,7 @@ const App: React.FC = () => {
                     </div>
                     <h2 className="text-2xl font-bold text-slate-800">{userProfile.name}</h2>
                     <p className="text-slate-500">Membre depuis le {new Date(userProfile.joinedAt).toLocaleDateString()}</p>
-                    <div className="mt-2 text-xs text-slate-300 font-mono">{userProfile.uid}</div>
+                    <div className="mt-2 text-xs text-slate-300 font-mono">{userProfile.email}</div>
                 </div>
 
                 {/* Status Card */}
