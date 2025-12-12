@@ -106,7 +106,7 @@ const Analytics: React.FC<AnalyticsProps> = ({ habits, logs, prayerLogs }) => {
                                 <Pie
                                     data={pieData}
                                     cx="50%"
-                                    cy="50%"
+                                    cy="40%" // Remonté à 40% pour laisser de la place à la légende
                                     innerRadius={60}
                                     outerRadius={80}
                                     paddingAngle={5}

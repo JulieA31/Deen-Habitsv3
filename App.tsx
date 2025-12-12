@@ -836,7 +836,9 @@ const App: React.FC = () => {
       {/* Mobile Top Bar */}
       <div className="bg-white p-4 sticky top-0 z-20 border-b border-slate-100 flex justify-between items-center md:hidden shadow-sm">
          <div className="flex items-center gap-2" onClick={() => setView('home')}>
-            <div className="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center text-white font-bold shadow-md">D</div>
+            <div className="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center text-white font-bold shadow-md">
+                <Home className="w-5 h-5" />
+            </div>
             {isSaving && <Cloud className="w-4 h-4 text-emerald-400 animate-pulse" />}
          </div>
          <div className="flex items-center gap-4">
@@ -892,7 +894,7 @@ const App: React.FC = () => {
             { id: 'tracker', icon: LayoutGrid, label: 'Habitudes' },
             { id: 'invocations', icon: BookOpen, label: 'Invocations' },
             { id: 'tasbih', icon: GripHorizontal, label: 'Tasbih' },
-            { id: 'challenges', icon: Trophy, label: 'Défis' }, // Remplace Stats pour mobile focus mais desktop peut tout avoir
+            { id: 'challenges', icon: Trophy, label: 'Défis' }, 
             { id: 'stats', icon: BarChart3, label: 'Statistiques' },
             { id: 'coach', icon: MessageSquare, label: 'Coach IA' },
             { id: 'profile', icon: User, label: 'Mon Profil' }
@@ -1162,12 +1164,13 @@ const App: React.FC = () => {
 
       {/* Mobile Bottom Nav */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 px-4 py-2 flex justify-between items-center z-50 safe-area-bottom shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
-         <NavButton target="home" icon={Home} label="Accueil" />
+         {/* <NavButton target="home" icon={Home} label="Accueil" /> REMOVED */}
          <NavButton target="tracker" icon={LayoutGrid} label="Habitudes" />
          <NavButton target="invocations" icon={BookOpen} label="Douas" />
-         {/* J'ai remplacé Tasbih par Défis (Trophy) car c'est une nouvelle fonctionnalité demandée, accessible plus rapidement */}
          <NavButton target="challenges" icon={Trophy} label="Défis" />
          <NavButton target="coach" icon={MessageSquare} label="Coach" />
+         {/* Added Tasbih as requested in 6th (now 5th) position */}
+         <NavButton target="tasbih" icon={GripHorizontal} label="Tasbih" />
       </nav>
 
     </div>
