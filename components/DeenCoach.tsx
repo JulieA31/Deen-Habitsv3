@@ -1,5 +1,6 @@
+
 import React, { useState, useEffect, useRef } from 'react';
-import { Sparkles, Send, Loader2, Crown, User, Bot } from 'lucide-react';
+import { Sparkles, Send, Loader2, Crown, User, Bot, AlertTriangle } from 'lucide-react';
 import { UserProfile, ChatMessage } from '../types';
 import { createChatSession } from '../services/geminiService';
 import { Chat } from '@google/genai';
@@ -24,6 +25,7 @@ const DeenCoach: React.FC<DeenCoachProps> = ({ userProfile, onSubscribe }) => {
   ]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [initError, setInitError] = useState<string | null>(null);
   
   const chatSessionRef = useRef<Chat | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -31,7 +33,13 @@ const DeenCoach: React.FC<DeenCoachProps> = ({ userProfile, onSubscribe }) => {
   // Initialisation du chat pour TOUS les utilisateurs (Mode Test)
   useEffect(() => {
     if (!chatSessionRef.current) {
-      chatSessionRef.current = createChatSession(userProfile.name);
+      try {
+        chatSessionRef.current = createChatSession(userProfile.name);
+        setInitError(null);
+      } catch (error: any) {
+        console.error("Erreur d'initialisation du Coach:", error);
+        setInitError("Impossible de démarrer le Coach IA. Vérifiez que la clé API (VITE_API_KEY) est bien configurée dans Vercel.");
+      }
     }
   }, [userProfile.name]);
 
@@ -44,14 +52,7 @@ const DeenCoach: React.FC<DeenCoachProps> = ({ userProfile, onSubscribe }) => {
     e?.preventDefault();
 
     if (!inputValue.trim()) return;
-    
-    // Restriction Premium désactivée pour le test
-    /* 
-    if (!userProfile.isPremium) {
-      setShowPaywall(true);
-      return;
-    } 
-    */
+    if (initError) return;
 
     const newUserMessage: ChatMessage = {
       id: Date.now().toString(),
@@ -78,6 +79,8 @@ const DeenCoach: React.FC<DeenCoachProps> = ({ userProfile, onSubscribe }) => {
         };
 
         setMessages(prev => [...prev, newAiMessage]);
+      } else {
+        throw new Error("Session de chat non initialisée");
       }
     } catch (error) {
       console.error("Erreur Chat:", error);
@@ -121,6 +124,17 @@ const DeenCoach: React.FC<DeenCoachProps> = ({ userProfile, onSubscribe }) => {
 
       {/* Messages Area */}
       <div className="flex-1 overflow-y-auto p-4 bg-slate-50 space-y-4">
+        
+        {initError && (
+          <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex items-start gap-3 text-red-700">
+             <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5" />
+             <div>
+               <h3 className="font-bold text-sm">Erreur de Configuration</h3>
+               <p className="text-xs mt-1">{initError}</p>
+             </div>
+          </div>
+        )}
+
         {messages.map((msg) => {
           const isUser = msg.role === 'user';
           return (
@@ -157,13 +171,13 @@ const DeenCoach: React.FC<DeenCoachProps> = ({ userProfile, onSubscribe }) => {
             type="text"
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
-            placeholder="Posez une question spirituelle..."
-            disabled={isLoading}
+            placeholder={initError ? "Service indisponible" : "Posez une question spirituelle..."}
+            disabled={isLoading || !!initError}
             className="flex-1 p-3 pr-12 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed text-slate-800 placeholder:text-slate-400"
           />
           <button
             type="submit"
-            disabled={isLoading || !inputValue.trim()}
+            disabled={isLoading || !inputValue.trim() || !!initError}
             className="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 disabled:bg-slate-300 disabled:cursor-not-allowed transition-colors"
           >
             {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
@@ -173,8 +187,6 @@ const DeenCoach: React.FC<DeenCoachProps> = ({ userProfile, onSubscribe }) => {
           L'IA peut commettre des erreurs. Vérifiez toujours les informations importantes auprès d'un savant.
         </p>
       </div>
-
-      {/* Paywall Overlay REMOVED FOR TESTING */}
     </div>
   );
 };

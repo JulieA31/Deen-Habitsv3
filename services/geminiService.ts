@@ -1,7 +1,37 @@
+
 import { GoogleGenAI, Chat } from "@google/genai";
 
+// Fonction robuste pour récupérer la clé API
+const getApiKey = (): string | undefined => {
+  // 1. Essayer via import.meta.env (Standard Vite)
+  // @ts-ignore
+  if (typeof import.meta !== 'undefined' && import.meta.env) {
+    // @ts-ignore
+    const viteKey = import.meta.env.VITE_API_KEY || import.meta.env.VITE_GEMINI_API_KEY;
+    if (viteKey) return viteKey;
+    // @ts-ignore
+    const plainKey = import.meta.env.API_KEY; // Au cas où configuré via define
+    if (plainKey) return plainKey;
+  }
+  
+  // 2. Fallback process.env (Node/Vercel)
+  if (typeof process !== 'undefined' && process.env) {
+    return process.env.VITE_API_KEY || process.env.API_KEY;
+  }
+  
+  return undefined;
+};
+
 const getClient = () => {
-  return new GoogleGenAI({ apiKey: process.env.API_KEY });
+  const apiKey = getApiKey();
+  
+  if (!apiKey) {
+    console.error("🔴 Clé API Gemini manquante !");
+    console.error("Action requise : Ajoutez une variable d'environnement 'VITE_API_KEY' dans Vercel.");
+    throw new Error("Clé API manquante (VITE_API_KEY).");
+  }
+  
+  return new GoogleGenAI({ apiKey });
 };
 
 export const createChatSession = (userName: string): Chat => {
