@@ -24,6 +24,7 @@ export interface HabitLog {
 }
 
 export interface UserProfile {
+  uid?: string; // ID Firebase unique
   name: string;
   email?: string;
   xp: number;

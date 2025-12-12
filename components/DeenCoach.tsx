@@ -125,29 +125,19 @@ const DeenCoach: React.FC<DeenCoachProps> = ({ userProfile, onSubscribe }) => {
           const isUser = msg.role === 'user';
           return (
             <div key={msg.id} className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
-              <div className={`flex max-w-[85%] md:max-w-[75%] gap-2 ${isUser ? 'flex-row-reverse' : 'flex-row'}`}>
-                <div className={`w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center mt-1 ${isUser ? 'bg-slate-200' : 'bg-emerald-100'}`}>
-                   {isUser ? <User className="w-5 h-5 text-slate-500" /> : <Bot className="w-5 h-5 text-emerald-600" />}
-                </div>
-                
-                <div className={`p-3.5 rounded-2xl text-sm leading-relaxed shadow-sm ${
+                <div className={`max-w-[90%] md:max-w-[85%] p-3.5 rounded-2xl text-sm leading-relaxed shadow-sm ${
                   isUser 
                     ? 'bg-slate-800 text-white rounded-tr-none' 
                     : 'bg-white text-slate-800 border border-slate-100 rounded-tl-none'
                 }`}>
                   {msg.text}
                 </div>
-              </div>
             </div>
           );
         })}
         
         {isLoading && (
           <div className="flex justify-start">
-            <div className="flex max-w-[75%] gap-2">
-              <div className="w-8 h-8 rounded-full bg-emerald-100 flex-shrink-0 flex items-center justify-center mt-1">
-                 <Bot className="w-5 h-5 text-emerald-600" />
-              </div>
               <div className="bg-white p-4 rounded-2xl rounded-tl-none border border-slate-100 shadow-sm">
                 <div className="flex gap-1">
                   <span className="w-2 h-2 bg-emerald-400 rounded-full animate-bounce [animation-delay:-0.3s]"></span>
@@ -155,7 +145,6 @@ const DeenCoach: React.FC<DeenCoachProps> = ({ userProfile, onSubscribe }) => {
                   <span className="w-2 h-2 bg-emerald-400 rounded-full animate-bounce"></span>
                 </div>
               </div>
-            </div>
           </div>
         )}
         <div ref={messagesEndRef} />
