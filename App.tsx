@@ -9,7 +9,9 @@ import Analytics from './components/Analytics';
 import PrayerTracker from './components/PrayerTracker';
 import InvocationLibrary from './components/InvocationLibrary';
 import TasbihCounter from './components/TasbihCounter';
-import PremiumModal from './components/PremiumModal'; // Import Modal
+import PremiumModal from './components/PremiumModal';
+import PrivacyPolicy from './components/PrivacyPolicy'; // Import New Component
+import Challenges from './components/Challenges'; // Import New Component
 import { getPrayerTimes, PrayerTimes } from './services/prayerService';
 
 // Firebase Imports
@@ -575,6 +577,23 @@ const App: React.FC = () => {
     });
   };
 
+  // --- CHALLENGES ---
+  const handleCompleteChallenge = (challengeId: string) => {
+    if (!userProfile) return;
+    setUserProfile(prev => {
+      if (!prev) return null;
+      return {
+        ...prev,
+        completedChallenges: {
+          ...(prev.completedChallenges || {}),
+          [challengeId]: Date.now()
+        }
+      };
+    });
+    // Trigger confetti or sound here if desired
+    playSound('beep');
+  };
+
   const getCompletionRate = () => {
       if (!userProfile) return 0;
       const habitCount = habits.filter(h => h.frequency.length === 0 || h.frequency.includes(new Date().getDay())).length;
@@ -873,6 +892,7 @@ const App: React.FC = () => {
             { id: 'tracker', icon: LayoutGrid, label: 'Habitudes' },
             { id: 'invocations', icon: BookOpen, label: 'Invocations' },
             { id: 'tasbih', icon: GripHorizontal, label: 'Tasbih' },
+            { id: 'challenges', icon: Trophy, label: 'Défis' }, // Remplace Stats pour mobile focus mais desktop peut tout avoir
             { id: 'stats', icon: BarChart3, label: 'Statistiques' },
             { id: 'coach', icon: MessageSquare, label: 'Coach IA' },
             { id: 'profile', icon: User, label: 'Mon Profil' }
@@ -907,17 +927,44 @@ const App: React.FC = () => {
                </p>
             </div>
 
-            {/* Quick Stats */}
+            {/* Quick Stats - Maintenant Cliquables pour aller aux stats */}
             <div className="grid grid-cols-2 gap-4">
-                <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
+                <button 
+                    onClick={() => setView('stats')}
+                    className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm text-left hover:bg-slate-50 transition-colors"
+                >
                     <div className="text-3xl font-bold text-emerald-600 mb-1">{getCompletionRate()}%</div>
-                    <div className="text-xs text-slate-400 uppercase font-bold">Complétion du jour</div>
-                </div>
-                <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
+                    <div className="text-xs text-slate-400 uppercase font-bold flex items-center gap-1">
+                        Complétion du jour <BarChart3 className="w-3 h-3" />
+                    </div>
+                </button>
+                <button 
+                    onClick={() => setView('challenges')}
+                    className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm text-left hover:bg-slate-50 transition-colors"
+                >
                     <div className="text-3xl font-bold text-slate-800 mb-1">{userProfile.xp}</div>
-                    <div className="text-xs text-slate-400 uppercase font-bold">Points XP</div>
-                </div>
+                    <div className="text-xs text-slate-400 uppercase font-bold flex items-center gap-1">
+                        Points XP <Trophy className="w-3 h-3" />
+                    </div>
+                </button>
             </div>
+
+            {/* Bouton Rapide pour Défis Mobile */}
+            <button 
+                onClick={() => setView('challenges')}
+                className="w-full bg-gradient-to-r from-yellow-500 to-amber-500 text-white p-4 rounded-xl shadow-md flex items-center justify-between group"
+            >
+                <div className="flex items-center gap-3">
+                    <div className="p-2 bg-white/20 rounded-lg">
+                        <Trophy className="w-6 h-6 text-white" />
+                    </div>
+                    <div className="text-left">
+                        <div className="font-bold">Défis Quotidiens</div>
+                        <div className="text-xs text-yellow-100">Gagne de l'XP en relevant des challenges</div>
+                    </div>
+                </div>
+                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            </button>
 
             <PrayerTracker 
                 logs={prayerLogs} 
@@ -961,10 +1008,20 @@ const App: React.FC = () => {
           </div>
         )}
 
+        {view === 'challenges' && (
+          <div className="animate-in fade-in zoom-in-95 duration-300">
+            <Challenges 
+                userProfile={userProfile} 
+                onUpdateXP={handleUpdateXP} 
+                onCompleteChallenge={handleCompleteChallenge}
+            />
+          </div>
+        )}
+
         {view === 'stats' && (
           <div className="animate-in fade-in zoom-in-95 duration-300">
             <h2 className="text-2xl font-bold text-slate-800 mb-6">Vos Statistiques</h2>
-            <Analytics habits={habits} logs={logs} />
+            <Analytics habits={habits} logs={logs} prayerLogs={prayerLogs} />
           </div>
         )}
 
@@ -979,6 +1036,12 @@ const App: React.FC = () => {
                 onSubscribe={handleOpenSubscribe}
              />
           </div>
+        )}
+
+        {view === 'privacy' && (
+            <div className="animate-in fade-in zoom-in-95 duration-300">
+                <PrivacyPolicy onBack={() => setView('profile')} />
+            </div>
         )}
 
         {view === 'profile' && (
@@ -1066,7 +1129,10 @@ const App: React.FC = () => {
                         </div>
                     </div>
 
-                    <button className="w-full flex items-center gap-3 p-4 hover:bg-slate-50 transition-colors border-b border-slate-50">
+                    <button 
+                        onClick={() => setView('privacy')}
+                        className="w-full flex items-center gap-3 p-4 hover:bg-slate-50 transition-colors border-b border-slate-50"
+                    >
                         <div className="p-2 bg-purple-50 text-purple-600 rounded-lg"><Shield className="w-5 h-5" /></div>
                         <span className="font-semibold text-slate-700">Politique de confidentialité</span>
                     </button>
@@ -1099,7 +1165,8 @@ const App: React.FC = () => {
          <NavButton target="home" icon={Home} label="Accueil" />
          <NavButton target="tracker" icon={LayoutGrid} label="Habitudes" />
          <NavButton target="invocations" icon={BookOpen} label="Douas" />
-         <NavButton target="tasbih" icon={GripHorizontal} label="Tasbih" />
+         {/* J'ai remplacé Tasbih par Défis (Trophy) car c'est une nouvelle fonctionnalité demandée, accessible plus rapidement */}
+         <NavButton target="challenges" icon={Trophy} label="Défis" />
          <NavButton target="coach" icon={MessageSquare} label="Coach" />
       </nav>
 

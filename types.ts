@@ -34,6 +34,7 @@ export interface UserProfile {
   notificationsEnabled: boolean; // Global toggle
   prayerNotifications: Record<string, boolean>; // Per prayer toggle (e.g. { Fajr: true, Dhuhr: false })
   notificationSound: 'beep' | 'adhan';
+  completedChallenges?: Record<string, number>; // ID du défi -> Timestamp de réalisation
 }
 
 export interface Invocation {
@@ -52,7 +53,17 @@ export interface ChatMessage {
   timestamp: number;
 }
 
-export type ViewMode = 'auth' | 'home' | 'tracker' | 'invocations' | 'tasbih' | 'stats' | 'coach' | 'profile';
+export interface Challenge {
+  id: string;
+  title: string;
+  description: string;
+  xp: number;
+  icon: string;
+  category: 'faith' | 'community' | 'self';
+  difficulty: 'easy' | 'medium' | 'hard';
+}
+
+export type ViewMode = 'auth' | 'home' | 'tracker' | 'invocations' | 'tasbih' | 'stats' | 'coach' | 'profile' | 'privacy' | 'challenges';
 
 export const CATEGORY_COLORS = {
   deen: 'bg-emerald-100 text-emerald-800 border-emerald-200',
