@@ -10,6 +10,7 @@ interface ChallengesProps {
 }
 
 const CHALLENGES_LIST: Challenge[] = [
+  // --- FOI & ADORATION (FAITH) ---
   {
     id: 'read_yasin',
     title: 'Lire Sourate Yasin',
@@ -29,22 +30,87 @@ const CHALLENGES_LIST: Challenge[] = [
     difficulty: 'hard'
   },
   {
-    id: 'charity',
-    title: 'Faire une Sadaqa',
-    description: "Donne quelque chose aujourd'hui, même 1€ ou un sourire sincère.",
-    xp: 30,
-    icon: '🤝',
-    category: 'community',
-    difficulty: 'easy'
-  },
-  {
     id: 'mosque_fajr',
     title: 'Fajr à la Mosquée',
-    description: "Prie le Fajr en groupe à la mosquée.",
+    description: "La prière la plus lourde pour les hypocrites, mais la plus récompensée.",
     xp: 150,
     icon: '🕌',
     category: 'community',
     difficulty: 'hard'
+  },
+  {
+    id: 'learn_verse',
+    title: 'Apprendre 1 Verset',
+    description: "Mémorise un nouveau verset avec sa signification en français.",
+    xp: 40,
+    icon: '🧠',
+    category: 'faith',
+    difficulty: 'medium'
+  },
+  {
+    id: 'prayer_duha',
+    title: 'Prière de Duha',
+    description: "2 unités de prière en matinée : c'est l'aumône de tes articulations.",
+    xp: 30,
+    icon: '☀️',
+    category: 'faith',
+    difficulty: 'easy'
+  },
+  {
+    id: 'prayer_witr',
+    title: 'Prière du Witr',
+    description: "Ne dors pas sans avoir prié au moins 1 rakat impaire.",
+    xp: 35,
+    icon: '🌙',
+    category: 'faith',
+    difficulty: 'easy'
+  },
+  {
+    id: 'surah_mulk',
+    title: 'Lire Al-Mulk',
+    description: "La protectrice contre les châtiments de la tombe, avant de dormir.",
+    xp: 40,
+    icon: '🛡️',
+    category: 'faith',
+    difficulty: 'medium'
+  },
+  {
+    id: 'ayat_kursi_prayer',
+    title: 'Ayat al-Kursi x5',
+    description: "Lis le verset du Trône après chacune des 5 prières obligatoires.",
+    xp: 50,
+    icon: '🪑',
+    category: 'faith',
+    difficulty: 'medium'
+  },
+  {
+    id: 'qiyam_night',
+    title: 'Qiyam al-Layl',
+    description: "Lève-toi 15min avant le Fajr pour prier 2 rakats dans le calme.",
+    xp: 150,
+    icon: '🌌',
+    category: 'faith',
+    difficulty: 'hard'
+  },
+  {
+    id: 'rawatib_12',
+    title: 'Les 12 Rawatib',
+    description: "Accomplis les 12 prières surérogatoires de la journée.",
+    xp: 120,
+    icon: '✨',
+    category: 'faith',
+    difficulty: 'hard'
+  },
+  
+  // --- COMMUNAUTÉ & FAMILLE (COMMUNITY) ---
+  {
+    id: 'charity',
+    title: 'Faire une Sadaqa',
+    description: "Donne quelque chose aujourd'hui, même 1€ ou de la nourriture.",
+    xp: 30,
+    icon: '🤝',
+    category: 'community',
+    difficulty: 'easy'
   },
   {
     id: 'call_parents',
@@ -56,6 +122,62 @@ const CHALLENGES_LIST: Challenge[] = [
     difficulty: 'easy'
   },
   {
+    id: 'feed_someone',
+    title: 'Nourrir quelqu\'un',
+    description: "Offre un repas ou partage ta nourriture avec quelqu'un.",
+    xp: 60,
+    icon: '🍲',
+    category: 'community',
+    difficulty: 'medium'
+  },
+  {
+    id: 'help_home',
+    title: 'Aider à la maison',
+    description: "Fais une tâche ménagère spontanée pour aider ta famille.",
+    xp: 25,
+    icon: '🧹',
+    category: 'community',
+    difficulty: 'easy'
+  },
+  {
+    id: 'forgive_someone',
+    title: 'Pardonner',
+    description: "Pardonne à une personne qui t'a blessé ou énervé aujourd'hui.",
+    xp: 70,
+    icon: '❤️',
+    category: 'community',
+    difficulty: 'hard'
+  },
+  {
+    id: 'visit_sick',
+    title: 'Visiter un malade',
+    description: "Rends visite à un malade, physique ou moral (déprime).",
+    xp: 100,
+    icon: '🏥',
+    category: 'community',
+    difficulty: 'hard'
+  },
+
+  // --- SOI & DÉVELOPPEMENT (SELF) ---
+  {
+    id: 'dhikr_100',
+    title: '100 Istighfar',
+    description: "Fais 100 fois 'Astaghfirullah' dans la journée.",
+    xp: 30,
+    icon: '📿',
+    category: 'self',
+    difficulty: 'easy'
+  },
+  {
+    id: 'salawat_100',
+    title: '100 Salawat',
+    description: "Prie 100 fois sur le Prophète (Allahumma salli 'ala Muhammad).",
+    xp: 40,
+    icon: '🌹',
+    category: 'self',
+    difficulty: 'medium'
+  },
+  {
     id: 'no_music',
     title: 'Journée sans musique',
     description: "Remplace la musique par du Coran ou des podcasts bénéfiques.",
@@ -65,20 +187,47 @@ const CHALLENGES_LIST: Challenge[] = [
     difficulty: 'medium'
   },
   {
-    id: 'learn_verse',
-    title: 'Apprendre 1 Verset',
-    description: "Mémorise un nouveau verset avec sa signification.",
-    xp: 40,
-    icon: '🧠',
-    category: 'faith',
+    id: 'social_detox',
+    title: 'Detox Réseaux',
+    description: "Passe 3h consécutives sans ouvrir Instagram/TikTok/Snap.",
+    xp: 50,
+    icon: '📵',
+    category: 'self',
     difficulty: 'medium'
   },
   {
-    id: 'dhikr_100',
-    title: '100 Istighfar',
-    description: "Fais 100 fois 'Astaghfirullah' dans la journée.",
-    xp: 30,
-    icon: '📿',
+    id: 'islamic_lecture',
+    title: 'Écouter un cours',
+    description: "Écoute une conférence religieuse de 20min minimum.",
+    xp: 40,
+    icon: '🎓',
+    category: 'self',
+    difficulty: 'easy'
+  },
+  {
+    id: 'wudu_sleep',
+    title: 'Dormir avec Wudu',
+    description: "Fais tes ablutions juste avant de te glisser dans ton lit.",
+    xp: 20,
+    icon: '💧',
+    category: 'self',
+    difficulty: 'easy'
+  },
+  {
+    id: 'walk_mosque',
+    title: 'Marche vers Allah',
+    description: "Vas à la mosquée à pied (chaque pas efface un péché).",
+    xp: 45,
+    icon: '👣',
+    category: 'self',
+    difficulty: 'medium'
+  },
+  {
+    id: 'smile_sunnah',
+    title: 'Sourire Sunnah',
+    description: "Efforce-toi de sourire à toutes les personnes que tu croises.",
+    xp: 20,
+    icon: '😊',
     category: 'self',
     difficulty: 'easy'
   }
