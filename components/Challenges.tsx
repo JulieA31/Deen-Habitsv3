@@ -6,7 +6,7 @@ import { Challenge, UserProfile } from '../types';
 interface ChallengesProps {
   userProfile: UserProfile;
   onUpdateXP: (xp: number) => void;
-  onCompleteChallenge: (challengeId: string) => void;
+  onToggleChallenge: (challengeId: string) => void;
 }
 
 const CHALLENGES_LIST: Challenge[] = [
@@ -233,13 +233,22 @@ const CHALLENGES_LIST: Challenge[] = [
   }
 ];
 
-const Challenges: React.FC<ChallengesProps> = ({ userProfile, onUpdateXP, onCompleteChallenge }) => {
+const Challenges: React.FC<ChallengesProps> = ({ userProfile, onUpdateXP, onToggleChallenge }) => {
   const completedIds = Object.keys(userProfile.completedChallenges || {});
 
   const handleClaim = (challenge: Challenge) => {
-    if (window.confirm(`Valider le défi "${challenge.title}" et recevoir ${challenge.xp} XP ?`)) {
-      onUpdateXP(challenge.xp);
-      onCompleteChallenge(challenge.id);
+    const isCompleted = completedIds.includes(challenge.id);
+    
+    if (isCompleted) {
+        if (window.confirm(`Voulez-vous annuler le défi "${challenge.title}" et retirer ${challenge.xp} XP ?`)) {
+            onUpdateXP(-challenge.xp);
+            onToggleChallenge(challenge.id);
+        }
+    } else {
+        if (window.confirm(`Valider le défi "${challenge.title}" et recevoir ${challenge.xp} XP ?`)) {
+            onUpdateXP(challenge.xp);
+            onToggleChallenge(challenge.id);
+        }
     }
   };
 
@@ -283,7 +292,7 @@ const Challenges: React.FC<ChallengesProps> = ({ userProfile, onUpdateXP, onComp
                 key={challenge.id}
                 className={`border rounded-2xl p-4 transition-all ${
                     isCompleted 
-                    ? 'bg-emerald-50/50 border-emerald-200 opacity-80' 
+                    ? 'bg-emerald-50/50 border-emerald-200' 
                     : 'bg-white border-slate-100 hover:shadow-md'
                 }`}
             >
@@ -293,7 +302,7 @@ const Challenges: React.FC<ChallengesProps> = ({ userProfile, onUpdateXP, onComp
                             {challenge.icon}
                         </div>
                         <div>
-                            <h3 className={`font-bold text-slate-800 ${isCompleted ? 'line-through text-slate-500' : ''}`}>
+                            <h3 className={`font-bold text-slate-800 ${isCompleted ? 'text-emerald-800' : ''}`}>
                                 {challenge.title}
                             </h3>
                             <div className="flex gap-2 mt-1">
@@ -315,14 +324,13 @@ const Challenges: React.FC<ChallengesProps> = ({ userProfile, onUpdateXP, onComp
 
                 <button
                     onClick={() => handleClaim(challenge)}
-                    disabled={isCompleted}
                     className={`w-full py-2.5 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 ${
                         isCompleted
-                        ? 'bg-slate-100 text-slate-400 cursor-default'
+                        ? 'bg-white text-slate-400 border border-slate-200 hover:text-red-500 hover:border-red-200 hover:bg-red-50'
                         : 'bg-slate-900 text-white hover:bg-emerald-600 shadow-lg shadow-slate-200 hover:shadow-emerald-200'
                     }`}
                 >
-                    {isCompleted ? 'Accompli' : 'Valider le défi'}
+                    {isCompleted ? 'Validé (Annuler ?)' : 'Valider le défi'}
                 </button>
             </div>
           );

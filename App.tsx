@@ -578,20 +578,26 @@ const App: React.FC = () => {
   };
 
   // --- CHALLENGES ---
-  const handleCompleteChallenge = (challengeId: string) => {
+  const handleToggleChallenge = (challengeId: string) => {
     if (!userProfile) return;
     setUserProfile(prev => {
       if (!prev) return null;
+      const challenges = { ...(prev.completedChallenges || {}) };
+      
+      // Si déjà complété, on le retire
+      if (challenges[challengeId]) {
+        delete challenges[challengeId];
+      } else {
+        // Sinon on l'ajoute
+        challenges[challengeId] = Date.now();
+      }
+
       return {
         ...prev,
-        completedChallenges: {
-          ...(prev.completedChallenges || {}),
-          [challengeId]: Date.now()
-        }
+        completedChallenges: challenges
       };
     });
-    // Trigger confetti or sound here if desired
-    playSound('beep');
+    // Sound only on completion, not removal (handled in component)
   };
 
   const getCompletionRate = () => {
@@ -1015,7 +1021,7 @@ const App: React.FC = () => {
             <Challenges 
                 userProfile={userProfile} 
                 onUpdateXP={handleUpdateXP} 
-                onCompleteChallenge={handleCompleteChallenge}
+                onToggleChallenge={handleToggleChallenge}
             />
           </div>
         )}

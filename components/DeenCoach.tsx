@@ -108,16 +108,13 @@ const DeenCoach: React.FC<DeenCoachProps> = ({ userProfile, onSubscribe }) => {
           <div>
             <h2 className="text-white font-bold flex items-center gap-2">
               Coach Deen IA
-              <span className="bg-emerald-600/50 text-emerald-100 text-[10px] px-1.5 py-0.5 rounded border border-emerald-500/30 uppercase tracking-wider">
-                Test Gratuit
-              </span>
             </h2>
             <p className="text-emerald-200 text-xs">Basé sur le Coran & la Sunna</p>
           </div>
         </div>
         {!userProfile.isPremium && (
           <button onClick={onSubscribe} className="text-xs bg-yellow-400 text-emerald-900 px-3 py-1.5 rounded-full font-bold flex items-center gap-1 hover:bg-yellow-300 transition-colors opacity-80" title="Abonnement optionnel">
-            <Crown className="w-3 h-3" /> Soutenir
+            <Crown className="w-3 h-3" /> Premium
           </button>
         )}
       </div>
