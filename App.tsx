@@ -1029,7 +1029,7 @@ const App: React.FC = () => {
         {view === 'stats' && (
           <div className="animate-in fade-in zoom-in-95 duration-300">
             <h2 className="text-2xl font-bold text-slate-800 mb-6">Vos Statistiques</h2>
-            <Analytics habits={habits} logs={logs} prayerLogs={prayerLogs} />
+            <Analytics habits={habits} logs={logs} prayerLogs={prayerLogs} userProfile={userProfile} />
           </div>
         )}
 
