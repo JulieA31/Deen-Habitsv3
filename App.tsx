@@ -152,7 +152,7 @@ const App: React.FC = () => {
           if (Notification.permission === 'granted') {
              new Notification(`C'est l'heure de ${prayer}`, {
                 body: "Hayya 'ala Salah (Venez à la prière)",
-                icon: '/public/logo.png' // Fallback icon
+                icon: '/logo.png' // Fallback icon
              });
           }
         }
@@ -669,7 +669,7 @@ const App: React.FC = () => {
             {showWelcomeScreen ? (
                  <div className="z-10 bg-white p-8 rounded-3xl shadow-2xl w-full max-w-sm border border-slate-100 animate-in fade-in zoom-in-95 duration-500">
                     <div className="flex justify-center mb-6">
-                        <img src="/public/logo.png" alt="Deen Habits Logo" className="w-24 h-24 object-contain" />
+                        <img src="/logo.png" alt="Deen Habits Logo" className="w-24 h-24 object-contain" />
                     </div>
                     <h1 className="text-2xl font-bold text-center text-slate-800 mb-2">Salam !</h1>
                     <p className="text-center text-slate-500 mb-8 text-sm">Comment t'appelles-tu ?</p>
@@ -864,7 +864,7 @@ const App: React.FC = () => {
       {/* Mobile Top Bar */}
       <div className="bg-white p-4 sticky top-0 z-20 border-b border-slate-100 flex justify-between items-center md:hidden shadow-sm">
          <div className="flex items-center gap-2" onClick={() => setView('home')}>
-            <img src="/public/logo.png" alt="Logo" className="w-8 h-8 rounded-lg object-contain bg-emerald-50" />
+            <img src="/logo.png" alt="Logo" className="w-8 h-8 rounded-lg object-contain bg-emerald-50" />
             {isSaving && <Cloud className="w-4 h-4 text-emerald-400 animate-pulse" />}
          </div>
          <div className="flex items-center gap-4">
@@ -890,7 +890,7 @@ const App: React.FC = () => {
       {/* Desktop Sidebar */}
       <aside className="hidden md:flex flex-col w-64 fixed left-0 top-0 bottom-0 bg-white border-r border-slate-200 px-4 py-8 z-50">
         <div className="flex items-center gap-3 px-4 mb-12 cursor-pointer" onClick={() => setView('home')}>
-          <img src="/public/logo.png" alt="Logo" className="w-10 h-10 rounded-xl object-contain bg-emerald-50" />
+          <img src="/logo.png" alt="Logo" className="w-10 h-10 rounded-xl object-contain bg-emerald-50" />
           <span className="text-xl font-bold tracking-tight text-slate-800">DeenHabits</span>
         </div>
 
