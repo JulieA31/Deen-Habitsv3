@@ -15,18 +15,7 @@ import Challenges from './components/Challenges'; // Import New Component
 import { getPrayerTimes, PrayerTimes } from './services/prayerService';
 
 // Firebase Imports
-import { auth, db } from './services/firebase';
-import { 
-  createUserWithEmailAndPassword, 
-  signInWithEmailAndPassword, 
-  updateProfile, 
-  onAuthStateChanged, 
-  signOut, 
-  deleteUser,
-  GoogleAuthProvider,
-  signInWithPopup
-} from 'firebase/auth';
-import { doc, getDoc, setDoc, deleteDoc } from 'firebase/firestore';
+import { auth, db, firebase } from './services/firebase';
 
 // Audio Assets - Utilisation d'URLs externes fiables
 const SOUND_URLS = {
@@ -59,7 +48,13 @@ const HADITHS = [
   "Ne vous mettez pas en colère.",
   "Celui qui croit en Allah et au Jour Dernier, qu'il dise du bien ou qu'il se taise.",
   "Allah est Beau et Il aime la beauté.",
-  "Le sourire est une aumône."
+  "Le sourire est une aumône.",
+  "Les actes ne valent que par leurs intentions",
+  "Aucun de vous ne croit vraiment tant qu’il n’aime pas pour son frère ce qu’il aime pour lui-même.",
+  "Allah est miséricordieux envers ceux qui sont miséricordieux.",
+  "Le meilleur d’entre vous est celui qui a le meilleur comportement.",
+  "Celui qui a l’intention de faire le bien et ne le fait pas, Allah lui inscrit une bonne action.",
+  "La pudeur fait partie de la foi."
 ];
 
 const App: React.FC = () => {
@@ -157,7 +152,7 @@ const App: React.FC = () => {
           if (Notification.permission === 'granted') {
              new Notification(`C'est l'heure de ${prayer}`, {
                 body: "Hayya 'ala Salah (Venez à la prière)",
-                icon: '/logo.png' // Fallback icon
+                icon: '/public/logo.png' // Fallback icon
              });
           }
         }
@@ -177,18 +172,18 @@ const App: React.FC = () => {
         return;
     }
 
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+    const unsubscribe = auth.onAuthStateChanged(async (user) => {
       setIsDataLoading(true);
       if (user) {
         // User is signed in, fetch data
         if (!db) return;
         try {
-          const docRef = doc(db, "users", user.uid);
-          const docSnap = await getDoc(docRef);
+          const docRef = db.collection("users").doc(user.uid);
+          const docSnap = await docRef.get();
 
-          if (docSnap.exists()) {
+          if (docSnap.exists) {
             const data = docSnap.data();
-            let profile = data.profile as UserProfile;
+            let profile = data?.profile as UserProfile;
 
             // CHECK FOR PAYMENT SUCCESS IN URL
             const urlParams = new URLSearchParams(window.location.search);
@@ -200,9 +195,9 @@ const App: React.FC = () => {
             }
 
             setUserProfile(profile);
-            setHabits(data.habits || DEFAULT_HABITS);
-            setLogs(data.logs || {});
-            setPrayerLogs(data.prayerLogs || {});
+            setHabits(data?.habits || DEFAULT_HABITS);
+            setLogs(data?.logs || {});
+            setPrayerLogs(data?.prayerLogs || {});
             setView('home'); // Go to app
           } else {
              // Cas rare où l'user est auth mais pas de doc (ex: connexion Google première fois gérée dans handleGoogleLogin, mais safety check ici)
@@ -244,8 +239,8 @@ const App: React.FC = () => {
     const saveData = async () => {
       setIsSaving(true);
       try {
-        const docRef = doc(db, "users", userProfile.uid!);
-        await setDoc(docRef, {
+        const docRef = db.collection("users").doc(userProfile.uid!);
+        await docRef.set({
           profile: userProfile,
           habits: habits,
           logs: logs,
@@ -333,16 +328,16 @@ const App: React.FC = () => {
     setIsDataLoading(true);
 
     try {
-      const provider = new GoogleAuthProvider();
-      const result = await signInWithPopup(auth, provider);
+      const provider = new firebase.auth.GoogleAuthProvider();
+      const result = await auth.signInWithPopup(provider);
       const user = result.user;
 
       // Vérifier si l'utilisateur existe déjà en BDD
-      if (db) {
-        const docRef = doc(db, "users", user.uid);
-        const docSnap = await getDoc(docRef);
+      if (db && user) {
+        const docRef = db.collection("users").doc(user.uid);
+        const docSnap = await docRef.get();
 
-        if (!docSnap.exists()) {
+        if (!docSnap.exists) {
           // Création du profil pour le nouvel utilisateur Google
           const newProfile: UserProfile = {
             uid: user.uid,
@@ -357,7 +352,7 @@ const App: React.FC = () => {
             notificationSound: 'beep'
           };
 
-          await setDoc(docRef, {
+          await docRef.set({
             profile: newProfile,
             habits: DEFAULT_HABITS,
             logs: {},
@@ -407,15 +402,15 @@ const App: React.FC = () => {
         
         if (isSignUpMode) {
             // --- INSCRIPTION ---
-            const userCredential = await createUserWithEmailAndPassword(auth, authEmail, authPassword);
+            const userCredential = await auth.createUserWithEmailAndPassword(authEmail, authPassword);
             user = userCredential.user;
             
             // Mise à jour du profil Auth
-            await updateProfile(user, { displayName: authName });
+            if (user) await user.updateProfile({ displayName: authName });
 
             // Création document Firestore
             const newProfile: UserProfile = {
-                uid: user.uid,
+                uid: user?.uid,
                 name: authName,
                 email: authEmail,
                 xp: 0,
@@ -427,8 +422,8 @@ const App: React.FC = () => {
                 notificationSound: 'beep'
             };
 
-            if (db) {
-                await setDoc(doc(db, "users", user.uid), {
+            if (db && user) {
+                await db.collection("users").doc(user.uid).set({
                     profile: newProfile,
                     habits: DEFAULT_HABITS,
                     logs: {},
@@ -441,7 +436,7 @@ const App: React.FC = () => {
 
         } else {
             // --- CONNEXION ---
-            const userCredential = await signInWithEmailAndPassword(auth, authEmail, authPassword);
+            const userCredential = await auth.signInWithEmailAndPassword(authEmail, authPassword);
             user = userCredential.user;
             // Le useEffect onAuthStateChanged se chargera de récupérer les données Firestore
         }
@@ -468,7 +463,7 @@ const App: React.FC = () => {
 
   const handleLogout = async () => {
     if (auth) {
-        await signOut(auth);
+        await auth.signOut();
         setAuthName('');
         setAuthEmail('');
         setAuthPassword('');
@@ -480,8 +475,8 @@ const App: React.FC = () => {
     if (window.confirm("Attention : Cette action est DÉFINITIVE. Vos données cloud seront supprimées. Continuer ?")) {
       if (auth && auth.currentUser && db) {
           try {
-              await deleteDoc(doc(db, "users", auth.currentUser.uid));
-              await deleteUser(auth.currentUser);
+              await db.collection("users").doc(auth.currentUser.uid).delete();
+              await auth.currentUser.delete();
               setUserProfile(null);
               setView('auth');
           } catch (e) {
@@ -674,7 +669,7 @@ const App: React.FC = () => {
             {showWelcomeScreen ? (
                  <div className="z-10 bg-white p-8 rounded-3xl shadow-2xl w-full max-w-sm border border-slate-100 animate-in fade-in zoom-in-95 duration-500">
                     <div className="flex justify-center mb-6">
-                        <img src="/logo.png" alt="Deen Habits Logo" className="w-24 h-24 object-contain" />
+                        <img src="/public/logo.png" alt="Deen Habits Logo" className="w-24 h-24 object-contain" />
                     </div>
                     <h1 className="text-2xl font-bold text-center text-slate-800 mb-2">Salam !</h1>
                     <p className="text-center text-slate-500 mb-8 text-sm">Comment t'appelles-tu ?</p>
@@ -869,7 +864,7 @@ const App: React.FC = () => {
       {/* Mobile Top Bar */}
       <div className="bg-white p-4 sticky top-0 z-20 border-b border-slate-100 flex justify-between items-center md:hidden shadow-sm">
          <div className="flex items-center gap-2" onClick={() => setView('home')}>
-            <img src="/logo.png" alt="Logo" className="w-8 h-8 rounded-lg object-contain bg-emerald-50" />
+            <img src="/public/logo.png" alt="Logo" className="w-8 h-8 rounded-lg object-contain bg-emerald-50" />
             {isSaving && <Cloud className="w-4 h-4 text-emerald-400 animate-pulse" />}
          </div>
          <div className="flex items-center gap-4">
@@ -895,7 +890,7 @@ const App: React.FC = () => {
       {/* Desktop Sidebar */}
       <aside className="hidden md:flex flex-col w-64 fixed left-0 top-0 bottom-0 bg-white border-r border-slate-200 px-4 py-8 z-50">
         <div className="flex items-center gap-3 px-4 mb-12 cursor-pointer" onClick={() => setView('home')}>
-          <img src="/logo.png" alt="Logo" className="w-10 h-10 rounded-xl object-contain bg-emerald-50" />
+          <img src="/public/logo.png" alt="Logo" className="w-10 h-10 rounded-xl object-contain bg-emerald-50" />
           <span className="text-xl font-bold tracking-tight text-slate-800">DeenHabits</span>
         </div>
 

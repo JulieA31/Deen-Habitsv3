@@ -1,7 +1,7 @@
 
-import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
+import firebase from "firebase/app";
+import "firebase/auth";
+import "firebase/firestore";
 
 // Fonction utilitaire ultra-robuste pour lire les variables d'environnement
 // Elle tente tous les préfixes possibles (VITE_, NEXT_PUBLIC_, REACT_APP_)
@@ -39,8 +39,8 @@ const firebaseConfig = {
 };
 
 let app;
-let auth;
-let db;
+let auth: firebase.auth.Auth | undefined;
+let db: firebase.firestore.Firestore | undefined;
 
 // Vérification détaillée pour le débogage
 const missingKeys = Object.entries(firebaseConfig)
@@ -56,13 +56,17 @@ if (missingKeys.length > 0) {
       // Vérifie qu'il n'y a pas de valeurs "undefined" explicites
       if (!firebaseConfig.apiKey) throw new Error("API Key is missing/undefined");
       
-      app = initializeApp(firebaseConfig);
-      auth = getAuth(app);
-      db = getFirestore(app);
+      if (!firebase.apps.length) {
+        app = firebase.initializeApp(firebaseConfig);
+      } else {
+        app = firebase.app();
+      }
+      auth = firebase.auth();
+      db = firebase.firestore();
       console.log("✅ Firebase initialisé avec succès ! Domaine:", firebaseConfig.authDomain);
   } catch (error) {
       console.error("Erreur critique d'initialisation Firebase:", error);
   }
 }
 
-export { auth, db };
+export { auth, db, firebase };
