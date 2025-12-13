@@ -227,7 +227,8 @@ const Analytics: React.FC<AnalyticsProps> = ({ habits, logs, prayerLogs, userPro
             Analyse des Prières Obligatoires
         </h3>
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-4 justify-items-center">
+        {/* Changement ici: grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 pour accommoder 4 graphiques */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-4 justify-items-center">
             
             {/* 1. Total Accompli */}
             <CircleProgress 
@@ -257,6 +258,16 @@ const Analytics: React.FC<AnalyticsProps> = ({ habits, logs, prayerLogs, userPro
                 size={140}
                 label="Prières Rattrapées"
                 subLabel="Mieux vaut tard que jamais"
+            />
+
+            {/* 4. Manquées (Nouveau) */}
+            <CircleProgress 
+                value={stats.missed} 
+                max={stats.totalPossiblePrayers} 
+                color="red" 
+                size={140}
+                label="Prières Manquées"
+                subLabel="Qu'Allah nous facilite"
             />
         </div>
 

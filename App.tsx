@@ -59,16 +59,7 @@ const HADITHS = [
   "Ne vous mettez pas en colère.",
   "Celui qui croit en Allah et au Jour Dernier, qu'il dise du bien ou qu'il se taise.",
   "Allah est Beau et Il aime la beauté.",
-  "Le sourire est une aumône.",
-  "Dépense (en charité), Ô fils d’Adam, et je dépenserai pour toi.",
-  "Le fait qu'un musulman insulte son frère est une perversité",
-  "Certes As Salam est un nom parmi les noms d'Allah qu'il a mis sur la Terre ainsi propagez le salam entre vous.",
-  "Les actes ne valent que par leurs intentions.",
-  "Aucun de vous ne croit vraiment tant qu’il n’aime pas pour son frère ce qu’il aime pour lui-même.",
-  "Allah est miséricordieux envers ceux qui sont miséricordieux.",
-  "Le meilleur d’entre vous est celui qui a le meilleur comportement.",
-  "Celui qui a l’intention de faire le bien et ne le fait pas, Allah lui inscrit une bonne action.",
-  "La pudeur fait partie de la foi."
+  "Le sourire est une aumône."
 ];
 
 const App: React.FC = () => {
