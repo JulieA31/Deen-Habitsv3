@@ -33,9 +33,9 @@ const INVOCATIONS_DATA: Invocation[] = [
     id: 'istikhara',
     category: 'Prière',
     title: 'Prière de Consultation (Istikhara)',
-    arabic: 'اللَّهُمَّ إِنِّي أَسْتَخِيرُكَ بِعِلْمِكَ وَأَسْتَقْدِرُكَ بِقُدْرَتِكَ، وَأَسْأَلُكَ مِنْ فَضْلِكَ الْعَظِيمِ، فَإِنَّكَ تَقْدِرُ وَلاَ أَقْدِرُ وَتَعْلَمُ وَلاَ أَعْلَمُ وَأَنْتَ عَلاَّمُ الْغُيُوبِ...',
-    phonetic: 'Allahumma inni astakhiruka bi\'ilmika wa astaqdiruka biqudratika...',
-    translation: 'Seigneur Allah, je Te demande de me guider par Ton savoir et je cherche la capacité par Ton pouvoir...'
+    arabic: 'اللَّهُمَّ إِنِّي أَسْتَخِيرُكَ بِعِلْمِكَ وَأَسْتَقْدِرُكَ بِقُدْرَتِكَ، وَأَسْأَلُكَ مِنْ فَضْلِكَ الْعَظِيمِ، فَإِنَّكَ تَقْدِرُ وَلاَ أَقْدِرُ وَتَعْلَمُ وَلاَ أَعْلَمُ وَأَنْتَ عَلاَّمُ الْغُيُوبِ، اللَّهُمَّ إِنْ كُنْتَ تَعْلَمُ أَنَّ هَذَا الأَمْرَ خَيْرٌ لِي فِي دِينِي وَمَعَاشِي وَعَاقِبَةِ أَمْرِي فَاقْدُرْهُ لِي وَيَسِّرْهُ لِي ثُمَّ بَارِكْ لِي فِيهِ، وَإِنْ كُنْتَ تَعْلَمُ أَنَّ هَذَا الأَمْرَ شَرٌّ لِي فِي دِينِي وَمَعَاشِي وَعَاقِبَةِ أَمْرِي فَاصْرِفْهُ عَنِّي وَاصْرِفْنِي عَنْهُ، وَاقْدُرْ لِي الْخَيْرَ حَيْثُ كَانَ ثُمَّ أَرْضِنِي بِهِ',
+    phonetic: 'Allâhumma innî astakhîruka bi-cilmika wa astaqdiruka bi-qudratika, wa as\'aluka min fadlika-l-cazîm. Fa-innaka taqdiru wa lâ aqdiru, wa taclamu wa lâ aclamu, wa anta callâmu-l-ghuyûb. Allâhumma in kunta taclamu anna hâdhâ-l-amra (nommer l\'affaire ici) khayrun lî fî dînî wa macâshî wa câqibati amrî, fa-qdurhu lî wa yassirhu lî thumma bârik lî fîh. Wa in kunta taclamu anna hâdhâ-l-amra sharrun lî fî dînî wa macâshî wa câqibati amrî, fa-srifhu cannî wa srifnî canhu, wa qdur liya-l-khayra haythu kâna thumma ardinî bih.',
+    translation: 'Seigneur Allah, je Te demande de me guider par Ton savoir et je cherche la capacité par Ton pouvoir et je Te demande de Ton immense grâce. Car certes Tu es Capable et je suis incapable, Tu sais et je ne sais pas et Tu es le Grand Connaisseur de l\'inconnu. Seigneur Allah, si Tu sais que cette affaire (la nommer) est un bien pour moi dans ma religion, ma vie mondaine et ma vie future, alors décrète-la pour moi, facilite-la-moi puis bénis-la pour moi. Et si Tu sais que cette affaire est un mal pour moi dans ma religion, ma vie mondaine et ma vie future, alors écarte-la de moi et écarte-moi d\'elle, et décrète pour moi le bien là où il se trouve puis rends-moi satisfait de cela.'
   },
   {
     id: '2',
@@ -50,7 +50,7 @@ const INVOCATIONS_DATA: Invocation[] = [
   {
     id: 'sayyid_istighfar',
     category: 'Pardon & Repentir',
-    title: 'La maîtresse demande de pardon',
+    title: 'Demande de pardon',
     arabic: 'اللَّهُمَّ أَنْتَ رَبِّي لَا إِلَهَ إِلَّا أَنْتَ، خَلَقْتَنِي وَأَنَا عَبْدُكَ، وَأَنَا عَلَى عَهْدِكَ وَوَعْدِكَ مَا اسْتَطَعْتُ، أَعُوذُ بِكَ مِنْ شَرِّ مَا صَنَعْتُ، أَبُوءُ لَكَ بِنِعْمَتِكَ عَلَيَّ، وَأَبُوءُ لَكَ بِذَنْبِي فَاغْفِرْ لِي، فَإِنَّهُ لَا يَغْفِرُ الذُّنُوبَ إِلَّا أَنْتَ',
     phonetic: 'Allāhumma anta rabbī lā ilāha illā ant, khalaqtanī wa anā ʾabduk, wa anā ʾalā ʾahdika wa wa’dika ma staṭa’t, a’ūdhu bika min charri mā ṣana’t, abūu laka bi-niʾmatika ʾalayy, wa abūu laka bi-dhanbī fa-ghfir lī, fa innahu lā yaghfiru dh-dhunūba illā ant',
     translation: 'Ô Allah, Tu es mon Seigneur, nul divinité autre que Toi. Tu m’as créé et je suis Ton serviteur. Je suis fidèle à Ton engagement et à Ta promesse tant que je le pourrai... Pardonne-moi donc, car personne d’autre que Toi ne pardonne les péchés.'
@@ -85,9 +85,9 @@ const INVOCATIONS_DATA: Invocation[] = [
     id: 'kursi',
     category: 'Protection',
     title: 'Ayat al-Kursi (Verset du Trône)',
-    arabic: 'اللَّهُ لَا إِلَٰهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ ۚ لَا تَأْخُذُهُ سِنَةٌ وَلَا نَوْمٌ...',
-    phonetic: 'Allahu la ilaha illa Huwa, Al-Haiyul-Qaiyum...',
-    translation: 'Allah ! Point de divinité à part Lui, le Vivant, Celui qui subsiste par Lui-même...'
+    arabic: 'اللَّهُ لَا إِلَٰهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ ۚ لَا تَأْخُذُهُ سِنَةٌ وَلَا نَوْمٌ ۚ لَّهُ مَا فِي السَّمَاوَاتِ وَمَا فِي الْأَرْضِ ۗ مَن ذَا الَّذِي يَشْفَعُ عِندَهُ إِلَّا بِإِذْنِهِ ۚ يَعْلَمُ مَا بَيْنَ أَيْدِيهِمْ وَمَا خَلْفَهُمْ ۖ وَلَا يُحِيطُونَ بِشَيْءٍ مِّنْ عِلْمِهِ إِلَّا بِمَا شَاءَ ۚ وَسِعَ كُرْسِيُّهُ السَّمَاوَاتِ وَالْأَرْضَ ۖ وَلَا يَئُودُهُ حِفْظُهُمَا ۚ وَهُوَ الْعَلِيُّ الْعَظِيمُ',
+    phonetic: 'Allāhu lā ilāha illā hu, al-ḥayyu l-qayyūm. Lā taʾkhudhuhu sinatun wa lā nawm. Lahu mā fi s-samāwāti wa mā fi l-arḍ. Man dhā lladhī yachfaʿu ʿindahu illā bi-idhnih. Yaʿlamu mā bayna aydīhim wa mā khalfahum. Wa lā yuḥīṭūna bi-chayʾin min ʿilmihi illā bi-mā chāʾ. Wasiʿa kursiyyuhu s-samāwāti wa l-arḍ. Wa lā yaʾūduhu ḥifẓuhumā. Wa huwa l-ʿaliyyu l-ʿaẓīm.',
+    translation: 'Allah ! Point de divinité à part Lui, le Vivant, Celui qui subsiste par lui-même "al-Qayyum". Ni somnolence ni sommeil ne Le saisissent. À Lui appartient tout ce qui est dans les cieux et sur la terre. Qui peut intercéder auprès de Lui sans Sa permission ? Il connaît leur passé et leur futur. Et, de Sa science, ils n\'embrassent que ce qu\'Il veut. Son Trône "Kursiy" déborde les cieux et la terre, dont la garde ne Lui coûte aucune peine. Et Il est le Très Haut, le Très Grand.'
   },
   {
     id: '1',

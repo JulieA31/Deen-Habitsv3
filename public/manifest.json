@@ -4,7 +4,7 @@
   "name": "Deen Habits AI",
   "icons": [
     {
-      "src": "/logo.png",
+      "src": "/public/logo.png",
       "sizes": "192x192 512x512",
       "type": "image/png"
     }
