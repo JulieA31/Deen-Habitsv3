@@ -1,0 +1,16 @@
+
+{
+  "short_name": "Deen Habits",
+  "name": "Deen Habits AI",
+  "icons": [
+    {
+      "src": "/logo.png",
+      "sizes": "192x192 512x512",
+      "type": "image/png"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#10b981",
+  "background_color": "#ffffff"
+}

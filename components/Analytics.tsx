@@ -182,7 +182,7 @@ const Analytics: React.FC<AnalyticsProps> = ({ habits, logs, prayerLogs, userPro
     if (navigator.share) {
         navigator.share({
             title: 'Deen Habits - Mes Statistiques',
-            text: `J'ai accompli ${stats.totalDone} prières et gagné ${stats.totalXPEarned} XP cette semaine ! Si tu connais quelqu'un qui comme toi a envie de s'améliorer, rejoins-moi sur Deen Habits.`,
+            text: `J'ai accompli ${stats.totalDone} prières et gagné ${stats.totalXPEarned} XP cette semaine ! Multiplie les récompenses : invite tes proches à progresser avec toi !`,
             url: window.location.href
         });
     } else {
@@ -198,10 +198,10 @@ const Analytics: React.FC<AnalyticsProps> = ({ habits, logs, prayerLogs, userPro
         <div>
             <h2 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
                 <TrendingUp className="w-6 h-6 text-emerald-600" />
-                Vos Performances
+                Tes Performances
             </h2>
             <p className="text-slate-500 text-sm">
-                Bilan de vos efforts sur les derniers jours
+                Bilan de tes efforts sur les derniers jours
             </p>
         </div>
         

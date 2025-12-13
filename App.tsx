@@ -157,7 +157,7 @@ const App: React.FC = () => {
           if (Notification.permission === 'granted') {
              new Notification(`C'est l'heure de ${prayer}`, {
                 body: "Hayya 'ala Salah (Venez à la prière)",
-                icon: '/logo192.png' // Fallback icon
+                icon: '/logo.png' // Fallback icon
              });
           }
         }
@@ -494,16 +494,22 @@ const App: React.FC = () => {
 
   const handleResetXP = async () => {
     if (!userProfile) return;
-    if (window.confirm("Êtes-vous sûr de vouloir réinitialiser vos points XP à 0 ?\n\nCette action est irréversible et remettra votre niveau à 1.")) {
-        setUserProfile(prev => prev ? { ...prev, xp: 0, level: 1 } : null);
-        alert("Vos points d'expérience ont été réinitialisés.");
+    if (window.confirm("Attention : Vous êtes sur le point de réinitialiser TOUTE votre progression.\n\nCela inclut :\n- Vos points XP et votre niveau\n- L'historique de vos habitudes et prières\n- Vos statistiques et défis\n\nVoulez-vous vraiment recommencer à zéro ?")) {
+        // 1. Reset Profile + Défis
+        setUserProfile(prev => prev ? { ...prev, xp: 0, level: 1, completedChallenges: {} } : null);
+        
+        // 2. Reset Historiques (Logs)
+        setLogs({});
+        setPrayerLogs({});
+
+        alert("Progression réinitialisée. Bismillah pour ce nouveau départ !");
     }
   };
 
   const handleShareApp = () => {
     const shareData = {
         title: 'Deen Habits',
-        text: "Si tu connais quelqu'un qui comme toi a envie de s'améliorer, rejoins-moi sur Deen Habits !",
+        text: "Le Bien se multiplie quand on le partage. Invite un ami à progresser avec toi !",
         url: window.location.href
     };
     
@@ -668,10 +674,7 @@ const App: React.FC = () => {
             {showWelcomeScreen ? (
                  <div className="z-10 bg-white p-8 rounded-3xl shadow-2xl w-full max-w-sm border border-slate-100 animate-in fade-in zoom-in-95 duration-500">
                     <div className="flex justify-center mb-6">
-                        {/* Correction: Retrait de rotate-3 */}
-                        <div className="w-16 h-16 bg-emerald-100 rounded-2xl flex items-center justify-center text-emerald-600 font-bold text-3xl shadow-sm">
-                            D
-                        </div>
+                        <img src="/logo.png" alt="Deen Habits Logo" className="w-24 h-24 object-contain" />
                     </div>
                     <h1 className="text-2xl font-bold text-center text-slate-800 mb-2">Salam !</h1>
                     <p className="text-center text-slate-500 mb-8 text-sm">Comment t'appelles-tu ?</p>
@@ -866,9 +869,7 @@ const App: React.FC = () => {
       {/* Mobile Top Bar */}
       <div className="bg-white p-4 sticky top-0 z-20 border-b border-slate-100 flex justify-between items-center md:hidden shadow-sm">
          <div className="flex items-center gap-2" onClick={() => setView('home')}>
-            <div className="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center text-white font-bold shadow-md">
-                <Home className="w-5 h-5" />
-            </div>
+            <img src="/logo.png" alt="Logo" className="w-8 h-8 rounded-lg object-contain bg-emerald-50" />
             {isSaving && <Cloud className="w-4 h-4 text-emerald-400 animate-pulse" />}
          </div>
          <div className="flex items-center gap-4">
@@ -894,7 +895,7 @@ const App: React.FC = () => {
       {/* Desktop Sidebar */}
       <aside className="hidden md:flex flex-col w-64 fixed left-0 top-0 bottom-0 bg-white border-r border-slate-200 px-4 py-8 z-50">
         <div className="flex items-center gap-3 px-4 mb-12 cursor-pointer" onClick={() => setView('home')}>
-          <div className="w-10 h-10 bg-emerald-600 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-emerald-200">D</div>
+          <img src="/logo.png" alt="Logo" className="w-10 h-10 rounded-xl object-contain bg-emerald-50" />
           <span className="text-xl font-bold tracking-tight text-slate-800">DeenHabits</span>
         </div>
 
@@ -988,7 +989,7 @@ const App: React.FC = () => {
                         <Share2 className="w-4 h-4" /> Motive tes proches !
                     </p>
                     <p className="text-xs text-indigo-100 leading-relaxed">
-                        "Si tu connais quelqu'un qui comme toi a envie de s'améliorer..." Partage l'app pour vous entraider.
+                        "Multiplie les récompenses : invite tes proches à progresser avec toi !"
                     </p>
                 </div>
                 <button 
@@ -1070,7 +1071,6 @@ const App: React.FC = () => {
 
         {view === 'stats' && (
           <div className="animate-in fade-in zoom-in-95 duration-300">
-            <h2 className="text-2xl font-bold text-slate-800 mb-6">Vos Statistiques</h2>
             <Analytics habits={habits} logs={logs} prayerLogs={prayerLogs} userProfile={userProfile} />
           </div>
         )}
