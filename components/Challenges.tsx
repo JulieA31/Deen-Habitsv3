@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Trophy, CheckCircle2, Star, RefreshCw } from 'lucide-react';
+import { Trophy, CheckCircle2, Star, RefreshCw, Share2 } from 'lucide-react';
 import { Challenge, UserProfile } from '../types';
 
 interface ChallengesProps {
@@ -261,6 +261,18 @@ const Challenges: React.FC<ChallengesProps> = ({ userProfile, onUpdateXP, onTogg
     }
   };
 
+  const handleShareChallenges = () => {
+    if (navigator.share) {
+        navigator.share({
+            title: 'Défis Deen Habits',
+            text: "Je relève des défis spirituels sur Deen Habits ! Si tu connais quelqu'un qui comme toi a envie de s'améliorer, rejoins-moi.",
+            url: window.location.href
+        });
+    } else {
+        alert("Partage non supporté");
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="bg-gradient-to-r from-yellow-500 to-amber-600 rounded-2xl p-6 text-white shadow-lg relative overflow-hidden">
@@ -282,6 +294,22 @@ const Challenges: React.FC<ChallengesProps> = ({ userProfile, onUpdateXP, onTogg
             </div>
         </div>
       </div>
+
+      {/* Share Banner for Challenges */}
+      <button 
+        onClick={handleShareChallenges}
+        className="w-full bg-indigo-50 border border-indigo-100 text-indigo-700 p-4 rounded-xl flex items-center justify-between group hover:bg-indigo-100 transition-colors"
+      >
+        <div className="flex items-center gap-3">
+            <div className="p-2 bg-indigo-200 rounded-lg">
+                <Share2 className="w-5 h-5 text-indigo-800" />
+            </div>
+            <div className="text-left">
+                <div className="font-bold text-sm">Se challenger entre amis</div>
+                <div className="text-xs text-indigo-500">Invite un proche à faire les défis avec toi</div>
+            </div>
+        </div>
+      </button>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {CHALLENGES_LIST.map((challenge) => {

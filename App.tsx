@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { LayoutGrid, BarChart3, MessageSquare, BookOpen, Home, Trophy, Star, LogIn, ArrowRight, User, Trash2, Bell, Shield, Volume2, Play, CreditCard, Loader2, GripHorizontal, CloudOff, Cloud, Mail, Lock, AlertCircle, ChevronLeft, Eye, EyeOff } from 'lucide-react';
+import { LayoutGrid, BarChart3, MessageSquare, BookOpen, Home, Trophy, Star, LogIn, ArrowRight, User, Trash2, Bell, Shield, Volume2, Play, CreditCard, Loader2, GripHorizontal, CloudOff, Cloud, Mail, Lock, AlertCircle, ChevronLeft, Eye, EyeOff, Share2, RefreshCw } from 'lucide-react';
 
 import { Habit, HabitLog, ViewMode, PrayerLog, UserProfile, PRAYER_NAMES } from './types';
 import HabitTracker from './components/HabitTracker';
@@ -492,6 +492,29 @@ const App: React.FC = () => {
     }
   };
 
+  const handleResetXP = async () => {
+    if (!userProfile) return;
+    if (window.confirm("Êtes-vous sûr de vouloir réinitialiser vos points XP à 0 ?\n\nCette action est irréversible et remettra votre niveau à 1.")) {
+        setUserProfile(prev => prev ? { ...prev, xp: 0, level: 1 } : null);
+        alert("Vos points d'expérience ont été réinitialisés.");
+    }
+  };
+
+  const handleShareApp = () => {
+    const shareData = {
+        title: 'Deen Habits',
+        text: "Si tu connais quelqu'un qui comme toi a envie de s'améliorer, rejoins-moi sur Deen Habits !",
+        url: window.location.href
+    };
+    
+    if (navigator.share) {
+        navigator.share(shareData);
+    } else {
+        navigator.clipboard.writeText(shareData.url);
+        alert("Lien de l'application copié !");
+    }
+  };
+
   const requestNotificationPermission = async (): Promise<boolean> => {
     if (!("Notification" in window)) {
         alert("Ce navigateur ne supporte pas les notifications.");
@@ -645,7 +668,8 @@ const App: React.FC = () => {
             {showWelcomeScreen ? (
                  <div className="z-10 bg-white p-8 rounded-3xl shadow-2xl w-full max-w-sm border border-slate-100 animate-in fade-in zoom-in-95 duration-500">
                     <div className="flex justify-center mb-6">
-                        <div className="w-16 h-16 bg-emerald-100 rounded-2xl flex items-center justify-center text-emerald-600 font-bold text-3xl shadow-sm transform rotate-3">
+                        {/* Correction: Retrait de rotate-3 */}
+                        <div className="w-16 h-16 bg-emerald-100 rounded-2xl flex items-center justify-center text-emerald-600 font-bold text-3xl shadow-sm">
                             D
                         </div>
                     </div>
@@ -957,6 +981,24 @@ const App: React.FC = () => {
                 </button>
             </div>
 
+            {/* Banner de Partage Accueil */}
+            <div className="bg-gradient-to-r from-indigo-500 to-blue-600 rounded-xl p-4 text-white shadow-md flex items-center justify-between gap-4">
+                <div className="flex-1">
+                    <p className="text-sm font-bold mb-1 flex items-center gap-2">
+                        <Share2 className="w-4 h-4" /> Motive tes proches !
+                    </p>
+                    <p className="text-xs text-indigo-100 leading-relaxed">
+                        "Si tu connais quelqu'un qui comme toi a envie de s'améliorer..." Partage l'app pour vous entraider.
+                    </p>
+                </div>
+                <button 
+                    onClick={handleShareApp}
+                    className="bg-white/10 hover:bg-white/20 text-white px-3 py-2 rounded-lg text-xs font-bold shadow-sm transition-colors border border-white/20"
+                >
+                    Inviter
+                </button>
+            </div>
+
             {/* Bouton Rapide pour Défis Mobile */}
             <button 
                 onClick={() => setView('challenges')}
@@ -1156,6 +1198,15 @@ const App: React.FC = () => {
 
                 {/* Danger Zone */}
                 <div className="mt-8 pt-6 border-t border-slate-200">
+                    <h3 className="text-sm font-bold text-slate-400 mb-2 uppercase">Gestion des données</h3>
+                    <button 
+                        onClick={handleResetXP}
+                        className="w-full flex items-center justify-between p-4 rounded-xl border border-slate-200 hover:bg-slate-50 transition-colors mb-4 text-slate-600"
+                    >
+                        <span className="font-medium">Réinitialiser mes points XP</span>
+                        <RefreshCw className="w-4 h-4" />
+                    </button>
+
                     <h3 className="text-sm font-bold text-red-600 mb-2 uppercase">Zone de danger</h3>
                     <button 
                         onClick={handleDeleteAccount}

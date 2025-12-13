@@ -1,5 +1,6 @@
+
 import React, { useState, useMemo } from 'react';
-import { Star, Trophy, CheckCircle2, TrendingUp } from 'lucide-react';
+import { Star, Trophy, CheckCircle2, TrendingUp, Share2 } from 'lucide-react';
 import { Habit, HabitLog, PrayerLog, PRAYER_NAMES, UserProfile } from '../types';
 
 interface AnalyticsProps {
@@ -177,6 +178,18 @@ const Analytics: React.FC<AnalyticsProps> = ({ habits, logs, prayerLogs, userPro
 
   }, [period, logs, prayerLogs, habits, userProfile]);
 
+  const handleShareStats = () => {
+    if (navigator.share) {
+        navigator.share({
+            title: 'Deen Habits - Mes Statistiques',
+            text: `J'ai accompli ${stats.totalDone} prières et gagné ${stats.totalXPEarned} XP cette semaine ! Si tu connais quelqu'un qui comme toi a envie de s'améliorer, rejoins-moi sur Deen Habits.`,
+            url: window.location.href
+        });
+    } else {
+        alert("Partage non supporté sur ce navigateur.");
+    }
+  };
+
   return (
     <div className="space-y-8 pb-24">
       
@@ -290,8 +303,15 @@ const Analytics: React.FC<AnalyticsProps> = ({ habits, logs, prayerLogs, userPro
                  </div>
              </div>
           </div>
-
       </div>
+
+      {/* --- SECTION 3: SHARE --- */}
+      <button 
+        onClick={handleShareStats}
+        className="w-full bg-slate-800 text-white p-4 rounded-xl flex items-center justify-center gap-2 hover:bg-slate-700 transition-colors shadow-lg"
+      >
+        <Share2 className="w-5 h-5" /> Partager mes résultats
+      </button>
 
     </div>
   );
