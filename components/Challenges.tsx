@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Trophy, CheckCircle2, Star, RefreshCw, Share2, Play, Timer, Plus, X, Calendar, Edit3, Trash2 } from 'lucide-react';
 import { Challenge, UserProfile } from '../types';
@@ -333,16 +332,6 @@ const Challenges: React.FC<ChallengesProps> = ({ userProfile, onUpdateXP, onTogg
         <p className="text-yellow-100 text-sm max-w-xs">
             Relève des défis pour booster ta foi et gagner des points d'expérience exclusifs !
         </p>
-        <div className="mt-4 flex gap-4">
-            <div className="bg-white/20 backdrop-blur-sm rounded-lg p-3 text-center">
-                <span className="block text-2xl font-bold">{activeIds.length}</span>
-                <span className="text-[10px] uppercase font-bold text-yellow-100">En cours</span>
-            </div>
-            <div className="bg-white/20 backdrop-blur-sm rounded-lg p-3 text-center">
-                <span className="block text-2xl font-bold">{completedIds.length}</span>
-                <span className="text-[10px] uppercase font-bold text-yellow-100">Réalisés</span>
-            </div>
-        </div>
       </div>
 
       {/* Action Buttons Group */}
