@@ -23,6 +23,18 @@ export interface HabitLog {
   };
 }
 
+export interface Challenge {
+  id: string;
+  title: string;
+  description: string;
+  xp: number;
+  icon: string;
+  category: 'faith' | 'community' | 'self';
+  difficulty: 'easy' | 'medium' | 'hard';
+  isCustom?: boolean; // Nouveau : Pour identifier les défis créés par l'utilisateur
+  duration?: string; // Nouveau : "3 jours", "Avant Lundi", etc.
+}
+
 export interface UserProfile {
   uid?: string; // ID Firebase unique
   name: string;
@@ -36,6 +48,7 @@ export interface UserProfile {
   notificationSound: 'beep' | 'adhan';
   completedChallenges?: Record<string, number>; // ID du défi -> Timestamp de réalisation
   activeChallenges?: Record<string, number>; // ID du défi en cours -> Timestamp de début
+  customChallenges?: Challenge[]; // Nouveau : Liste des défis créés par l'utilisateur
 }
 
 export interface Invocation {
@@ -52,16 +65,6 @@ export interface ChatMessage {
   role: 'user' | 'model';
   text: string;
   timestamp: number;
-}
-
-export interface Challenge {
-  id: string;
-  title: string;
-  description: string;
-  xp: number;
-  icon: string;
-  category: 'faith' | 'community' | 'self';
-  difficulty: 'easy' | 'medium' | 'hard';
 }
 
 export type ViewMode = 'auth' | 'home' | 'tracker' | 'invocations' | 'tasbih' | 'stats' | 'coach' | 'profile' | 'privacy' | 'challenges';

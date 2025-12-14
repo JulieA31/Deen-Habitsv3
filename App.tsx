@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { LayoutGrid, BarChart3, MessageSquare, BookOpen, Home, Trophy, Star, LogIn, ArrowRight, User, Trash2, Bell, Shield, Volume2, Play, CreditCard, Loader2, GripHorizontal, CloudOff, Cloud, Mail, Lock, AlertCircle, ChevronLeft, Eye, EyeOff, Share2, RefreshCw } from 'lucide-react';
 
-import { Habit, HabitLog, ViewMode, PrayerLog, UserProfile, PRAYER_NAMES } from './types';
+import { Habit, HabitLog, ViewMode, PrayerLog, UserProfile, PRAYER_NAMES, Challenge } from './types';
 import HabitTracker from './components/HabitTracker';
 import DeenCoach from './components/DeenCoach';
 import Analytics from './components/Analytics';
@@ -213,7 +213,8 @@ const App: React.FC = () => {
                 prayerNotifications: {},
                 notificationSound: 'beep',
                 completedChallenges: {},
-                activeChallenges: {}
+                activeChallenges: {},
+                customChallenges: []
             };
             
             // On ne force pas la création ici car handleGoogleLogin le fait, mais c'est un fallback
@@ -353,7 +354,8 @@ const App: React.FC = () => {
             prayerNotifications: {},
             notificationSound: 'beep',
             completedChallenges: {},
-            activeChallenges: {}
+            activeChallenges: {},
+            customChallenges: []
           };
 
           await docRef.set({
@@ -425,7 +427,8 @@ const App: React.FC = () => {
                 prayerNotifications: {},
                 notificationSound: 'beep',
                 completedChallenges: {},
-                activeChallenges: {}
+                activeChallenges: {},
+                customChallenges: []
             };
 
             if (db && user) {
@@ -502,7 +505,8 @@ const App: React.FC = () => {
             xp: 0, 
             level: 1, 
             completedChallenges: {}, 
-            activeChallenges: {} 
+            activeChallenges: {},
+            customChallenges: [] 
         } : null);
         
         // 2. Reset Historiques (Logs)
@@ -653,6 +657,39 @@ const App: React.FC = () => {
         activeChallenges: active
       };
     });
+  };
+
+  // 3. Créer un défi personnalisé
+  const handleCreateChallenge = (newChallenge: Challenge) => {
+    if (!userProfile) return;
+    setUserProfile(prev => {
+        if (!prev) return null;
+        return {
+            ...prev,
+            customChallenges: [...(prev.customChallenges || []), newChallenge]
+        };
+    });
+  };
+
+  // 4. Supprimer un défi personnalisé
+  const handleDeleteChallenge = (challengeId: string) => {
+      if (!userProfile) return;
+      
+      // Cleanup status just in case
+      const updatedActive = { ...(userProfile.activeChallenges || {}) };
+      delete updatedActive[challengeId];
+      const updatedCompleted = { ...(userProfile.completedChallenges || {}) };
+      delete updatedCompleted[challengeId];
+
+      setUserProfile(prev => {
+          if (!prev) return null;
+          return {
+              ...prev,
+              customChallenges: (prev.customChallenges || []).filter(c => c.id !== challengeId),
+              activeChallenges: updatedActive,
+              completedChallenges: updatedCompleted
+          };
+      });
   };
 
   const getCompletionRate = () => {
@@ -1092,6 +1129,8 @@ const App: React.FC = () => {
                 onUpdateXP={handleUpdateXP} 
                 onToggleChallenge={handleCompleteChallenge}
                 onStartChallenge={handleStartChallenge}
+                onCreateChallenge={handleCreateChallenge}
+                onDeleteChallenge={handleDeleteChallenge}
             />
           </div>
         )}

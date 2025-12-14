@@ -1,6 +1,6 @@
 
-import React from 'react';
-import { Trophy, CheckCircle2, Star, RefreshCw, Share2, Play, Timer } from 'lucide-react';
+import React, { useState } from 'react';
+import { Trophy, CheckCircle2, Star, RefreshCw, Share2, Play, Timer, Plus, X, Calendar, Edit3, Trash2 } from 'lucide-react';
 import { Challenge, UserProfile } from '../types';
 
 interface ChallengesProps {
@@ -8,6 +8,8 @@ interface ChallengesProps {
   onUpdateXP: (xp: number) => void;
   onToggleChallenge: (challengeId: string) => void; // Used for completing/resetting
   onStartChallenge: (challengeId: string) => void; // New prop for starting
+  onCreateChallenge: (challenge: Challenge) => void; // Create custom challenge
+  onDeleteChallenge: (challengeId: string) => void; // Delete custom challenge
 }
 
 const CHALLENGES_LIST: Challenge[] = [
@@ -234,30 +236,69 @@ const CHALLENGES_LIST: Challenge[] = [
   }
 ];
 
-const Challenges: React.FC<ChallengesProps> = ({ userProfile, onUpdateXP, onToggleChallenge, onStartChallenge }) => {
+const Challenges: React.FC<ChallengesProps> = ({ userProfile, onUpdateXP, onToggleChallenge, onStartChallenge, onCreateChallenge, onDeleteChallenge }) => {
+  const [isAdding, setIsAdding] = useState(false);
+  const [newTitle, setNewTitle] = useState('');
+  const [newDesc, setNewDesc] = useState('');
+  const [newXP, setNewXP] = useState(50);
+  const [newDuration, setNewDuration] = useState('');
+
   const completedIds = Object.keys(userProfile.completedChallenges || {});
   const activeIds = Object.keys(userProfile.activeChallenges || {});
+  const customChallenges = userProfile.customChallenges || [];
+  
+  // Merge lists: Custom challenges first, then standard ones
+  const allChallenges = [...customChallenges, ...CHALLENGES_LIST];
+
+  const handleCreate = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newTitle.trim()) return;
+
+    const newChallenge: Challenge = {
+        id: `custom_${Date.now()}`,
+        title: newTitle,
+        description: newDesc,
+        xp: newXP,
+        duration: newDuration,
+        icon: '🎯',
+        category: 'self',
+        difficulty: 'medium',
+        isCustom: true
+    };
+
+    onCreateChallenge(newChallenge);
+    setIsAdding(false);
+    // Reset form
+    setNewTitle('');
+    setNewDesc('');
+    setNewXP(50);
+    setNewDuration('');
+  };
 
   const handleAction = (challenge: Challenge) => {
     const isCompleted = completedIds.includes(challenge.id);
     const isActive = activeIds.includes(challenge.id);
 
     if (isCompleted) {
-        // État 3: Terminé -> Recommencer
         if (window.confirm(`Voulez-vous recommencer le défi "${challenge.title}" ?\n\nCela réinitialisera son statut.`)) {
             onToggleChallenge(challenge.id);
         }
     } else if (isActive) {
-        // État 2: Actif -> Valider
         if (window.confirm(`Avez-vous terminé "${challenge.title}" ?\n\nVous recevrez ${challenge.xp} XP !`)) {
             onUpdateXP(challenge.xp);
             onToggleChallenge(challenge.id);
         }
     } else {
-        // État 1: Disponible -> Choisir
         onStartChallenge(challenge.id);
     }
   };
+
+  const handleDelete = (e: React.MouseEvent, id: string) => {
+      e.stopPropagation();
+      if(window.confirm("Supprimer définitivement ce défi personnalisé ?")) {
+          onDeleteChallenge(id);
+      }
+  }
 
   const getDifficultyColor = (diff: string) => {
     switch (diff) {
@@ -282,6 +323,8 @@ const Challenges: React.FC<ChallengesProps> = ({ userProfile, onUpdateXP, onTogg
 
   return (
     <div className="space-y-6">
+      
+      {/* Header Banner */}
       <div className="bg-gradient-to-r from-yellow-500 to-amber-600 rounded-2xl p-6 text-white shadow-lg relative overflow-hidden">
         <div className="absolute right-0 top-0 p-4 opacity-10">
             <Trophy className="w-32 h-32" />
@@ -302,31 +345,103 @@ const Challenges: React.FC<ChallengesProps> = ({ userProfile, onUpdateXP, onTogg
         </div>
       </div>
 
-      {/* Share Banner for Challenges */}
-      <button 
-        onClick={handleShareChallenges}
-        className="w-full bg-indigo-50 border border-indigo-100 text-indigo-700 p-4 rounded-xl flex items-center justify-between group hover:bg-indigo-100 transition-colors"
-      >
-        <div className="flex items-center gap-3">
-            <div className="p-2 bg-indigo-200 rounded-lg">
-                <Share2 className="w-5 h-5 text-indigo-800" />
-            </div>
-            <div className="text-left">
-                <div className="font-bold text-sm">Se challenger entre amis</div>
-                <div className="text-xs text-indigo-500">Invite un proche à faire les défis avec toi</div>
-            </div>
-        </div>
-      </button>
+      {/* Action Buttons Group */}
+      <div className="grid grid-cols-2 gap-3">
+        {/* Create Button */}
+        <button 
+            onClick={() => setIsAdding(!isAdding)}
+            className={`p-4 rounded-xl flex items-center justify-center gap-2 font-bold transition-all ${isAdding ? 'bg-slate-800 text-white' : 'bg-white border-2 border-dashed border-slate-300 text-slate-500 hover:border-emerald-500 hover:text-emerald-600'}`}
+        >
+            {isAdding ? <X className="w-5 h-5" /> : <Plus className="w-5 h-5" />}
+            {isAdding ? "Fermer" : "Créer un défi"}
+        </button>
 
+        {/* Share Button */}
+        <button 
+            onClick={handleShareChallenges}
+            className="bg-indigo-50 border border-indigo-100 text-indigo-700 p-4 rounded-xl flex items-center justify-center gap-2 font-bold hover:bg-indigo-100 transition-colors"
+        >
+            <Share2 className="w-5 h-5" /> Inviter un ami
+        </button>
+      </div>
+
+      {/* Creation Form */}
+      {isAdding && (
+          <form onSubmit={handleCreate} className="bg-white p-6 rounded-2xl shadow-lg border border-emerald-100 animate-in slide-in-from-top-4 duration-300">
+              <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2">
+                  <Edit3 className="w-5 h-5 text-emerald-600" /> Nouveau Défi Personnalisé
+              </h3>
+              
+              <div className="space-y-4">
+                  <div>
+                      <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Titre du défi</label>
+                      <input 
+                        type="text" 
+                        required
+                        value={newTitle}
+                        onChange={(e) => setNewTitle(e.target.value)}
+                        placeholder="Ex: Jeûner 3 jours"
+                        className="w-full p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none"
+                      />
+                  </div>
+
+                  <div>
+                      <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Durée / Fréquence</label>
+                      <input 
+                        type="text" 
+                        value={newDuration}
+                        onChange={(e) => setNewDuration(e.target.value)}
+                        placeholder="Ex: Avant la fin de la semaine"
+                        className="w-full p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none"
+                      />
+                  </div>
+
+                  <div>
+                      <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Points XP</label>
+                      <div className="flex items-center gap-4">
+                          <input 
+                            type="range" 
+                            min="10" 
+                            max="500" 
+                            step="10"
+                            value={newXP}
+                            onChange={(e) => setNewXP(parseInt(e.target.value))}
+                            className="flex-1 accent-emerald-600"
+                          />
+                          <span className="font-bold text-emerald-600 bg-emerald-50 px-3 py-1 rounded-lg w-20 text-center">{newXP} XP</span>
+                      </div>
+                  </div>
+
+                  <div>
+                      <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Description (Optionnelle)</label>
+                      <textarea 
+                        value={newDesc}
+                        onChange={(e) => setNewDesc(e.target.value)}
+                        placeholder="Détails de votre objectif..."
+                        className="w-full p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none h-20 resize-none"
+                      />
+                  </div>
+
+                  <button 
+                    type="submit"
+                    className="w-full bg-slate-900 text-white py-3 rounded-xl font-bold hover:bg-slate-800 transition-colors flex items-center justify-center gap-2"
+                  >
+                      <Plus className="w-5 h-5" /> Ajouter ce défi
+                  </button>
+              </div>
+          </form>
+      )}
+
+      {/* Challenges Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {CHALLENGES_LIST.map((challenge) => {
+        {allChallenges.map((challenge) => {
           const isCompleted = completedIds.includes(challenge.id);
           const isActive = activeIds.includes(challenge.id);
           
           return (
             <div 
                 key={challenge.id}
-                className={`border rounded-2xl p-4 transition-all ${
+                className={`border rounded-2xl p-4 transition-all relative ${
                     isCompleted 
                     ? 'bg-emerald-50/50 border-emerald-200 opacity-90' 
                     : isActive
@@ -334,16 +449,27 @@ const Challenges: React.FC<ChallengesProps> = ({ userProfile, onUpdateXP, onTogg
                     : 'bg-white border-slate-100 hover:shadow-md'
                 }`}
             >
+                {/* Delete button for custom challenges */}
+                {challenge.isCustom && !isActive && !isCompleted && (
+                    <button 
+                        onClick={(e) => handleDelete(e, challenge.id)}
+                        className="absolute top-2 right-2 p-1.5 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                        title="Supprimer"
+                    >
+                        <Trash2 className="w-4 h-4" />
+                    </button>
+                )}
+
                 <div className="flex justify-between items-start mb-3">
                     <div className="flex gap-3">
                         <div className="text-3xl bg-slate-50 w-12 h-12 rounded-xl flex items-center justify-center shadow-sm">
                             {challenge.icon}
                         </div>
                         <div>
-                            <h3 className={`font-bold text-slate-800 ${isCompleted ? 'text-emerald-800' : ''}`}>
+                            <h3 className={`font-bold text-slate-800 pr-6 ${isCompleted ? 'text-emerald-800' : ''}`}>
                                 {challenge.title}
                             </h3>
-                            <div className="flex gap-2 mt-1">
+                            <div className="flex flex-wrap gap-2 mt-1">
                                 <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider ${getDifficultyColor(challenge.difficulty)}`}>
                                     {challenge.difficulty}
                                 </span>
@@ -357,8 +483,15 @@ const Challenges: React.FC<ChallengesProps> = ({ userProfile, onUpdateXP, onTogg
                     {isActive && <div className="text-[10px] font-bold text-blue-600 bg-blue-100 px-2 py-1 rounded-full animate-pulse flex items-center gap-1"><Timer className="w-3 h-3"/> En cours</div>}
                 </div>
                 
+                {challenge.duration && (
+                     <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-600 mb-2 bg-slate-50 px-2 py-1 rounded-md inline-block">
+                        <Calendar className="w-3 h-3" />
+                        {challenge.duration}
+                     </div>
+                )}
+                
                 <p className="text-sm text-slate-500 mb-4 leading-relaxed">
-                    {challenge.description}
+                    {challenge.description || "Aucune description."}
                 </p>
 
                 <button
