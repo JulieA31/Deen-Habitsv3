@@ -35,6 +35,7 @@ export interface UserProfile {
   prayerNotifications: Record<string, boolean>; // Per prayer toggle (e.g. { Fajr: true, Dhuhr: false })
   notificationSound: 'beep' | 'adhan';
   completedChallenges?: Record<string, number>; // ID du défi -> Timestamp de réalisation
+  activeChallenges?: Record<string, number>; // ID du défi en cours -> Timestamp de début
 }
 
 export interface Invocation {

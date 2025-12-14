@@ -211,7 +211,9 @@ const App: React.FC = () => {
                 joinedAt: Date.now(),
                 notificationsEnabled: false,
                 prayerNotifications: {},
-                notificationSound: 'beep'
+                notificationSound: 'beep',
+                completedChallenges: {},
+                activeChallenges: {}
             };
             
             // On ne force pas la création ici car handleGoogleLogin le fait, mais c'est un fallback
@@ -349,7 +351,9 @@ const App: React.FC = () => {
             joinedAt: Date.now(),
             notificationsEnabled: false,
             prayerNotifications: {},
-            notificationSound: 'beep'
+            notificationSound: 'beep',
+            completedChallenges: {},
+            activeChallenges: {}
           };
 
           await docRef.set({
@@ -419,7 +423,9 @@ const App: React.FC = () => {
                 joinedAt: Date.now(),
                 notificationsEnabled: false,
                 prayerNotifications: {},
-                notificationSound: 'beep'
+                notificationSound: 'beep',
+                completedChallenges: {},
+                activeChallenges: {}
             };
 
             if (db && user) {
@@ -491,7 +497,13 @@ const App: React.FC = () => {
     if (!userProfile) return;
     if (window.confirm("Attention : Vous êtes sur le point de réinitialiser TOUTE votre progression.\n\nCela inclut :\n- Vos points XP et votre niveau\n- L'historique de vos habitudes et prières\n- Vos statistiques et défis\n\nVoulez-vous vraiment recommencer à zéro ?")) {
         // 1. Reset Profile + Défis
-        setUserProfile(prev => prev ? { ...prev, xp: 0, level: 1, completedChallenges: {} } : null);
+        setUserProfile(prev => prev ? { 
+            ...prev, 
+            xp: 0, 
+            level: 1, 
+            completedChallenges: {}, 
+            activeChallenges: {} 
+        } : null);
         
         // 2. Reset Historiques (Logs)
         setLogs({});
@@ -601,27 +613,46 @@ const App: React.FC = () => {
     });
   };
 
-  // --- CHALLENGES ---
-  const handleToggleChallenge = (challengeId: string) => {
+  // --- CHALLENGES MANAGEMENT ---
+  
+  // 1. Démarrer un défi (Ajouter aux actifs)
+  const handleStartChallenge = (challengeId: string) => {
+      if (!userProfile) return;
+      setUserProfile(prev => {
+          if (!prev) return null;
+          const active = { ...(prev.activeChallenges || {}) };
+          active[challengeId] = Date.now();
+          return { ...prev, activeChallenges: active };
+      });
+  };
+
+  // 2. Valider (Terminer) un défi (Supprimer des actifs, Ajouter aux complétés)
+  // Ou Recommencer (Supprimer des complétés, Ajouter aux actifs - ou dispo)
+  const handleCompleteChallenge = (challengeId: string) => {
     if (!userProfile) return;
+    
     setUserProfile(prev => {
       if (!prev) return null;
-      const challenges = { ...(prev.completedChallenges || {}) };
+      const completed = { ...(prev.completedChallenges || {}) };
+      const active = { ...(prev.activeChallenges || {}) };
       
-      // Si déjà complété, on le retire
-      if (challenges[challengeId]) {
-        delete challenges[challengeId];
+      // Si déjà complété, on le "Recommence" : on le retire des complétés
+      if (completed[challengeId]) {
+        delete completed[challengeId];
+        // Optionnel : On peut le remettre directement dans "active" si on veut
+        // ou le laisser dispo. Ici on le laisse dispo (supprime des complétés).
       } else {
-        // Sinon on l'ajoute
-        challenges[challengeId] = Date.now();
+        // Sinon c'est une validation : on l'ajoute aux complétés ET on le retire des actifs
+        completed[challengeId] = Date.now();
+        delete active[challengeId];
       }
 
       return {
         ...prev,
-        completedChallenges: challenges
+        completedChallenges: completed,
+        activeChallenges: active
       };
     });
-    // Sound only on completion, not removal (handled in component)
   };
 
   const getCompletionRate = () => {
@@ -1059,7 +1090,8 @@ const App: React.FC = () => {
             <Challenges 
                 userProfile={userProfile} 
                 onUpdateXP={handleUpdateXP} 
-                onToggleChallenge={handleToggleChallenge}
+                onToggleChallenge={handleCompleteChallenge}
+                onStartChallenge={handleStartChallenge}
             />
           </div>
         )}

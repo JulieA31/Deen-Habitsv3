@@ -1,12 +1,13 @@
 
 import React from 'react';
-import { Trophy, CheckCircle2, Star, RefreshCw, Share2 } from 'lucide-react';
+import { Trophy, CheckCircle2, Star, RefreshCw, Share2, Play, Timer } from 'lucide-react';
 import { Challenge, UserProfile } from '../types';
 
 interface ChallengesProps {
   userProfile: UserProfile;
   onUpdateXP: (xp: number) => void;
-  onToggleChallenge: (challengeId: string) => void;
+  onToggleChallenge: (challengeId: string) => void; // Used for completing/resetting
+  onStartChallenge: (challengeId: string) => void; // New prop for starting
 }
 
 const CHALLENGES_LIST: Challenge[] = [
@@ -233,22 +234,28 @@ const CHALLENGES_LIST: Challenge[] = [
   }
 ];
 
-const Challenges: React.FC<ChallengesProps> = ({ userProfile, onUpdateXP, onToggleChallenge }) => {
+const Challenges: React.FC<ChallengesProps> = ({ userProfile, onUpdateXP, onToggleChallenge, onStartChallenge }) => {
   const completedIds = Object.keys(userProfile.completedChallenges || {});
+  const activeIds = Object.keys(userProfile.activeChallenges || {});
 
-  const handleClaim = (challenge: Challenge) => {
+  const handleAction = (challenge: Challenge) => {
     const isCompleted = completedIds.includes(challenge.id);
-    
+    const isActive = activeIds.includes(challenge.id);
+
     if (isCompleted) {
-        if (window.confirm(`Voulez-vous recommencer le défi "${challenge.title}" ?\n\nCela réinitialisera son statut pour que vous puissiez le valider à nouveau (demain par exemple).`)) {
-            // Note: On ne retire PAS l'XP pour permettre le cumul si le défi est refait.
+        // État 3: Terminé -> Recommencer
+        if (window.confirm(`Voulez-vous recommencer le défi "${challenge.title}" ?\n\nCela réinitialisera son statut.`)) {
             onToggleChallenge(challenge.id);
         }
-    } else {
-        if (window.confirm(`Valider le défi "${challenge.title}" et recevoir ${challenge.xp} XP ?`)) {
+    } else if (isActive) {
+        // État 2: Actif -> Valider
+        if (window.confirm(`Avez-vous terminé "${challenge.title}" ?\n\nVous recevrez ${challenge.xp} XP !`)) {
             onUpdateXP(challenge.xp);
             onToggleChallenge(challenge.id);
         }
+    } else {
+        // État 1: Disponible -> Choisir
+        onStartChallenge(challenge.id);
     }
   };
 
@@ -285,12 +292,12 @@ const Challenges: React.FC<ChallengesProps> = ({ userProfile, onUpdateXP, onTogg
         </p>
         <div className="mt-4 flex gap-4">
             <div className="bg-white/20 backdrop-blur-sm rounded-lg p-3 text-center">
-                <span className="block text-2xl font-bold">{completedIds.length}</span>
-                <span className="text-[10px] uppercase font-bold text-yellow-100">Défis Réalisés</span>
+                <span className="block text-2xl font-bold">{activeIds.length}</span>
+                <span className="text-[10px] uppercase font-bold text-yellow-100">En cours</span>
             </div>
             <div className="bg-white/20 backdrop-blur-sm rounded-lg p-3 text-center">
-                <span className="block text-2xl font-bold">{CHALLENGES_LIST.length - completedIds.length}</span>
-                <span className="text-[10px] uppercase font-bold text-yellow-100">Disponibles</span>
+                <span className="block text-2xl font-bold">{completedIds.length}</span>
+                <span className="text-[10px] uppercase font-bold text-yellow-100">Réalisés</span>
             </div>
         </div>
       </div>
@@ -314,13 +321,16 @@ const Challenges: React.FC<ChallengesProps> = ({ userProfile, onUpdateXP, onTogg
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {CHALLENGES_LIST.map((challenge) => {
           const isCompleted = completedIds.includes(challenge.id);
+          const isActive = activeIds.includes(challenge.id);
           
           return (
             <div 
                 key={challenge.id}
                 className={`border rounded-2xl p-4 transition-all ${
                     isCompleted 
-                    ? 'bg-emerald-50/50 border-emerald-200' 
+                    ? 'bg-emerald-50/50 border-emerald-200 opacity-90' 
+                    : isActive
+                    ? 'bg-white border-blue-400 shadow-md ring-1 ring-blue-100'
                     : 'bg-white border-slate-100 hover:shadow-md'
                 }`}
             >
@@ -344,6 +354,7 @@ const Challenges: React.FC<ChallengesProps> = ({ userProfile, onUpdateXP, onTogg
                         </div>
                     </div>
                     {isCompleted && <CheckCircle2 className="w-6 h-6 text-emerald-500" />}
+                    {isActive && <div className="text-[10px] font-bold text-blue-600 bg-blue-100 px-2 py-1 rounded-full animate-pulse flex items-center gap-1"><Timer className="w-3 h-3"/> En cours</div>}
                 </div>
                 
                 <p className="text-sm text-slate-500 mb-4 leading-relaxed">
@@ -351,19 +362,27 @@ const Challenges: React.FC<ChallengesProps> = ({ userProfile, onUpdateXP, onTogg
                 </p>
 
                 <button
-                    onClick={() => handleClaim(challenge)}
+                    onClick={() => handleAction(challenge)}
                     className={`w-full py-2.5 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 ${
                         isCompleted
                         ? 'bg-white text-emerald-600 border border-emerald-200 hover:bg-emerald-50'
-                        : 'bg-slate-900 text-white hover:bg-emerald-600 shadow-lg shadow-slate-200 hover:shadow-emerald-200'
+                        : isActive
+                        ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-md shadow-blue-200'
+                        : 'bg-slate-900 text-white hover:bg-slate-800 shadow-lg shadow-slate-200'
                     }`}
                 >
                     {isCompleted ? (
                         <>
                             <RefreshCw className="w-4 h-4" /> Recommencer
                         </>
+                    ) : isActive ? (
+                        <>
+                            <CheckCircle2 className="w-4 h-4" /> Valider le défi
+                        </>
                     ) : (
-                        'Valider le défi'
+                        <>
+                            <Play className="w-4 h-4 fill-current" /> Choisir ce défi
+                        </>
                     )}
                 </button>
             </div>
