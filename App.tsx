@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { LayoutGrid, BarChart3, MessageSquare, BookOpen, Home, Trophy, Star, LogIn, ArrowRight, User, Trash2, Bell, Shield, Volume2, Play, CreditCard, Loader2, GripHorizontal, CloudOff, Cloud, Mail, Lock, AlertCircle, ChevronLeft, Eye, EyeOff, Share2, RefreshCw } from 'lucide-react';
+import { LayoutGrid, BarChart3, MessageSquare, BookOpen, Home, Trophy, Star, LogIn, ArrowRight, User, Trash2, Bell, Shield, Volume2, Play, CreditCard, Loader2, GripHorizontal, CloudOff, Cloud, Mail, Lock, AlertCircle, ChevronLeft, Eye, EyeOff, Share2, RefreshCw, Edit2, Save, X } from 'lucide-react';
 
 import { Habit, HabitLog, ViewMode, PrayerLog, UserProfile, PRAYER_NAMES, Challenge } from './types';
 import HabitTracker from './components/HabitTracker';
@@ -85,6 +85,10 @@ const App: React.FC = () => {
   const [authPassword, setAuthPassword] = useState('');
   const [authError, setAuthError] = useState('');
   const [showPassword, setShowPassword] = useState(false); // Toggle password visibility
+
+  // Profile Edit State
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [editNameValue, setEditNameValue] = useState('');
 
   // Lifted Prayer State
   const [prayerTimes, setPrayerTimes] = useState<PrayerTimes | null>(null);
@@ -325,6 +329,29 @@ const App: React.FC = () => {
       setAuthError('');
   };
 
+  const handleForgotPassword = async () => {
+      if (!authEmail) {
+          setAuthError("Veuillez entrer votre email pour réinitialiser le mot de passe.");
+          return;
+      }
+      if (!auth) return;
+      
+      try {
+          await auth.sendPasswordResetEmail(authEmail);
+          alert(`Un email de réinitialisation a été envoyé à ${authEmail}. Vérifiez vos spams.`);
+          setAuthError('');
+      } catch (error: any) {
+          console.error("Reset password error:", error);
+          if (error.code === 'auth/user-not-found') {
+              setAuthError("Aucun compte associé à cet email.");
+          } else if (error.code === 'auth/invalid-email') {
+              setAuthError("Format d'email invalide.");
+          } else {
+              setAuthError("Erreur lors de l'envoi de l'email.");
+          }
+      }
+  };
+
   const handleGoogleLogin = async () => {
     if (!auth) return;
     setAuthError('');
@@ -477,6 +504,34 @@ const App: React.FC = () => {
         setAuthEmail('');
         setAuthPassword('');
         setAuthError('');
+    }
+  };
+
+  // --- PROFILE MANAGEMENT ---
+
+  const handleUpdateProfileName = async () => {
+    if (!editNameValue.trim() || !userProfile || !auth?.currentUser) return;
+    
+    setIsDataLoading(true);
+    try {
+        // Update Firebase Auth
+        await auth.currentUser.updateProfile({ displayName: editNameValue });
+        
+        // Update Firestore
+        if (db) {
+             await db.collection("users").doc(userProfile.uid!).update({
+                "profile.name": editNameValue
+            });
+        }
+        
+        // Update Local State
+        setUserProfile(prev => prev ? { ...prev, name: editNameValue } : null);
+        setIsEditingName(false);
+    } catch (error) {
+        console.error("Error updating name:", error);
+        alert("Erreur lors de la mise à jour du nom.");
+    } finally {
+        setIsDataLoading(false);
     }
   };
 
@@ -874,6 +929,18 @@ const App: React.FC = () => {
                             </div>
                         </div>
 
+                        {!isSignUpMode && (
+                            <div className="flex justify-end">
+                                <button
+                                    type="button"
+                                    onClick={handleForgotPassword}
+                                    className="text-xs text-slate-500 hover:text-emerald-600 font-medium"
+                                >
+                                    Mot de passe oublié ?
+                                </button>
+                            </div>
+                        )}
+
                         <button type="submit" className="w-full bg-emerald-600 text-white py-3 rounded-xl font-bold hover:bg-emerald-700 transition-colors shadow-lg shadow-emerald-200 flex items-center justify-center gap-2">
                             {isSignUpMode ? 'Terminer l\'inscription' : 'Se connecter'} <ArrowRight className="w-4 h-4" />
                         </button>
@@ -1171,7 +1238,48 @@ const App: React.FC = () => {
                             </div>
                         )}
                     </div>
-                    <h2 className="text-2xl font-bold text-slate-800">{userProfile.name}</h2>
+                    
+                    {/* Name Editing Section */}
+                    {isEditingName ? (
+                        <div className="flex items-center justify-center gap-2 mb-2">
+                             <input 
+                                type="text"
+                                value={editNameValue}
+                                onChange={(e) => setEditNameValue(e.target.value)}
+                                className="border border-slate-300 rounded-lg p-2 text-center text-lg font-bold text-slate-800 w-48 focus:ring-2 focus:ring-emerald-500 outline-none"
+                                autoFocus
+                             />
+                             <button 
+                                onClick={handleUpdateProfileName} 
+                                className="p-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700"
+                                title="Sauvegarder"
+                             >
+                                <Save className="w-4 h-4" />
+                             </button>
+                             <button 
+                                onClick={() => setIsEditingName(false)} 
+                                className="p-2 bg-slate-200 text-slate-600 rounded-lg hover:bg-slate-300"
+                                title="Annuler"
+                             >
+                                <X className="w-4 h-4" />
+                             </button>
+                        </div>
+                    ) : (
+                        <h2 className="text-2xl font-bold text-slate-800 flex items-center justify-center gap-2 group">
+                            {userProfile.name}
+                            <button 
+                                onClick={() => {
+                                    setEditNameValue(userProfile.name);
+                                    setIsEditingName(true);
+                                }}
+                                className="opacity-0 group-hover:opacity-100 text-slate-400 hover:text-emerald-600 transition-all p-1"
+                                title="Modifier le nom"
+                            >
+                                <Edit2 className="w-4 h-4" />
+                            </button>
+                        </h2>
+                    )}
+
                     <p className="text-slate-500">Membre depuis le {new Date(userProfile.joinedAt).toLocaleDateString()}</p>
                     <div className="mt-2 text-xs text-slate-300 font-mono">{userProfile.email}</div>
                 </div>

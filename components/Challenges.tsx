@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Trophy, CheckCircle2, Star, RefreshCw, Share2, Play, Timer, Plus, X, Calendar, Edit3, Trash2 } from 'lucide-react';
 import { Challenge, UserProfile } from '../types';
@@ -312,7 +313,7 @@ const Challenges: React.FC<ChallengesProps> = ({ userProfile, onUpdateXP, onTogg
     if (navigator.share) {
         navigator.share({
             title: 'Défis Deen Habits',
-            text: "Je relève des défis spirituels sur Deen Habits ! Si tu connais quelqu'un qui comme toi a envie de s'améliorer, rejoins-moi.",
+            text: "Je relève des défis spirituels sur Deen Habits ! Rejoins-moi.",
             url: window.location.href
         });
     } else {
