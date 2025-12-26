@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { LayoutGrid, BarChart3, MessageSquare, BookOpen, Home, Trophy, Star, LogIn, ArrowRight, User, Trash2, Bell, Shield, Volume2, Play, CreditCard, Loader2, GripHorizontal, CloudOff, Cloud, Mail, Lock, AlertCircle, ChevronLeft, Eye, EyeOff, Share2, RefreshCw, Edit2, Save, X, Compass } from 'lucide-react';
+import { LayoutGrid, BarChart3, MessageSquare, BookOpen, Home, Trophy, Star, LogIn, ArrowRight, User, Trash2, Bell, Shield, Volume2, Play, CreditCard, Loader2, GripHorizontal, CloudOff, Cloud, Mail, Lock, AlertCircle, ChevronLeft, Eye, EyeOff, Share2, RefreshCw, Edit2, Save, X, Compass, Zap } from 'lucide-react';
 
 import { Habit, HabitLog, ViewMode, PrayerLog, UserProfile, PRAYER_NAMES, Challenge } from './types';
 import HabitTracker from './components/HabitTracker';
@@ -416,6 +416,13 @@ const App: React.FC = () => {
       return Math.round((done / total) * 100) || 0;
   };
 
+  const getLevelProgress = () => {
+      if (!userProfile) return 0;
+      // Basé sur handleUpdateXP: floor(sqrt(xp/100)) + 1
+      // Pour une barre de progression simple entre les niveaux de 100 XP
+      return userProfile.xp % 100;
+  };
+
   const NavButton = ({ target, icon: Icon, label }: { target: ViewMode, icon: any, label: string }) => (
     <button 
       onClick={() => setView(target)}
@@ -503,12 +510,45 @@ const App: React.FC = () => {
       <main className="md:ml-64 p-4 md:p-8 max-w-3xl mx-auto min-h-screen">
         {view === 'home' && (
           <div className="space-y-6 animate-in fade-in duration-300">
+            {/* 1. Header Hadith */}
             <div className="bg-gradient-to-r from-emerald-600 to-teal-600 rounded-2xl p-6 text-white shadow-lg relative overflow-hidden">
                <div className="absolute top-0 right-0 p-4 opacity-10"><Star className="w-20 h-20" /></div>
                <span className="text-xs font-bold uppercase opacity-80 tracking-widest">Hadith du jour</span>
                <p className="text-lg italic mt-3 font-serif leading-relaxed">"{currentHadith}"</p>
             </div>
 
+            {/* 2. Nouveau Dashboard : Niveau et Jauge */}
+            <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-4">
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 bg-yellow-50 text-yellow-600 rounded-xl flex items-center justify-center shadow-sm">
+                            <Trophy className="w-6 h-6" />
+                        </div>
+                        <div>
+                            <h3 className="font-bold text-slate-800 text-lg">Niveau {userProfile.level}</h3>
+                            <p className="text-xs text-slate-400 font-medium">{userProfile.xp} XP au total</p>
+                        </div>
+                    </div>
+                    <div className="text-right">
+                        <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-lg">Prochain Niveau</span>
+                    </div>
+                </div>
+                
+                <div className="space-y-2">
+                    <div className="flex justify-between text-[10px] font-bold text-slate-400 uppercase tracking-wider px-1">
+                        <span>Progression</span>
+                        <span>{getLevelProgress()}%</span>
+                    </div>
+                    <div className="h-4 bg-slate-100 rounded-full overflow-hidden border border-slate-50">
+                        <div 
+                            className="h-full bg-gradient-to-r from-yellow-400 to-amber-500 transition-all duration-1000 ease-out shadow-inner"
+                            style={{ width: `${getLevelProgress()}%` }}
+                        ></div>
+                    </div>
+                </div>
+            </div>
+
+            {/* 3. Statistiques de Complétion et Raccourci Qibla */}
             <div className="grid grid-cols-2 gap-4">
                 <button onClick={() => setView('stats')} className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm hover:bg-slate-50 transition-colors text-left group">
                     <div className="flex justify-between items-start mb-2">
@@ -517,24 +557,13 @@ const App: React.FC = () => {
                     </div>
                     <div className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Complétion du jour</div>
                 </button>
-                <button onClick={() => setView('challenges')} className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm hover:bg-slate-50 transition-colors text-left group">
+                <button onClick={() => setView('qibla')} className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm hover:bg-slate-50 transition-colors text-left group">
                     <div className="flex justify-between items-start mb-2">
-                        <div className="text-3xl font-bold text-slate-800">{userProfile.xp}</div>
-                        <div className="p-2 bg-yellow-50 text-yellow-600 rounded-lg group-hover:scale-110 transition-transform"><Trophy className="w-5 h-5" /></div>
+                        <div className="text-3xl font-bold text-slate-800"><Compass className="w-8 h-8 text-emerald-600" /></div>
+                        <div className="p-2 bg-emerald-50 text-emerald-600 rounded-lg group-hover:rotate-45 transition-transform"><Zap className="w-5 h-5" /></div>
                     </div>
-                    <div className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Points XP Total</div>
+                    <div className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Boussole Qibla</div>
                 </button>
-            </div>
-
-            <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between group cursor-pointer" onClick={() => setView('qibla')}>
-                <div className="flex items-center gap-3">
-                    <div className="p-2 bg-emerald-100 text-emerald-700 rounded-xl"><Compass className="w-6 h-6" /></div>
-                    <div>
-                        <div className="font-bold text-slate-800">Direction de la Qibla</div>
-                        <div className="text-xs text-slate-400">Trouvez la direction de la Mecque</div>
-                    </div>
-                </div>
-                <ArrowRight className="w-5 h-5 text-slate-300 group-hover:translate-x-1 transition-transform" />
             </div>
 
             <PrayerTracker 
@@ -599,7 +628,7 @@ const App: React.FC = () => {
         )}
       </main>
 
-      {/* Mobile Bottom Navigation */}
+      {/* Mobile Bottom Navigation - Avec Bouton Accueil réactivé */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t p-2 flex justify-around items-center z-50 shadow-[0_-4px_10px_-1px_rgba(0,0,0,0.05)]">
          <NavButton target="home" icon={Home} label="Accueil" />
          <NavButton target="tracker" icon={LayoutGrid} label="Habitudes" />
