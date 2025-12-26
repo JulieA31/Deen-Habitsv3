@@ -1,6 +1,5 @@
 
 import React from 'react';
-// Added BookOpen to the list of icons imported from lucide-react
 import { ChevronLeft, Award, Trophy, Star, ShieldCheck, Zap, Heart, BookOpen } from 'lucide-react';
 
 interface LevelInfoProps {
@@ -33,7 +32,7 @@ const GRADES: Grade[] = [
 
 const LevelInfo: React.FC<LevelInfoProps> = ({ currentLevel, currentXP, onBack }) => {
   return (
-    <div className="space-y-6 animate-in slide-in-from-right duration-300">
+    <div className="space-y-6 animate-in slide-in-from-right duration-300 pb-10">
       <div className="flex items-center gap-4">
         <button onClick={onBack} className="p-2 hover:bg-white rounded-xl transition-colors text-slate-400">
           <ChevronLeft className="w-6 h-6" />
@@ -63,11 +62,12 @@ const LevelInfo: React.FC<LevelInfoProps> = ({ currentLevel, currentXP, onBack }
           {GRADES.map((grade) => {
             const isUnlocked = currentLevel >= grade.level;
             const isNext = grade.level === currentLevel + 1;
+            const isCurrent = grade.level === currentLevel;
 
             return (
               <div 
                 key={grade.level}
-                className={`relative flex items-center gap-4 p-5 rounded-3xl border transition-all ${
+                className={`relative flex items-start gap-4 p-5 rounded-3xl border transition-all ${
                   isUnlocked 
                     ? 'bg-white border-slate-100 shadow-sm' 
                     : isNext 
@@ -80,23 +80,26 @@ const LevelInfo: React.FC<LevelInfoProps> = ({ currentLevel, currentXP, onBack }
                 </div>
                 
                 <div className="flex-1 min-w-0">
-                   <div className="flex justify-between items-start">
-                        <div>
-                            <span className="text-[10px] font-black uppercase text-slate-400 tracking-tighter">Grade {grade.level}</span>
-                            <h5 className={`text-lg font-bold leading-none ${isUnlocked ? 'text-slate-800' : 'text-slate-400'}`}>{grade.name}</h5>
+                   <div className="flex justify-between items-start gap-2">
+                        <div className="min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="text-[10px] font-black uppercase text-slate-400 tracking-tighter">Grade {grade.level}</span>
+                              {isCurrent && (
+                                <span className="bg-emerald-100 text-emerald-700 text-[8px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-widest">Actuel</span>
+                              )}
+                            </div>
+                            <h5 className={`text-lg font-bold leading-tight ${isUnlocked ? 'text-slate-800' : 'text-slate-400'}`}>{grade.name}</h5>
                         </div>
-                        <div className="text-right">
+                        <div className="shrink-0 pt-1">
                             <span className={`text-xs font-bold ${isUnlocked ? 'text-emerald-600' : 'text-slate-400'}`}>
                                 {grade.xpRequired} XP
                             </span>
                         </div>
                    </div>
-                   <p className="text-xs text-slate-500 mt-2 line-clamp-1 italic">{grade.description}</p>
+                   <p className="text-xs text-slate-500 mt-2 leading-relaxed italic">
+                     {grade.description}
+                   </p>
                 </div>
-
-                {isUnlocked && grade.level === currentLevel && (
-                    <div className="absolute top-4 right-4 bg-emerald-100 text-emerald-700 text-[8px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-widest">Actuel</div>
-                )}
               </div>
             );
           })}
