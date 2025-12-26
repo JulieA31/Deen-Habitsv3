@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { LayoutGrid, BarChart3, MessageSquare, BookOpen, Home, Trophy, Star, LogIn, ArrowRight, User, Trash2, Bell, Shield, Volume2, Play, CreditCard, Loader2, GripHorizontal, CloudOff, Cloud, Mail, Lock, AlertCircle, ChevronLeft, Eye, EyeOff, Share2, RefreshCw, Edit2, Save, X, Compass, Zap } from 'lucide-react';
+import { LayoutGrid, BarChart3, MessageSquare, BookOpen, Home, Trophy, Star, LogIn, ArrowRight, User, Trash2, Bell, Shield, Volume2, Play, CreditCard, Loader2, GripHorizontal, CloudOff, Cloud, Mail, Lock, AlertCircle, ChevronLeft, Eye, EyeOff, Share2, RefreshCw, Edit2, Save, X, Compass, Zap, ChevronRight, Award } from 'lucide-react';
 
 import { Habit, HabitLog, ViewMode, PrayerLog, UserProfile, PRAYER_NAMES, Challenge } from './types';
 import HabitTracker from './components/HabitTracker';
@@ -13,6 +13,7 @@ import PremiumModal from './components/PremiumModal';
 import PrivacyPolicy from './components/PrivacyPolicy';
 import Challenges from './components/Challenges';
 import QiblaCompass from './components/QiblaCompass';
+import LevelInfo from './components/LevelInfo';
 import { getPrayerTimes, PrayerTimes } from './services/prayerService';
 
 // Firebase Imports
@@ -39,7 +40,6 @@ const HADITHS = [
   "La pudeur fait partie de la foi."
 ];
 
-// Added missing DEFAULT_HABITS constant
 const DEFAULT_HABITS: Habit[] = [
   { id: 'habit_quran', title: 'Lire le Coran', category: 'deen', icon: '📖', createdAt: Date.now(), frequency: [], xp: 30 },
   { id: 'habit_dhikr', title: 'Dhikr Matin & Soir', category: 'deen', icon: '📿', createdAt: Date.now(), frequency: [], xp: 20 },
@@ -54,7 +54,6 @@ const App: React.FC = () => {
   const [showPremiumModal, setShowPremiumModal] = useState(false);
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   
-  // Fix error: Reference DEFAULT_HABITS
   const [habits, setHabits] = useState<Habit[]>(DEFAULT_HABITS);
   const [logs, setLogs] = useState<HabitLog>({});
   const [prayerLogs, setPrayerLogs] = useState<PrayerLog>({});
@@ -72,14 +71,10 @@ const App: React.FC = () => {
   const [authError, setAuthError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
-  const [isEditingName, setIsEditingName] = useState(false);
-  const [editNameValue, setEditNameValue] = useState('');
-
   const [prayerTimes, setPrayerTimes] = useState<PrayerTimes | null>(null);
   const [prayerLoading, setPrayerLoading] = useState(false);
   const [prayerError, setPrayerError] = useState<string | null>(null);
-  const notifiedPrayersRef = useRef<Set<string>>(new Set());
-
+  
   const [currentLocation, setCurrentLocation] = useState<{lat: number, lon: number} | null>(null);
 
   const now = new Date();
@@ -98,56 +93,13 @@ const App: React.FC = () => {
           const { latitude, longitude } = position.coords;
           setCurrentLocation({ lat: latitude, lon: longitude });
           const fetchedTimes = await getPrayerTimes(latitude, longitude);
-          if (fetchedTimes) {
-            setPrayerTimes(fetchedTimes);
-          } else {
-            setPrayerError("Impossible de charger les horaires.");
-          }
+          if (fetchedTimes) setPrayerTimes(fetchedTimes);
           setPrayerLoading(false);
         },
-        (err) => {
-          console.error(err);
-          setPrayerError("Activez la localisation pour les horaires.");
-          setPrayerLoading(false);
-        }
+        () => setPrayerLoading(false)
       );
-    } else {
-      setPrayerError("Géolocalisation non supportée.");
     }
   }, []);
-
-  useEffect(() => {
-    if (!prayerTimes || !userProfile?.notificationsEnabled) return;
-
-    const intervalId = setInterval(() => {
-      const now = new Date();
-      const currentHM = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-      
-      if (currentHM === '00:00') {
-        notifiedPrayersRef.current.clear();
-      }
-
-      PRAYER_NAMES.forEach(prayer => {
-        const isEnabled = userProfile.prayerNotifications?.[prayer];
-        const time = prayerTimes[prayer];
-        const cleanTime = time ? time.split(' ')[0] : '';
-
-        if (isEnabled && cleanTime === currentHM && !notifiedPrayersRef.current.has(prayer)) {
-          notifiedPrayersRef.current.add(prayer);
-          playSound(userProfile.notificationSound || 'beep');
-          if (Notification.permission === 'granted') {
-             new Notification(`C'est l'heure de ${prayer}`, {
-                body: "Hayya 'ala Salah (Venez à la prière)",
-                icon: '/logo.png'
-             });
-          }
-        }
-      });
-
-    }, 10000);
-
-    return () => clearInterval(intervalId);
-  }, [prayerTimes, userProfile]);
 
   useEffect(() => {
     if (!auth) {
@@ -162,78 +114,39 @@ const App: React.FC = () => {
         try {
           const docRef = db.collection("users").doc(user.uid);
           const docSnap = await docRef.get();
-
           if (docSnap.exists) {
             const data = docSnap.data();
-            let profile = data?.profile as UserProfile;
-
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.get('payment_success') === 'true' && !profile.isPremium) {
-                profile = { ...profile, isPremium: true };
-                window.history.replaceState({}, document.title, window.location.pathname);
-                alert("MashaAllah ! Merci pour votre abonnement Premium.");
-            }
-
-            setUserProfile(profile);
-            // Fix error: Reference DEFAULT_HABITS
+            setUserProfile(data?.profile as UserProfile);
             setHabits(data?.habits || DEFAULT_HABITS);
             setLogs(data?.logs || {});
             setPrayerLogs(data?.prayerLogs || {});
             setView('home');
           }
-        } catch (error) {
-          console.error("Error fetching user data:", error);
-          setAuthError("Erreur de connexion à la base de données.");
-        }
+        } catch (error) { console.error(error); }
       } else {
         setUserProfile(null);
         setView('auth');
-        setShowWelcomeScreen(true);
       }
       setIsDataLoading(false);
     });
-
     return () => unsubscribe();
   }, []);
 
   useEffect(() => {
     if (!userProfile?.uid || !db || isDataLoading) return;
-
     const saveData = async () => {
       setIsSaving(true);
       try {
-        const docRef = db.collection("users").doc(userProfile.uid!);
-        await docRef.set({
+        await db!.collection("users").doc(userProfile.uid!).set({
           profile: userProfile,
-          habits: habits,
-          logs: logs,
-          prayerLogs: prayerLogs,
-          lastUpdated: Date.now()
+          habits, logs, prayerLogs, lastUpdated: Date.now()
         }, { merge: true });
-      } catch (error) {
-        console.error("Error saving data:", error);
-      } finally {
-        setTimeout(() => setIsSaving(false), 500);
-      }
+      } catch (error) { console.error(error); }
+      finally { setTimeout(() => setIsSaving(false), 500); }
     };
-
     const timeoutId = setTimeout(saveData, 2000);
     return () => clearTimeout(timeoutId);
   }, [habits, logs, prayerLogs, userProfile]);
-
-  const playSound = (soundType: 'beep' | 'adhan') => {
-    if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current.currentTime = 0;
-    }
-
-    const audio = new Audio(SOUND_URLS[soundType]);
-    audioRef.current = audio;
-    setIsPlayingSound(true);
-    
-    audio.play().catch(error => console.error(error));
-    audio.onended = () => setIsPlayingSound(false);
-  };
 
   const handleAuthAction = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -244,42 +157,19 @@ const App: React.FC = () => {
             const userCredential = await auth.createUserWithEmailAndPassword(authEmail, authPassword);
             const user = userCredential.user;
             if (user) await user.updateProfile({ displayName: authName });
-
             const newProfile: UserProfile = {
-                uid: user?.uid,
-                name: authName,
-                email: authEmail,
-                xp: 0,
-                level: 1,
-                isPremium: false,
-                joinedAt: Date.now(),
-                notificationsEnabled: false,
-                prayerNotifications: {},
-                notificationSound: 'beep',
-                completedChallenges: {},
-                activeChallenges: {},
-                customChallenges: []
+                uid: user?.uid, name: authName, email: authEmail, xp: 0, level: 1, isPremium: false,
+                joinedAt: Date.now(), notificationsEnabled: false, prayerNotifications: {},
+                notificationSound: 'beep', completedChallenges: {}, activeChallenges: {}, customChallenges: []
             };
-
-            if (db && user) {
-                await db.collection("users").doc(user.uid).set({
-                    profile: newProfile,
-                    // Fix error: Reference DEFAULT_HABITS
-                    habits: DEFAULT_HABITS,
-                    logs: {},
-                    prayerLogs: {}
-                });
-            }
+            if (db) await db.collection("users").doc(user!.uid).set({ profile: newProfile, habits: DEFAULT_HABITS, logs: {}, prayerLogs: {} });
             setUserProfile(newProfile);
         } else {
             await auth.signInWithEmailAndPassword(authEmail, authPassword);
         }
         setView('home');
-    } catch (error: any) {
-        setAuthError("Identifiants incorrects ou erreur serveur.");
-    } finally {
-        setIsDataLoading(false);
-    }
+    } catch (error: any) { setAuthError("Erreur d'authentification."); }
+    finally { setIsDataLoading(false); }
   };
 
   const handleUpdateXP = (points: number) => {
@@ -302,22 +192,15 @@ const App: React.FC = () => {
   const getLevelProgress = () => {
       if (!userProfile) return 0;
       const currentLevel = userProfile.level;
-      const currentXP = userProfile.xp;
-      
       const baseXP = Math.pow(currentLevel - 1, 2) * 100;
       const nextXP = Math.pow(currentLevel, 2) * 100;
       const range = nextXP - baseXP;
-      
       if (range === 0) return 0;
-      const progress = ((currentXP - baseXP) / range) * 100;
-      return Math.min(Math.max(Math.round(progress), 0), 100);
+      return Math.min(Math.max(Math.round(((userProfile.xp - baseXP) / range) * 100), 0), 100);
   };
 
   const NavButton = ({ target, icon: Icon, label }: { target: ViewMode, icon: any, label: string }) => (
-    <button 
-      onClick={() => setView(target)}
-      className={`flex flex-col items-center gap-1 p-2 rounded-lg transition-colors min-w-[55px] ${view === target ? 'text-emerald-600 bg-emerald-50' : 'text-slate-400 hover:text-slate-600'}`}
-    >
+    <button onClick={() => setView(target)} className={`flex flex-col items-center gap-1 p-2 rounded-lg transition-colors min-w-[55px] ${view === target ? 'text-emerald-600 bg-emerald-50' : 'text-slate-400 hover:text-slate-600'}`}>
       <Icon className="w-5 h-5" />
       <span className="text-[10px] font-medium">{label}</span>
     </button>
@@ -333,7 +216,7 @@ const App: React.FC = () => {
                  <div className="z-10 bg-white p-8 rounded-3xl shadow-2xl w-full max-w-sm border border-slate-100">
                     <img src="/logo.png" alt="Logo" className="w-20 h-20 mx-auto mb-6" />
                     <h1 className="text-2xl font-bold text-center mb-6 text-slate-800">Salam Alaykum</h1>
-                    <form onSubmit={(e) => { e.preventDefault(); if (authName.trim()) { setShowWelcomeScreen(false); setIsSignUpMode(true); } }} className="space-y-4">
+                    <form onSubmit={(e) => { e.preventDefault(); if (authName.trim()) setShowWelcomeScreen(false); setIsSignUpMode(true); }} className="space-y-4">
                         <input type="text" required value={authName} onChange={(e) => setAuthName(e.target.value)} className="w-full p-3 border rounded-xl text-slate-800" placeholder="Ton Prénom" />
                         <button type="submit" className="w-full bg-emerald-600 text-white py-3 rounded-xl font-bold">C'est parti</button>
                     </form>
@@ -343,17 +226,14 @@ const App: React.FC = () => {
                 <div className="z-10 bg-white p-8 rounded-3xl shadow-2xl w-full max-w-sm border border-slate-100">
                     <button onClick={() => setShowWelcomeScreen(true)} className="text-xs font-bold mb-4 uppercase flex items-center gap-1 text-slate-500"><ChevronLeft className="w-4 h-4"/> Retour</button>
                     <h1 className="text-2xl font-bold mb-6 text-slate-800">{isSignUpMode ? 'Inscription' : 'Connexion'}</h1>
-                    {authError && <div className="mb-4 p-3 bg-red-50 text-red-600 text-xs rounded-lg flex items-center gap-2"><AlertCircle className="w-4 h-4" /> {authError}</div>}
                     <form onSubmit={handleAuthAction} className="space-y-4">
                         {isSignUpMode && <input type="text" required value={authName} onChange={(e) => setAuthName(e.target.value)} className="w-full p-3 border rounded-xl text-slate-800" placeholder="Prénom" />}
                         <input type="email" required value={authEmail} onChange={(e) => setAuthEmail(e.target.value)} className="w-full p-3 border rounded-xl text-slate-800" placeholder="Email" />
                         <div className="relative">
                             <input type={showPassword ? "text" : "password"} required value={authPassword} onChange={(e) => setAuthPassword(e.target.value)} className="w-full p-3 border rounded-xl text-slate-800" placeholder="Mot de passe" />
-                            <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">
-                                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                            </button>
+                            <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">{showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}</button>
                         </div>
-                        <button type="submit" className="w-full bg-emerald-600 text-white py-3 rounded-xl font-bold shadow-lg shadow-emerald-100">{isSignUpMode ? 'Créer mon compte' : 'Se connecter'}</button>
+                        <button type="submit" className="w-full bg-emerald-600 text-white py-3 rounded-xl font-bold shadow-lg">{isSignUpMode ? 'Créer mon compte' : 'Se connecter'}</button>
                     </form>
                     <button onClick={() => setIsSignUpMode(!isSignUpMode)} className="w-full mt-6 text-sm text-slate-500">{isSignUpMode ? "Déjà un compte ?" : "Pas encore de compte ?"}</button>
                 </div>
@@ -396,19 +276,26 @@ const App: React.FC = () => {
                <p className="text-lg italic mt-3 font-serif leading-relaxed">"{currentHadith}"</p>
             </div>
 
-            <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-4">
+            {/* Dashboard cliquable */}
+            <button 
+                onClick={() => setView('levels')}
+                className="w-full bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-4 text-left hover:border-emerald-300 transition-all group"
+            >
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 bg-yellow-50 text-yellow-600 rounded-xl flex items-center justify-center shadow-sm">
+                        <div className="w-12 h-12 bg-yellow-50 text-yellow-600 rounded-xl flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
                             <Trophy className="w-6 h-6" />
                         </div>
                         <div>
-                            <h3 className="font-bold text-slate-800 text-lg">Niveau {userProfile.level}</h3>
+                            <h3 className="font-bold text-slate-800 text-lg flex items-center gap-2">
+                                Niveau {userProfile.level} 
+                                <ChevronRight className="w-4 h-4 text-slate-300" />
+                            </h3>
                             <p className="text-xs text-slate-400 font-medium">{userProfile.xp} XP au total</p>
                         </div>
                     </div>
                     <div className="text-right">
-                        <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-lg">Progrès</span>
+                        <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-lg uppercase tracking-wider">Voir les grades</span>
                     </div>
                 </div>
                 
@@ -418,13 +305,10 @@ const App: React.FC = () => {
                         <span>{getLevelProgress()}%</span>
                     </div>
                     <div className="h-4 bg-slate-100 rounded-full overflow-hidden border border-slate-50">
-                        <div 
-                            className="h-full bg-gradient-to-r from-yellow-400 to-amber-500 transition-all duration-700 ease-out shadow-inner"
-                            style={{ width: `${getLevelProgress()}%` }}
-                        ></div>
+                        <div className="h-full bg-gradient-to-r from-yellow-400 to-amber-500 transition-all duration-700 ease-out shadow-inner" style={{ width: `${getLevelProgress()}%` }}></div>
                     </div>
                 </div>
-            </div>
+            </button>
 
             <div className="grid grid-cols-2 gap-4">
                 <button onClick={() => setView('stats')} className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm hover:bg-slate-50 transition-colors text-left group">
@@ -437,26 +321,16 @@ const App: React.FC = () => {
                 <button onClick={() => setView('qibla')} className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm hover:bg-slate-50 transition-colors text-left group">
                     <div className="flex justify-between items-start mb-2">
                         <div className="text-3xl font-bold text-slate-800"><Compass className="w-8 h-8 text-emerald-600" /></div>
-                        {/* Seconde icône Zap retirée ici */}
                     </div>
                     <div className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Boussole Qibla</div>
                 </button>
             </div>
 
-            <PrayerTracker 
-                logs={prayerLogs} 
-                setLogs={setPrayerLogs} 
-                currentDate={currentDate} 
-                onUpdateXP={handleUpdateXP}
-                prayerTimes={prayerTimes}
-                prayerLoading={prayerLoading}
-                prayerError={prayerError}
-                userProfile={userProfile}
-                onToggleNotification={() => {}}
-            />
+            <PrayerTracker logs={prayerLogs} setLogs={setPrayerLogs} currentDate={currentDate} onUpdateXP={handleUpdateXP} prayerTimes={prayerTimes} prayerLoading={prayerLoading} prayerError={prayerError} userProfile={userProfile} onToggleNotification={() => {}} />
           </div>
         )}
 
+        {view === 'levels' && <LevelInfo currentLevel={userProfile.level} currentXP={userProfile.xp} onBack={() => setView('home')} />}
         {view === 'qibla' && <QiblaCompass userLocation={currentLocation} />}
         {view === 'tracker' && <HabitTracker habits={habits} logs={logs} setHabits={setHabits} setLogs={setLogs} currentDate={currentDate} onUpdateXP={handleUpdateXP} />}
         {view === 'invocations' && <InvocationLibrary />}
@@ -471,7 +345,7 @@ const App: React.FC = () => {
         )}
       </main>
 
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t p-2 flex justify-around items-center z-50 shadow-[0_-4px_10px_-1px_rgba(0,0,0,0.05)]">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t p-2 flex justify-around items-center z-50 shadow-md">
          <NavButton target="home" icon={Home} label="Accueil" />
          <NavButton target="tracker" icon={LayoutGrid} label="Habitudes" />
          <NavButton target="invocations" icon={BookOpen} label="Douas" />
