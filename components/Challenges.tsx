@@ -293,8 +293,7 @@ const Challenges: React.FC<ChallengesProps> = ({ userProfile, onUpdateXP, onTogg
     }
   };
 
-  const handleDelete = (e: React.MouseEvent, id: string) => {
-      e.stopPropagation();
+  const handleDelete = (id: string) => {
       if(window.confirm("Supprimer définitivement ce défi personnalisé ?")) {
           onDeleteChallenge(id);
       }
@@ -317,107 +316,62 @@ const Challenges: React.FC<ChallengesProps> = ({ userProfile, onUpdateXP, onTogg
             url: window.location.href
         });
     } else {
-        alert("Partage non supporté");
+        alert("Partage non supporté sur ce navigateur.");
     }
   };
 
   return (
     <div className="space-y-6">
       
-      {/* Header Banner */}
+      {/* Header Banner - Sans compteurs */}
       <div className="bg-gradient-to-r from-yellow-500 to-amber-600 rounded-2xl p-6 text-white shadow-lg relative overflow-hidden">
         <div className="absolute right-0 top-0 p-4 opacity-10">
             <Trophy className="w-32 h-32" />
         </div>
         <h2 className="text-2xl font-bold mb-2">Centre de Défis</h2>
-        <p className="text-yellow-100 text-sm max-w-xs">
+        <p className="text-yellow-100 text-sm max-w-xs leading-relaxed">
             Relève des défis pour booster ta foi et gagner des points d'expérience exclusifs !
         </p>
       </div>
 
       {/* Action Buttons Group */}
       <div className="grid grid-cols-2 gap-3">
-        {/* Create Button */}
         <button 
             onClick={() => setIsAdding(!isAdding)}
-            className={`p-4 rounded-xl flex items-center justify-center gap-2 font-bold transition-all ${isAdding ? 'bg-slate-800 text-white' : 'bg-white border-2 border-dashed border-slate-300 text-slate-500 hover:border-emerald-500 hover:text-emerald-600'}`}
+            className={`p-4 rounded-xl flex items-center justify-center gap-2 font-bold transition-all shadow-sm ${isAdding ? 'bg-slate-800 text-white' : 'bg-white border border-slate-200 text-slate-600 hover:border-emerald-500 hover:text-emerald-600'}`}
         >
-            {isAdding ? <X className="w-5 h-5" /> : <Plus className="w-5 h-5" />}
+            {isAdding ? <X className="w-5 h-5" /> : <Plus className="w-5 h-5 text-emerald-500" />}
             {isAdding ? "Fermer" : "Créer un défi"}
         </button>
 
-        {/* Share Button */}
         <button 
             onClick={handleShareChallenges}
-            className="bg-indigo-50 border border-indigo-100 text-indigo-700 p-4 rounded-xl flex items-center justify-center gap-2 font-bold hover:bg-indigo-100 transition-colors"
+            className="bg-indigo-600 text-white p-4 rounded-xl flex items-center justify-center gap-2 font-bold hover:bg-indigo-700 transition-colors shadow-md shadow-indigo-100"
         >
-            <Share2 className="w-5 h-5" /> Inviter un ami
+            <Share2 className="w-5 h-5" /> Rejoins-moi
         </button>
       </div>
 
       {/* Creation Form */}
       {isAdding && (
           <form onSubmit={handleCreate} className="bg-white p-6 rounded-2xl shadow-lg border border-emerald-100 animate-in slide-in-from-top-4 duration-300">
-              <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2">
-                  <Edit3 className="w-5 h-5 text-emerald-600" /> Nouveau Défi Personnalisé
+              <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2 text-lg">
+                  <Edit3 className="w-5 h-5 text-emerald-600" /> Nouveau Défi
               </h3>
               
               <div className="space-y-4">
                   <div>
-                      <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Titre du défi</label>
-                      <input 
-                        type="text" 
-                        required
-                        value={newTitle}
-                        onChange={(e) => setNewTitle(e.target.value)}
-                        placeholder="Ex: Jeûner 3 jours"
-                        className="w-full p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none"
-                      />
+                      <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Titre</label>
+                      <input type="text" required value={newTitle} onChange={(e) => setNewTitle(e.target.value)} placeholder="Ex: Jeûner 3 jours" className="w-full p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none" />
                   </div>
-
-                  <div>
-                      <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Durée / Fréquence</label>
-                      <input 
-                        type="text" 
-                        value={newDuration}
-                        onChange={(e) => setNewDuration(e.target.value)}
-                        placeholder="Ex: Avant la fin de la semaine"
-                        className="w-full p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none"
-                      />
-                  </div>
-
                   <div>
                       <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Points XP</label>
                       <div className="flex items-center gap-4">
-                          <input 
-                            type="range" 
-                            min="10" 
-                            max="500" 
-                            step="10"
-                            value={newXP}
-                            onChange={(e) => setNewXP(parseInt(e.target.value))}
-                            className="flex-1 accent-emerald-600"
-                          />
-                          <span className="font-bold text-emerald-600 bg-emerald-50 px-3 py-1 rounded-lg w-20 text-center">{newXP} XP</span>
+                          <input type="range" min="10" max="500" step="10" value={newXP} onChange={(e) => setNewXP(parseInt(e.target.value))} className="flex-1 accent-emerald-600" />
+                          <span className="font-bold text-emerald-600 bg-emerald-50 px-3 py-1 rounded-lg min-w-[70px] text-center">{newXP} XP</span>
                       </div>
                   </div>
-
-                  <div>
-                      <label className="block text-xs font-bold text-slate-400 uppercase mb-1">Description (Optionnelle)</label>
-                      <textarea 
-                        value={newDesc}
-                        onChange={(e) => setNewDesc(e.target.value)}
-                        placeholder="Détails de votre objectif..."
-                        className="w-full p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none h-20 resize-none"
-                      />
-                  </div>
-
-                  <button 
-                    type="submit"
-                    className="w-full bg-slate-900 text-white py-3 rounded-xl font-bold hover:bg-slate-800 transition-colors flex items-center justify-center gap-2"
-                  >
-                      <Plus className="w-5 h-5" /> Ajouter ce défi
-                  </button>
+                  <button type="submit" className="w-full bg-slate-900 text-white py-3 rounded-xl font-bold hover:bg-slate-800 transition-colors">Ajouter le défi</button>
               </div>
           </form>
       )}
@@ -432,81 +386,36 @@ const Challenges: React.FC<ChallengesProps> = ({ userProfile, onUpdateXP, onTogg
             <div 
                 key={challenge.id}
                 className={`border rounded-2xl p-4 transition-all relative ${
-                    isCompleted 
-                    ? 'bg-emerald-50/50 border-emerald-200 opacity-90' 
-                    : isActive
-                    ? 'bg-white border-blue-400 shadow-md ring-1 ring-blue-100'
-                    : 'bg-white border-slate-100 hover:shadow-md'
+                    isCompleted ? 'bg-emerald-50/50 border-emerald-200' : isActive ? 'bg-white border-blue-400 shadow-md ring-1 ring-blue-50' : 'bg-white border-slate-100 hover:shadow-md'
                 }`}
             >
-                {/* Delete button for custom challenges */}
                 {challenge.isCustom && !isActive && !isCompleted && (
-                    <button 
-                        onClick={(e) => handleDelete(e, challenge.id)}
-                        className="absolute top-2 right-2 p-1.5 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                        title="Supprimer"
-                    >
-                        <Trash2 className="w-4 h-4" />
-                    </button>
+                    <button onClick={() => handleDelete(challenge.id)} className="absolute top-2 right-2 p-1 text-slate-300 hover:text-red-500"><Trash2 className="w-4 h-4" /></button>
                 )}
 
                 <div className="flex justify-between items-start mb-3">
                     <div className="flex gap-3">
-                        <div className="text-3xl bg-slate-50 w-12 h-12 rounded-xl flex items-center justify-center shadow-sm">
-                            {challenge.icon}
-                        </div>
+                        <div className="text-3xl bg-slate-50 w-12 h-12 rounded-xl flex items-center justify-center shadow-sm">{challenge.icon}</div>
                         <div>
-                            <h3 className={`font-bold text-slate-800 pr-6 ${isCompleted ? 'text-emerald-800' : ''}`}>
-                                {challenge.title}
-                            </h3>
-                            <div className="flex flex-wrap gap-2 mt-1">
-                                <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider ${getDifficultyColor(challenge.difficulty)}`}>
-                                    {challenge.difficulty}
-                                </span>
-                                <span className="text-[10px] bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full font-bold flex items-center gap-1">
-                                    <Star className="w-3 h-3" /> {challenge.xp} XP
-                                </span>
+                            <h3 className={`font-bold text-slate-800 ${isCompleted ? 'text-emerald-800' : ''}`}>{challenge.title}</h3>
+                            <div className="flex gap-2 mt-1">
+                                <span className={`text-[9px] px-2 py-0.5 rounded-full font-bold uppercase tracking-widest ${getDifficultyColor(challenge.difficulty)}`}>{challenge.difficulty}</span>
+                                <span className="text-[9px] bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full font-bold">+{challenge.xp} XP</span>
                             </div>
                         </div>
                     </div>
                     {isCompleted && <CheckCircle2 className="w-6 h-6 text-emerald-500" />}
-                    {isActive && <div className="text-[10px] font-bold text-blue-600 bg-blue-100 px-2 py-1 rounded-full animate-pulse flex items-center gap-1"><Timer className="w-3 h-3"/> En cours</div>}
                 </div>
                 
-                {challenge.duration && (
-                     <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-600 mb-2 bg-slate-50 px-2 py-1 rounded-md inline-block">
-                        <Calendar className="w-3 h-3" />
-                        {challenge.duration}
-                     </div>
-                )}
-                
-                <p className="text-sm text-slate-500 mb-4 leading-relaxed">
-                    {challenge.description || "Aucune description."}
-                </p>
+                <p className="text-sm text-slate-500 mb-4 line-clamp-2 leading-relaxed">{challenge.description || "Relève ce défi pour progresser."}</p>
 
                 <button
                     onClick={() => handleAction(challenge)}
                     className={`w-full py-2.5 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 ${
-                        isCompleted
-                        ? 'bg-white text-emerald-600 border border-emerald-200 hover:bg-emerald-50'
-                        : isActive
-                        ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-md shadow-blue-200'
-                        : 'bg-slate-900 text-white hover:bg-slate-800 shadow-lg shadow-slate-200'
+                        isCompleted ? 'bg-white text-emerald-600 border border-emerald-200 hover:bg-emerald-50' : isActive ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-slate-900 text-white hover:bg-slate-800'
                     }`}
                 >
-                    {isCompleted ? (
-                        <>
-                            <RefreshCw className="w-4 h-4" /> Recommencer
-                        </>
-                    ) : isActive ? (
-                        <>
-                            <CheckCircle2 className="w-4 h-4" /> Valider le défi
-                        </>
-                    ) : (
-                        <>
-                            <Play className="w-4 h-4 fill-current" /> Choisir ce défi
-                        </>
-                    )}
+                    {isCompleted ? <><RefreshCw className="w-4 h-4" /> Recommencer</> : isActive ? <><CheckCircle2 className="w-4 h-4" /> Valider</> : <><Play className="w-4 h-4 fill-current" /> Commencer</>}
                 </button>
             </div>
           );
