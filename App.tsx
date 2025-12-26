@@ -24,12 +24,6 @@ const SOUND_URLS = {
   adhan: 'https://www.islamcan.com/audio/adhan/azan1.mp3' 
 };
 
-// Initial Data
-const DEFAULT_HABITS: Habit[] = [
-  { id: '1', title: 'Lecture Coran (1 page)', category: 'deen', icon: '📖', createdAt: Date.now(), frequency: [], xp: 15 },
-  { id: '2', title: 'Boire 1,5L Eau', category: 'health', icon: '💧', createdAt: Date.now(), frequency: [], xp: 5 },
-];
-
 const HADITHS = [
   "La pureté est la moitié de la foi.",
   "Le meilleur d'entre vous est celui qui apprend le Coran et l'enseigne.",
@@ -45,6 +39,13 @@ const HADITHS = [
   "La pudeur fait partie de la foi."
 ];
 
+// Added missing DEFAULT_HABITS constant
+const DEFAULT_HABITS: Habit[] = [
+  { id: 'habit_quran', title: 'Lire le Coran', category: 'deen', icon: '📖', createdAt: Date.now(), frequency: [], xp: 30 },
+  { id: 'habit_dhikr', title: 'Dhikr Matin & Soir', category: 'deen', icon: '📿', createdAt: Date.now(), frequency: [], xp: 20 },
+  { id: 'habit_sport', title: 'Activité Physique', category: 'health', icon: '💪', createdAt: Date.now(), frequency: [1, 3, 5], xp: 40 }
+];
+
 const App: React.FC = () => {
   const [currentHadith, setCurrentHadith] = useState('');
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -53,6 +54,7 @@ const App: React.FC = () => {
   const [showPremiumModal, setShowPremiumModal] = useState(false);
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   
+  // Fix error: Reference DEFAULT_HABITS
   const [habits, setHabits] = useState<Habit[]>(DEFAULT_HABITS);
   const [logs, setLogs] = useState<HabitLog>({});
   const [prayerLogs, setPrayerLogs] = useState<PrayerLog>({});
@@ -173,6 +175,7 @@ const App: React.FC = () => {
             }
 
             setUserProfile(profile);
+            // Fix error: Reference DEFAULT_HABITS
             setHabits(data?.habits || DEFAULT_HABITS);
             setLogs(data?.logs || {});
             setPrayerLogs(data?.prayerLogs || {});
@@ -261,6 +264,7 @@ const App: React.FC = () => {
             if (db && user) {
                 await db.collection("users").doc(user.uid).set({
                     profile: newProfile,
+                    // Fix error: Reference DEFAULT_HABITS
                     habits: DEFAULT_HABITS,
                     logs: {},
                     prayerLogs: {}
@@ -433,7 +437,7 @@ const App: React.FC = () => {
                 <button onClick={() => setView('qibla')} className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm hover:bg-slate-50 transition-colors text-left group">
                     <div className="flex justify-between items-start mb-2">
                         <div className="text-3xl font-bold text-slate-800"><Compass className="w-8 h-8 text-emerald-600" /></div>
-                        <div className="p-2 bg-emerald-50 text-emerald-600 rounded-lg group-hover:rotate-45 transition-transform"><Zap className="w-5 h-5" /></div>
+                        {/* Seconde icône Zap retirée ici */}
                     </div>
                     <div className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Boussole Qibla</div>
                 </button>

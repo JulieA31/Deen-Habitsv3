@@ -127,23 +127,18 @@ const QiblaCompass: React.FC<QiblaCompassProps> = ({ userLocation }) => {
             <span className="absolute bottom-2 font-black text-slate-400">S</span>
             <span className="absolute left-2 font-black text-slate-400">W</span>
             
-            {/* Qibla Needle Container (Points fixed to Qibla angle) */}
+            {/* Qibla Arrow Container */}
             <div 
                 className="absolute inset-0 flex items-center justify-center"
                 style={{ transform: `rotate(${qiblaAngle}deg)` }}
             >
                 <div className="relative h-full w-full flex flex-col items-center justify-start py-8">
-                    {/* The Mecca/Kaaba Indicator */}
+                    {/* Simple Emerald Arrow */}
                     <div className="flex flex-col items-center">
-                        <div className="w-12 h-12 bg-slate-900 border-2 border-emerald-500 rounded-lg shadow-xl flex items-center justify-center overflow-hidden z-20">
-                            {/* SVG Kaaba Icon */}
-                            <svg viewBox="0 0 24 24" className="w-8 h-8 text-white fill-current">
-                                <rect x="4" y="4" width="16" height="16" rx="1" />
-                                <rect x="4" y="8" width="16" height="2" className="text-yellow-500" />
-                                <rect x="11" y="10" width="2" height="10" className="text-yellow-500 opacity-50" />
-                            </svg>
-                        </div>
-                        <div className="w-1.5 h-16 bg-gradient-to-b from-emerald-500 to-transparent -mt-2 rounded-full"></div>
+                        <div 
+                            className="w-0 h-0 border-l-[15px] border-l-transparent border-r-[15px] border-r-transparent border-b-[30px] border-b-emerald-600 drop-shadow-xl z-20"
+                        ></div>
+                        <div className="w-1.5 h-20 bg-gradient-to-b from-emerald-600 to-transparent -mt-1 rounded-full opacity-50"></div>
                     </div>
                 </div>
             </div>
