@@ -38,7 +38,6 @@ const QiblaCompass: React.FC<QiblaCompassProps> = ({ userLocation }) => {
   }, [userLocation]);
 
   const requestPermission = async () => {
-    // Handling iOS 13+ permission
     // @ts-ignore
     if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
       try {
@@ -52,7 +51,6 @@ const QiblaCompass: React.FC<QiblaCompassProps> = ({ userLocation }) => {
         console.error(err);
       }
     } else {
-      // Non-iOS or older iOS
       setIsPermissionGranted(true);
       startCompass();
     }
@@ -62,19 +60,18 @@ const QiblaCompass: React.FC<QiblaCompassProps> = ({ userLocation }) => {
     const handleOrientation = (event: DeviceOrientationEvent) => {
       let compassHeading = 0;
       // @ts-ignore
-      if (event.webkitCompassHeading) {
+      if (event.webkitCompassHeading !== undefined) {
         // iOS
         // @ts-ignore
         compassHeading = event.webkitCompassHeading;
       } else if (event.alpha !== null) {
-        // Android / others (alpha might not be absolute heading without specific events)
+        // Android / others
         compassHeading = 360 - event.alpha;
       }
       setHeading(compassHeading);
     };
 
     window.addEventListener('deviceorientation', handleOrientation, true);
-    // Use absolute orientation if available for better accuracy on some Androids
     window.addEventListener('deviceorientationabsolute', handleOrientation as any, true);
 
     return () => {
@@ -84,14 +81,12 @@ const QiblaCompass: React.FC<QiblaCompassProps> = ({ userLocation }) => {
   };
 
   useEffect(() => {
-    // Start listening if permission is already assumed (like on most Androids)
+    // Check support
     // @ts-ignore
     if (typeof DeviceOrientationEvent === 'undefined') {
       setIsSupported(false);
     }
   }, []);
-
-  const totalRotation = qiblaAngle - heading;
 
   return (
     <div className="flex flex-col items-center justify-center p-6 space-y-8 animate-in fade-in duration-500">
@@ -99,7 +94,7 @@ const QiblaCompass: React.FC<QiblaCompassProps> = ({ userLocation }) => {
         <h2 className="text-2xl font-bold text-slate-800 flex items-center justify-center gap-2">
           <Compass className="w-6 h-6 text-emerald-600" /> Direction de la Qibla
         </h2>
-        <p className="text-sm text-slate-500 mt-1">Tournez votre appareil pour trouver la Kaaba</p>
+        <p className="text-sm text-slate-500 mt-1">Tenez votre appareil à plat et tournez-le</p>
       </div>
 
       {!isPermissionGranted ? (
@@ -107,65 +102,76 @@ const QiblaCompass: React.FC<QiblaCompassProps> = ({ userLocation }) => {
           <div className="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mx-auto">
             <RotateCw className="w-8 h-8" />
           </div>
-          <p className="text-slate-600 font-medium">L'application a besoin d'accéder aux capteurs de mouvement pour afficher la boussole.</p>
+          <p className="text-slate-600 font-medium">L'accès aux capteurs de mouvement est requis pour faire fonctionner la boussole.</p>
           <button 
             onClick={requestPermission}
             className="w-full bg-emerald-600 text-white py-4 rounded-2xl font-bold shadow-lg shadow-emerald-100 hover:bg-emerald-700 transition-colors"
           >
-            Activer les capteurs
+            Activer la boussole
           </button>
         </div>
       ) : (
-        <div className="relative w-72 h-72">
-          {/* Outer Ring */}
-          <div className="absolute inset-0 rounded-full border-8 border-slate-100 shadow-inner"></div>
+        <div className="relative w-80 h-80 flex items-center justify-center">
+          {/* Outer static Ring */}
+          <div className="absolute inset-0 rounded-full border-[10px] border-slate-100 shadow-inner"></div>
+          <div className="absolute inset-[15px] rounded-full border border-slate-200 opacity-30"></div>
           
-          {/* Compass Face */}
+          {/* Compass Face (Rotates with phone heading) */}
           <div 
-            className="absolute inset-4 rounded-full bg-white shadow-xl flex items-center justify-center transition-transform duration-100"
+            className="absolute inset-4 rounded-full flex items-center justify-center transition-transform duration-100"
             style={{ transform: `rotate(${-heading}deg)` }}
           >
             {/* Cardinal points */}
-            <span className="absolute top-2 font-bold text-slate-300">N</span>
-            <span className="absolute right-2 font-bold text-slate-300">E</span>
-            <span className="absolute bottom-2 font-bold text-slate-300">S</span>
-            <span className="absolute left-2 font-bold text-slate-300">W</span>
+            <span className="absolute top-2 font-black text-slate-400">N</span>
+            <span className="absolute right-2 font-black text-slate-400">E</span>
+            <span className="absolute bottom-2 font-black text-slate-400">S</span>
+            <span className="absolute left-2 font-black text-slate-400">W</span>
             
-            {/* Qibla Needle Container (rotates within the compass) */}
+            {/* Qibla Needle Container (Points fixed to Qibla angle) */}
             <div 
                 className="absolute inset-0 flex items-center justify-center"
                 style={{ transform: `rotate(${qiblaAngle}deg)` }}
             >
-                <div className="relative flex flex-col items-center">
-                    {/* The Mecca Icon/Indicator */}
-                    <div className="absolute -top-12 flex flex-col items-center">
-                        <img src="/logo.png" className="w-10 h-10 shadow-lg rounded-lg border-2 border-emerald-500 bg-white" alt="Kaaba" />
-                        <div className="w-1 h-8 bg-emerald-500 mt-1 rounded-full"></div>
+                <div className="relative h-full w-full flex flex-col items-center justify-start py-8">
+                    {/* The Mecca/Kaaba Indicator */}
+                    <div className="flex flex-col items-center">
+                        <div className="w-12 h-12 bg-slate-900 border-2 border-emerald-500 rounded-lg shadow-xl flex items-center justify-center overflow-hidden z-20">
+                            {/* SVG Kaaba Icon */}
+                            <svg viewBox="0 0 24 24" className="w-8 h-8 text-white fill-current">
+                                <rect x="4" y="4" width="16" height="16" rx="1" />
+                                <rect x="4" y="8" width="16" height="2" className="text-yellow-500" />
+                                <rect x="11" y="10" width="2" height="10" className="text-yellow-500 opacity-50" />
+                            </svg>
+                        </div>
+                        <div className="w-1.5 h-16 bg-gradient-to-b from-emerald-500 to-transparent -mt-2 rounded-full"></div>
                     </div>
                 </div>
             </div>
-            
-            {/* Central Dot */}
-            <div className="w-4 h-4 bg-slate-800 rounded-full z-10 border-4 border-white"></div>
           </div>
           
+          {/* Static Center Dot */}
+          <div className="w-6 h-6 bg-slate-800 rounded-full z-10 border-4 border-white shadow-md"></div>
+          
           {/* Angle Display Overlay */}
-          <div className="absolute -bottom-12 left-0 right-0 text-center">
-            <div className="inline-block bg-slate-800 text-white px-4 py-1.5 rounded-full text-sm font-mono shadow-md">
-              Azimut: {Math.round(qiblaAngle)}° | Cap: {Math.round(heading)}°
+          <div className="absolute -bottom-14 left-0 right-0 text-center">
+            <div className="inline-flex flex-col bg-white border border-slate-100 px-4 py-2 rounded-2xl shadow-lg">
+              <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Angle Qibla</span>
+              <span className="text-xl font-black text-emerald-600">{Math.round(qiblaAngle)}°</span>
             </div>
           </div>
         </div>
       )}
 
       {/* Info Card */}
-      <div className="bg-emerald-50 p-4 rounded-2xl border border-emerald-100 flex items-start gap-3 max-w-sm">
-        <MapPin className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
-        <div className="text-xs text-emerald-800 leading-relaxed">
+      <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm flex items-start gap-4 max-w-sm mt-8">
+        <div className="p-2 bg-emerald-50 text-emerald-600 rounded-xl">
+            <MapPin className="w-5 h-5" />
+        </div>
+        <div className="text-sm text-slate-600 leading-relaxed">
           {userLocation ? (
-            <p>Calculé pour votre position actuelle : <b>{userLocation.lat.toFixed(4)}, {userLocation.lon.toFixed(4)}</b>. Tenez votre téléphone à plat (horizontalement).</p>
+            <p>Direction calculée pour : <br/><span className="font-bold text-slate-800">{userLocation.lat.toFixed(3)}, {userLocation.lon.toFixed(3)}</span></p>
           ) : (
-            <p className="text-amber-700 flex items-center gap-1"><AlertCircle className="w-3 h-3" /> Géolocalisation nécessaire pour une précision optimale.</p>
+            <p className="text-amber-600 font-medium">Localisation requise pour la précision.</p>
           )}
         </div>
       </div>
