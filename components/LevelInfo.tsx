@@ -61,18 +61,13 @@ const LevelInfo: React.FC<LevelInfoProps> = ({ currentLevel, currentXP, onBack }
         <div className="grid gap-3">
           {GRADES.map((grade) => {
             const isUnlocked = currentLevel >= grade.level;
-            const isNext = grade.level === currentLevel + 1;
             const isCurrent = grade.level === currentLevel;
 
             return (
               <div 
                 key={grade.level}
                 className={`relative flex items-start gap-4 p-5 rounded-3xl border transition-all ${
-                  isUnlocked 
-                    ? 'bg-white border-slate-100 shadow-sm' 
-                    : isNext 
-                      ? 'bg-white border-dashed border-emerald-300 opacity-70' 
-                      : 'bg-slate-50 border-transparent opacity-40'
+                  isUnlocked ? 'bg-white border-slate-100 shadow-sm' : 'bg-slate-50 border-transparent opacity-40'
                 }`}
               >
                 <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 border ${isUnlocked ? grade.color : 'bg-slate-100 text-slate-300'}`}>
@@ -82,21 +77,21 @@ const LevelInfo: React.FC<LevelInfoProps> = ({ currentLevel, currentXP, onBack }
                 <div className="flex-1 min-w-0">
                    <div className="flex justify-between items-start gap-2">
                         <div className="min-w-0">
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <span className="text-[10px] font-black uppercase text-slate-400 tracking-tighter">Grade {grade.level}</span>
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="text-[10px] font-black uppercase text-slate-400 tracking-tighter">Niveau {grade.level}</span>
                               {isCurrent && (
-                                <span className="bg-emerald-100 text-emerald-700 text-[8px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-widest">Actuel</span>
+                                <span className="bg-emerald-100 text-emerald-700 text-[8px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-widest shrink-0">Actuel</span>
                               )}
                             </div>
                             <h5 className={`text-lg font-bold leading-tight ${isUnlocked ? 'text-slate-800' : 'text-slate-400'}`}>{grade.name}</h5>
                         </div>
-                        <div className="shrink-0 pt-1">
+                        <div className="shrink-0 pt-4">
                             <span className={`text-xs font-bold ${isUnlocked ? 'text-emerald-600' : 'text-slate-400'}`}>
                                 {grade.xpRequired} XP
                             </span>
                         </div>
                    </div>
-                   <p className="text-xs text-slate-500 mt-2 leading-relaxed italic">
+                   <p className="text-xs text-slate-500 mt-2 leading-relaxed italic break-words">
                      {grade.description}
                    </p>
                 </div>
@@ -104,11 +99,6 @@ const LevelInfo: React.FC<LevelInfoProps> = ({ currentLevel, currentXP, onBack }
             );
           })}
         </div>
-      </div>
-
-      <div className="p-8 text-center text-slate-400 text-xs">
-          La progression se base sur le carré du niveau : <br/>
-          <code className="bg-slate-100 px-2 py-1 rounded-md mt-2 inline-block">XP Requis = (Niveau - 1)² x 100</code>
       </div>
     </div>
   );
