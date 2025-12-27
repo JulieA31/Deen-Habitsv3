@@ -43,9 +43,9 @@ const INVOCATIONS_DATA: Invocation[] = [
     id: 'istikhara',
     category: 'Prière',
     title: 'Prière de Consultation (Istikhara)',
-    arabic: 'اللَّهُمَّ إِنِّي أَسْتَخِيرُكَ بِعِلْمِكَ وَأَسْتَقْدِرُكَ بِقُدْرَتِكَ، وَأَسْأَلُكَ مِنْ فَضْلِكَ الْعَظِيمِ، فَإِنَّكَ تَقْدِرُ وَلاَ أَقْدِرُ وَتَعْلَمُ وَلاَ أَعْلَمُ وَأنتَ عَلاَّمُ الْغُيُوبِ. اللَّهُمَّ إِنْ كُنْتَ تَعْلَمُ أَنَّ هَذَا الأَمْرَ خَيْرٌ لِي فِي دِينِي وَمَعَاشِي وَعَاقِبَةِ أَمْرِي فَاقْدُرْهُ لِي وَيَسِّرْهُ لِي ثُمَّ بَارِكْ لِي فِيهِ',
-    phonetic: 'Allāhumma innī astakhīruka bi-ʿilmika wa astaqdiruka bi-qudratika...',
-    translation: 'Ô Allah, je Te demande de me guider par Ton savoir et de me donner la force par Ta puissance...'
+    arabic: 'اللَّهُمَّ إِنِّي أَسْتَخِيرُكَ بِعِلْمِكَ وَأَسْتَقْدِرُكَ بِقُدْرَتِكَ، وَأَسْأَلُكَ مِنْ فَضْلِكَ الْعَظِيمِ، فَإِنَّكَ تَقْدِرُ وَلَا أَقْدِرُ، وَتَعْلَمُ وَلَا أَعْلَمُ، وَأَنْتَ عَلَّامُ الْغُيُوبِ. اللَّهُمَّ إِنْ كُنْتَ تَعْلَمُ أَنَّ هَذَا الْأَمْرَ خَيْرٌ لِي فِي دِينِي وَمَعَاشِي وَعَاقِبَةِ أَمْرِي فَاقْدُرْهُ لِي وَيَسِّرْهُ لِي ثُمَّ بَارِكْ لِي فِيهِ، وَإِنْ كُنْتَ تَعْلَمُ أَنَّ هَذَا الْأَمْرَ شَرٌّ لِي فِي دِينِي وَمَعَاشِي وَعَاقِبَةِ أَمْرِي فَاصْرِفْهُ عَنِّي وَاصْرِفْنِي عَنْهُ، وَاقْدُرْ لِيَ الْخَيْرَ حَيْثُ كَانَ ثُمَّ أَرْضِنِي بِهِ',
+    phonetic: 'Allāhumma innī astakhīruka bi-ʿilmika wa-astaqdiruka bi-qudratika, wa-asʾaluka min faḍlika l-ʿaẓīm, fa-innaka taqdiru wa-lā aqdir, wa-taʿlamu wa-lā aʿlam, wa-anta ʿallāmu l-ghuyūb. Allāhumma in kunta taʿlamu anna hādhā l-amra khayrun lī fī dīnī wa-maʿāshī wa-ʿāqibati amrī, fa-qdurhu lī wa-yassirhu lī thumma bārik lī fīh. Wa-in kunta taʿlamu anna hādhā l-amra sharrun lī fī dīnī wa-maʿāshī wa-ʿāqibati amrī, fa-ṣrifhu ʿannī wa-ṣrifnī ʿanhu, wa-qdur liya l-khayra ḥaythu kāna thumma arḍinī bih.',
+    translation: 'Ô Allah, je Te demande de me guider par Ton savoir et de me donner la force par Ta puissance, et je Te demande de Ta grâce immense. Car Tu peux tout et je ne peux rien, Tu sais tout et je ne sais rien, et c’est Toi le Grand Connaisseur de l’invisible. Ô Allah, si Tu sais que cette affaire est une bonne chose pour moi dans ma religion, ma vie présente et ma vie future, alors décrète-la-moi, facilite-la-moi et bénis-la-moi. Et si Tu sais que cette affaire est mauvaise pour moi dans ma religion, ma vie présente et ma vie future, alors détourne-la de moi et détourne-moi d’elle, et décrète-moi le bien où qu’il soit, puis rends-m’en satisfait.'
   },
 
   // --- PARDON & REPENTIR ---
@@ -71,9 +71,9 @@ const INVOCATIONS_DATA: Invocation[] = [
     id: 'kursi',
     category: 'Protection',
     title: 'Ayat al-Kursi (Verset du Trône)',
-    arabic: 'اللَّهُ لَا إِلَٰهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ ۚ لَا تَأْخُذُهُ سِنَةٌ وَلَا نَوْمٌ ۚ لَّهُ مَا فِي السَّمَاوَاتِ وَمَا فِي الْأَرْضِ ۗ مَن ذَا الَّذِي يَشْفَعُ عِندَهُ إِلَّا بِإِذْنِهِ ۚ يَعْلَمُ مَا بَيْنَ أَيْدِيهِمْ وَمَا خَلْفَهُمْ ۖ وَلَا يُحِيطُونَ بِشَيْءٍ مِّنْ عِلْمِهِ إِلَّا بِمَا شَاءَ ۚ وَسِعَ كُرْسِيُّهُ السَّمَاوَاتِ وَالْأَرْضَ ۖ وَلَا يَؤُودُهُ حِفْظُهُمَا ۚ وَهُوَ الْعَلِيُّ الْعَظِيمُ',
-    phonetic: 'Allāhu lā ilāha illā hu, al-ḥayyu l-qayyūm...',
-    translation: 'Allah ! Point de divinité à part Lui, le Vivant, Celui qui subsiste par lui-même. Ni somnolence ni sommeil ne Le saisissent...'
+    arabic: 'اللَّهُ لَا إِلَهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ لَا تَأْخُذُهُ سِنَةٌ وَلَا نَوْمٌ لَهُ مَا فِي السَّمَاوَاتِ وَمَا فِي الْأَرْضِ مَنْ ذَا الَّذِي يَشْفَعُ عِنْدَهُ إِلَّا بِإِذْنِهِ يَعْلَمُ مَا بَيْنَ أَيْدِيهِمْ وَمَا خَلْفَهُمْ وَلَا يُحِيطُونَ بِشَيْءٍ مِنْ عِلْمِهِ إِلَّا بِمَا شَاءَ وَسِعَ كُرْسِيُّهُ السَّمَاوَاتِ وَالْأَرْضَ وَلَا يَئُودُهُ حِفْظُهُمَا وَهُوَ الْعَلِيُّ الْعَظِيمُ',
+    phonetic: 'Allāhu lā ilāha illā huwa l-ḥayyu l-qayyūm, lā taʾkhudhuhu sinatun wa-lā nawm, lahu mā fī s-samāwāti wa-mā fī l-arḍ, man dhā lladhī yashfaʿu ʿindahu illā bi-idhnihi, yaʿlamu mā bayna aydīhim wa-mā khalfahum, wa-lā yuḥīṭūna bi-shayʾin min ʿilmihi illā bi-mā shāʾa, wasiʿa kursiyyuhu s-samāwāti wa-l-arḍ, wa-lā yaʾūduhu ḥifẓuhumā wa-huwa l-ʿaliyyu l-ʿaẓīm.',
+    translation: 'Allah ! Point de divinité à part Lui, le Vivant, Celui qui subsiste par Lui-même "Al-Qayyûm". Ni somnolence ni sommeil ne Le saisissent. À Lui appartient tout ce qui est dans les cieux et sur la terre. Qui peut intercéder auprès de Lui sans Sa permission ? Il connaît leur passé et leur futur. Et, de Sa science, ils n’embrassent que ce qu’Il veut. Son Trône "Kursî" déborde les cieux et la terre, dont la garde ne Lui coûte aucune peine. Et Il est le Très Haut, le Très Grand.'
   },
   {
     id: 'protection_epreuves',
@@ -141,7 +141,7 @@ const INVOCATIONS_DATA: Invocation[] = [
     id: 'global_repair',
     category: 'Spiritualité',
     title: 'Réparation de la religion et de la vie',
-    arabic: 'اللَّهُمَّ أَصْلِحْ لِي دِينِيَ الَّذِي هُوَ عِصْمَةُ أَمْرِي، وَأَصْلِحْ لِي دُنْيَايَ الَّتِي فِيهَا مَعَاشِي، وَأَصْلِحْ لِي آخِرَتِيَ الَّتِي إِلَيْهَا مَعَادِي، وَاجْعَلِ الْحَيَاةَ زِيَادَةً لِي فِي كُلِّ خَيْرٍ، وَاجْعَلِ الْمَوْتَ رَاحَةً لِي مِنْ كُلِّ شَرٍّ',
+    arabic: 'اللَّهُمَّ أَصْلِحْ لِي دِينِيَ الَّذِي هُوة عِصْمَةُ أَمْرِي، وَأَصْلِحْ لِي دُنْيَايَ الَّتِي فِيهَا مَعَاشِي، وَأَصْلِحْ لِي آخِرَتِيَ الَّتِي إِلَيْهَا مَعَادِي، وَاجْعَلِ الْحَيَاةَ زِيَادَةً لِي فِي كُلِّ خَيْرٍ، وَاجْعَلِ الْمَوْتَ رَاحَةً لِي مِنْ كُلِّ شَرٍّ',
     phonetic: 'Allāhumma aṣliḥ lī dīnī alladhī huwa ʿiṣmatu amrī, wa aṣliḥ lī dunyāya allatī fīhā maʿāshī, wa aṣliḥ lī ākhiratī allatī ilayhā maʿādī, wajʿali l-ḥayāta ziyādatan lī fī kulli khayr, wajʿali l-mawta rāḥatan lī min kulli sharr',
     translation: 'Ô Allah, améliore ma religion qui est la sauvegarde de mon sort, améliore ma vie d’ici-bas qui est ma subsistance, améliore mon au-delà vers lequel est mon retour. Fais de la vie une augmentation en tout bien et de la mort un repos contre tout mal.'
   },
@@ -158,7 +158,7 @@ const INVOCATIONS_DATA: Invocation[] = [
     category: 'Spiritualité',
     title: 'Invocation globale d’excellence',
     arabic: 'اللَّهُمَّ إِنِّي أَسْأَلُكَ أَفْضَلَ الْمَسَائِلِ، وَأَفْضَلَ الدُّعَاءِ، وَأَفْضَلَ النَّجَاحِ، وَأَفْضَلَ الْعِلْمِ، وَأَفْضَلَ الْعَمَلِ، وَأَفْضَلَ الثَّوَابِ، وَأَفْضَلَ الْحَيَاةِ، وَأَفْضَلَ الْمَمَاتِ، وَثَبِّتْنِي، وَثَقِّلْ مَوَازِينِي، وَأَكْمِلْ إِيمَانِي، وَارْفَعْ دَرَجَاتِي، وَتَقَبَّلْ صَلَاتِي، وَاغْفِرْ خَطِيئَاتِي، وَأَسْأَلُكَ الدَّرَجَاتِ الْعُلَى مِنَ الْجَنَّةِ',
-    phonetic: 'Allāhumma innī asʾaluka afḍala l-masāʾil, wa afḍala d-duʿāʾ, wa afḍala n-najāḥ...',
+    phonetic: 'Allāhumma innī asʾaluka afḍala l-masāʾil, wa afḍala d-duʿāʾ, wa afḍala n-najāḥ, wa afḍala l-ʿilm, wa afḍala l-ʿamal, wa afḍala th-thawāb, wa afḍala l-ḥayāh, wa afḍala l-mamāt, wa thabbitnī, wa thaqqil mawāzīnī, wa akmil īmānī, warfaʿ darajātī, wa taqabbal ṣalātī, waghfir khaṭīʾātī, wa asʾaluka d-darajāti l-ʿulā mina l-jannah',
     translation: 'Ô Allah, je Te demande la meilleure requête, la meilleure invocation, la meilleure réussite, la meilleure science, la meilleure action, la plus belle récompense, la meilleure vie et la meilleure mort. Affermis-moi, alourdis mes balances, complète ma foi, élève mes degrés, accepte ma prière, pardonne mes fautes et accorde-moi les plus hauts degrés du Paradis.'
   },
   {
