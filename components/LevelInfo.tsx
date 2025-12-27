@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { ChevronLeft, Award, Trophy, Star, ShieldCheck, Zap, Heart, BookOpen } from 'lucide-react';
+import { ChevronLeft, Award, Trophy, Star, ShieldCheck, Zap, Heart, BookOpen, Share2 } from 'lucide-react';
 
 interface LevelInfoProps {
   currentLevel: number;
@@ -31,19 +31,44 @@ const GRADES: Grade[] = [
 ];
 
 const LevelInfo: React.FC<LevelInfoProps> = ({ currentLevel, currentXP, onBack }) => {
+  const currentGrade = GRADES.find(g => g.level === currentLevel);
+
+  const handleShare = () => {
+    const text = `Alhamdulillah ! Je viens d'atteindre le grade "${currentGrade?.name || 'Croyant'}" (Niveau ${currentLevel}) sur Deen Habits. 🌙✨ Rejoins-moi pour améliorer tes habitudes spirituelles ensemble !`;
+    if (navigator.share) {
+      navigator.share({
+        title: 'Ma Progression Deen Habits',
+        text: text,
+        url: window.location.href
+      }).catch(console.error);
+    } else {
+      navigator.clipboard.writeText(text);
+      alert("Lien et message copiés ! Partage-les avec tes amis.");
+    }
+  };
+
   return (
     <div className="space-y-6 animate-in slide-in-from-right duration-300 pb-10">
-      <div className="flex items-center gap-4">
-        <button onClick={onBack} className="p-2 hover:bg-white rounded-xl transition-colors text-slate-400">
-          <ChevronLeft className="w-6 h-6" />
+      <div className="flex items-center justify-between pr-2">
+        <div className="flex items-center gap-4">
+          <button onClick={onBack} className="p-2 hover:bg-white rounded-xl transition-colors text-slate-400">
+            <ChevronLeft className="w-6 h-6" />
+          </button>
+          <h2 className="text-2xl font-bold text-slate-800">Grades & Progression</h2>
+        </div>
+        <button 
+          onClick={handleShare}
+          className="p-3 bg-indigo-50 text-indigo-600 rounded-2xl hover:bg-indigo-100 transition-all shadow-sm flex items-center gap-2 group"
+        >
+          <Share2 className="w-5 h-5 group-hover:scale-110 transition-transform" />
+          <span className="text-xs font-bold hidden sm:inline">Partager</span>
         </button>
-        <h2 className="text-2xl font-bold text-slate-800">Grades & Progression</h2>
       </div>
 
       <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-3xl p-6 text-white shadow-xl relative overflow-hidden mb-8">
           <div className="absolute top-0 right-0 p-8 opacity-10 rotate-12"><Trophy className="w-32 h-32" /></div>
           <p className="text-slate-400 text-xs font-bold uppercase tracking-widest mb-1">Ton Grade Actuel</p>
-          <h3 className="text-3xl font-black mb-2">{GRADES.find(g => g.level === currentLevel)?.name || "Mubtadi"}</h3>
+          <h3 className="text-3xl font-black mb-2">{currentGrade?.name || "Mubtadi"}</h3>
           <div className="flex items-center gap-4 mt-4">
               <div className="bg-white/10 px-4 py-2 rounded-xl backdrop-blur-md">
                   <span className="text-[10px] text-slate-400 block uppercase font-bold">Total XP</span>
