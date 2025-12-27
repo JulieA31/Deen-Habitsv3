@@ -33,7 +33,7 @@ const INVOCATIONS_DATA: Invocation[] = [
     id: 'istikhara',
     category: 'Prière',
     title: 'Prière de Consultation (Istikhara)',
-    arabic: 'اللَّهُمَّ إِنِّي أَسْتَخِيرُكَ بِعِلْمِكَ وَأَسْتَقْدِرُكَ بِقُدْرَتِكَ، وَأَسْأَلُكَ مِنْ فَضْلِكَ الْعَظِيمِ، فَإِنَّكَ تَقْدِرُ وَلاَ أَقْدِرُ وَتَعْلَمُ وَلاَ أَعْلَمُ وَأَنْتَ عَلاَّمُ الْغُيُوبِ، اللَّهُمَّ إِنْ كُنْتَ تَعْلَمُ أَنَّ هَذَا الأَمْرَ خَيْرٌ لِي فِي دِينِي وَمَعَاشِي وَعَاقِبَةِ أَمْرِي فَاقْدُرْهُ لِي وَيَسِّرْهُ لِي ثُمَّ بَارِكْ لِي فِيهِ، وَإِنْ كُنْتَ تَعْلَمُ أَنَّ هَذَا الأَمْرَ شَرٌّ لِي فِي دِينِي وَمَعَاشِي وَعَاقِبَةِ أَمْرِي فَاصْرِفْهُ عَنِّي وَاصْرِفْنِي عَنْهُ، وَاقْدُرْ لِي الْخَيْرَ حَيْثُ كَانَ ثُمَّ أَرْضِنِي بِهِ',
+    arabic: 'اللَّهُمَّ إِنِّي أَسْتَخِيرُكَ بِعِلْمِكَ وَأَسْتَقْدِرُكَ بِقُدْرَتِكَ، وَأَسْأَلُكَ مِنْ فَضْلِكَ الْعَظِيمِ، فَإِنَّكَ تَقْدِرُ وَلاَ أَقْدِرُ وَتَعْلَمُ وَلاَ أَعْلَمُ وَأنتَ عَلاَّمُ الْغُيُوبِ، اللَّهُمَّ إِنْ كُنْتَ تَعْلَمُ أَنَّ هَذَا الأَمْرَ خَيْرٌ لِي فِي دِينِي وَمَعَاشِي وَعَاقِبَةِ أَمْرِي فَاقْدُرْهُ لِي وَيَسِّرْهُ لِي ثُمَّ بَارِكْ لِي فِيهِ، وَإِنْ كُنْتَ تَعْلَمُ أَنَّ هَذَا الأَمْرَ شَرٌّ لِي فِي دِينِي وَمَعَاشِي وَعَاقِبَةِ أَمْرِي فَاصْرِفْهُ عَنِّي وَاصْرِفْنِي عَنْهُ، وَاقْدُرْ لِي الْخَيْرَ حَيْثُ كَانَ ثُمَّ أَرْضِنِي بِهِ',
     phonetic: 'Allâhumma innî astakhîruka bi-cilmika wa astaqdiruka bi-qudratika, wa as\'aluka min fadlika-l-cazîm. Fa-innaka taqdiru wa lâ aqdiru, wa taclamu wa lâ aclamu, wa anta callâmu-l-ghuyûb. Allâhumma in kunta taclamu anna hâdhâ-l-amra (nommer l\'affaire ici) khayrun lî fî dînî wa macâshî wa câqibati amrî, fa-qdurhu lî wa yassirhu lî thumma bârik lî fîh. Wa in kunta taclamu anna hâdhâ-l-amra sharrun lî fî dînî wa macâshî wa câqibati amrî, fa-srifhu cannî wa srifnî canhu, wa qdur liya-l-khayra haythu kâna thumma ardinî bih.',
     translation: 'Seigneur Allah, je Te demande de me guider par Ton savoir et je cherche la capacité par Ton pouvoir et je Te demande de Ton immense grâce. Car certes Tu es Capable et je suis incapable, Tu sais et je ne sais pas et Tu es le Grand Connaisseur de l\'inconnu. Seigneur Allah, si Tu sais que cette affaire (la nommer) est un bien pour moi dans ma religion, ma vie mondaine et ma vie future, alors décrète-la pour moi, facilite-la-moi puis bénis-la pour moi. Et si Tu sais que cette affaire est un mal pour moi dans ma religion, ma vie mondaine et ma vie future, alors écarte-la de moi et écarte-moi d\'elle, et décrète pour moi le bien là où il se trouve puis rends-moi satisfait de cela.'
   },
@@ -46,12 +46,12 @@ const INVOCATIONS_DATA: Invocation[] = [
     translation: 'Je demande pardon à Allah (3 fois). Ô Allah, Tu es la Paix et la paix vient de Toi. Béni sois-Tu, Ô Possesseur de la Majesté et de la Noblesse.'
   },
 
-  // --- PARDON & REPENTIR (NOUVEAU) ---
+  // --- PARDON & REPENTIR ---
   {
     id: 'sayyid_istighfar',
     category: 'Pardon & Repentir',
     title: 'Demande de pardon',
-    arabic: 'اللَّهُمَّ أَنْتَ رَبِّي لَا إِلَهَ إِلَّا أَنْتَ، خَلَقْتَنِي وَأَنَا عَبْدُكَ، وَأَنَا عَلَى عَهْدِكَ وَوَعْدِكَ مَا اسْتَطَعْتُ، أَعُوذُ بِكَ مِنْ شَرِّ مَا صَنَعْتُ، أَبُوءُ لَكَ بِنِعْمَتِكَ عَلَيَّ، وَأَبُوءُ لَكَ بِذَنْبِي فَاغْفِرْ لِي، فَإِنَّهُ لَا يَغْفِرُ الذُّنُوبَ إِلَّا أَنْتَ',
+    arabic: 'اللَّهُمَّ أَنْتَ رَبِّي لَا إِلَهَ إِلَّا أنتَ، خَلَقْتَنِي وَأَنَا عَبْدُكَ، وَأَنَا عَلَى عَهْدِكَ وَوَعْدِكَ مَا اسْتَطَعْتُ، أَعُوذُ بِكَ مِنْ شَرِّ مَا صَنَعْتُ، أَبُوءُ لَكَ بِنِعْمَتِكَ عَلَيَّ، وَأَبُوءُ لَكَ بِذَنْبِي فَاغْفِرْ لِي، فَإِنَّهُ لَا يَغْفِرُ الذُّنُوبَ إِلَّا أَنْتَ',
     phonetic: 'Allāhumma anta rabbī lā ilāha illā ant, khalaqtanī wa anā ʾabduk, wa anā ʾalā ʾahdika wa wa’dika ma staṭa’t, a’ūdhu bika min charri mā ṣana’t, abūu laka bi-niʾmatika ʾalayy, wa abūu laka bi-dhanbī fa-ghfir lī, fa innahu lā yaghfiru dh-dhunūba illā ant',
     translation: 'Ô Allah, Tu es mon Seigneur, nul divinité autre que Toi. Tu m’as créé et je suis Ton serviteur. Je suis fidèle à Ton engagement et à Ta promesse tant que je le pourrai... Pardonne-moi donc, car personne d’autre que Toi ne pardonne les péchés.'
   },
@@ -93,7 +93,7 @@ const INVOCATIONS_DATA: Invocation[] = [
     id: '1',
     category: 'Protection',
     title: 'Protection totale (Matin/Soir)',
-    arabic: 'بِسْمِ اللَّهِ الَّذِي لَا يَضُرُّ مَعَ اسْمِهِ شَيْءٌ فِي الْأَرْضِ وَلَا فِي السَّمَاءِ وَهُوَ السَّمِيعُ الْعَلِيمُ',
+    arabic: 'بِسْمِ اللَّهِ الَّذِي لَا يَضُرُّ مَعَ اسْمِهِ شَيْءٌ فِي الْأَرْضِ وَلَا فِي السَّماءِ وَهُوَ السَّمِيعُ الْعَلِيمُ',
     phonetic: 'Bismillahil-ladhi la yadurru ma\'as-mihi shai\'un fil-ardi wa la fis-sama\'i, wa Huwas-Sami\'ul-\'Alim',
     translation: 'Au nom d\'Allah, tel qu\'en compagnie de Son Nom, rien sur Terre ni au ciel ne peut nuire, et Il est Celui qui entend tout et sait tout.'
   },
@@ -132,34 +132,10 @@ const INVOCATIONS_DATA: Invocation[] = [
     translation: 'Ô Allah, il n\'y a de facile que ce que Tu rends facile, et si Tu le veux, Tu peux rendre la tristesse (ou la difficulté) facile.'
   },
 
-  // --- QUOTIDIEN & SPIRITUALITÉ ---
-  {
-    id: 'coeur_ferme',
-    category: 'Quotidien & Spiritualité',
-    title: 'Pour la fermeté du cœur',
-    arabic: 'يَا مُقَلِّبَ الْقُلُوبِ ثَبِّتْ قَلْبِي عَلَى دِينِكَ',
-    phonetic: 'Yā muqalliba l-qulūbi thabbit qalbī ʾalā dīnik',
-    translation: 'Ô Toi qui fais osciller les cœurs ! Affermis mon cœur dans Ta religion.'
-  },
-  {
-    id: 'dunya_akhira',
-    category: 'Quotidien & Spiritualité',
-    title: 'Invocation complète (Dunya & Akhira)',
-    arabic: 'اللَّهُمَّ رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً، وَفِي الْآخِرَةِ حَسَنَةً، وَقِنَا عَذَابَ النَّارِ',
-    phonetic: 'Allāhumma rabbanā ātinā fi d-dunyā ḥasanah, wa fi l-ākhirati ḥasanah, wa qinā ʾadhāba n-nār',
-    translation: 'Ô Allah notre Seigneur ! Accorde-nous une belle part dans ce bas monde et une belle part dans l’au-delà, et préserve-nous du châtiment du Feu.'
-  },
-  {
-    id: 'rizq_halal',
-    category: 'Quotidien & Spiritualité',
-    title: 'Pour la subsistance licite',
-    arabic: 'اللَّهُمَّ اكْفِنِي بِحَلَالِكَ عَنْ حَرَامِكَ، وَأَغْنِنِي بِفَضْلِكَ عَمَّنْ سِوَاكَ',
-    phonetic: 'Allāhumma kfinī bi-ḥalālika ʾan ḥarāmik, wa ghninī bi-faḍlika ʾan siwāk',
-    translation: 'Ô Allah, fais que je me contente de ce que Tu as déclaré licite pour que je ne m’approche pas de ce que Tu as déclaré illicite et épargne-moi par Ta grâce de recourir à autre que Toi.'
-  },
+  // --- QUOTIDIEN ---
   {
     id: 'meal_before',
-    category: 'Quotidien & Spiritualité',
+    category: 'Quotidien',
     title: 'Avant de manger',
     arabic: 'بِسْمِ اللهِ',
     phonetic: 'Bismillah',
@@ -167,7 +143,7 @@ const INVOCATIONS_DATA: Invocation[] = [
   },
   {
     id: 'meal_after',
-    category: 'Quotidien & Spiritualité',
+    category: 'Quotidien',
     title: 'Après avoir mangé',
     arabic: 'الْحَمْدُ لِلَّهِ الَّذِي أَطْعَمَنَا وَسَقَانَا وَجَعَلَنَا مُسْلِمِينَ',
     phonetic: 'Al-hamdu lillahil-ladhi at\'amana wa saqana wa ja\'alana muslimin',
@@ -175,7 +151,7 @@ const INVOCATIONS_DATA: Invocation[] = [
   },
   {
     id: 'iftar',
-    category: 'Quotidien & Spiritualité',
+    category: 'Quotidien',
     title: 'Rupture du jeûne (Iftar)',
     arabic: 'ذَهَبَ الظَّمَأُ وَابْتَلَّتِ الْعُرُوقُ وَثَبَتَ الْأَجْرُ إِنْ شَاءَ اللَّهُ',
     phonetic: 'Dhahaba adh-dhama\'u wabtallatil-\'uruqu wa thabatal-ajru in sha\' Allah',
@@ -183,16 +159,41 @@ const INVOCATIONS_DATA: Invocation[] = [
   },
   {
     id: '3',
-    category: 'Quotidien & Spiritualité',
+    category: 'Quotidien',
     title: 'Avant de dormir',
     arabic: 'بِاسْمِكَ اللَّهُمَّ أَمُوتُ وَأَحْيَا',
     phonetic: 'Bismika Allahumma amutu wa ahya',
     translation: 'C\'est en Ton nom, ô Allah, que je meurs et que je vis.'
+  },
+
+  // --- SPIRITUALITÉ ---
+  {
+    id: 'coeur_ferme',
+    category: 'Spiritualité',
+    title: 'Pour la fermeté du cœur',
+    arabic: 'يَا مُقَلِّبَ الْقُلُوبِ ثَبِّتْ قَلْبِي عَلَى دِينِكَ',
+    phonetic: 'Yā muqalliba l-qulūbi thabbit qalbī ʾalā dīnik',
+    translation: 'Ô Toi qui fais osciller les cœurs ! Affermis mon cœur dans Ta religion.'
+  },
+  {
+    id: 'dunya_akhira',
+    category: 'Spiritualité',
+    title: 'Invocation complète (Dunya & Akhira)',
+    arabic: 'اللَّهُمَّ رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً، وَفِي الْآخِرَةِ حَسَنَةً، وَقِنَا عَذَابَ النَّارِ',
+    phonetic: 'Allāhumma rabbanā ātinā fi d-dunyā ḥasanah, wa fi l-ākhirati ḥasanah, wa qinā ʾadhāba n-nār',
+    translation: 'Ô Allah notre Seigneur ! Accorde-nous une belle part dans ce bas monde et une belle part dans l’au-delà, et préserve-nous du châtiment du Feu.'
+  },
+  {
+    id: 'rizq_halal',
+    category: 'Spiritualité',
+    title: 'Pour la subsistance licite',
+    arabic: 'اللَّهُمَّ اكْفِنِي بِحَلَالِكَ عَنْ حَرَامِكَ، وَأَغْنِنِي بِفَضْلِكَ عَمَّنْ سِوَاكَ',
+    phonetic: 'Allāhumma kfinī bi-ḥalālika ʾan ḥarāmik, wa ghninī bi-faḍlika ʾan siwāk',
+    translation: 'Ô Allah, fais que je me contente de ce que Tu as déclaré licite pour que je ne m’approche pas de ce que Tu as déclaré illicite et épargne-moi par Ta grâce de recourir à autre que Toi.'
   }
 ];
 
 const InvocationLibrary: React.FC = () => {
-  // Modification : Array vide par défaut pour que toutes les catégories soient fermées
   const [openCategories, setOpenCategories] = useState<string[]>([]);
 
   const toggleCategory = (category: string) => {
@@ -209,7 +210,8 @@ const InvocationLibrary: React.FC = () => {
       case 'Pardon & Repentir': return <RefreshCw className="w-4 h-4" />;
       case 'Difficulté & Apaisement': return <Cloud className="w-4 h-4" />;
       case 'Prière': return <Heart className="w-4 h-4" />;
-      case 'Quotidien & Spiritualité': return <Compass className="w-4 h-4" />;
+      case 'Quotidien': return <Sun className="w-4 h-4" />;
+      case 'Spiritualité': return <Sparkles className="w-4 h-4" />;
       default: return <BookOpen className="w-4 h-4" />;
     }
   };

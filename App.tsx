@@ -96,7 +96,10 @@ const App: React.FC = () => {
           if (fetchedTimes) setPrayerTimes(fetchedTimes);
           setPrayerLoading(false);
         },
-        () => setPrayerLoading(false)
+        () => {
+          setPrayerError("Activez la localisation");
+          setPrayerLoading(false);
+        }
       );
     }
   }, []);
@@ -310,28 +313,41 @@ const App: React.FC = () => {
                 </div>
             </button>
 
-            <div className="grid grid-cols-2 gap-4">
-                <button onClick={() => setView('stats')} className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm hover:bg-slate-50 transition-colors text-left group">
-                    <div className="flex justify-between items-start mb-2">
-                        <div className="text-3xl font-bold text-emerald-600">{getCompletionRate()}%</div>
-                        <div className="p-2 bg-emerald-50 text-emerald-600 rounded-lg group-hover:scale-110 transition-transform"><BarChart3 className="w-5 h-5" /></div>
-                    </div>
-                    <div className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Complétion du jour</div>
-                </button>
-                <button onClick={() => setView('qibla')} className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm hover:bg-slate-50 transition-colors text-left group">
-                    <div className="flex justify-between items-start mb-2">
-                        <div className="text-3xl font-bold text-slate-800"><Compass className="w-8 h-8 text-emerald-600" /></div>
-                    </div>
-                    <div className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Boussole Qibla</div>
-                </button>
-            </div>
+            {/* Grille d'accueil simplifiée : la complétion prend toute la largeur */}
+            <button onClick={() => setView('stats')} className="w-full bg-white p-6 rounded-2xl border border-slate-100 shadow-sm hover:bg-slate-50 transition-all text-left group flex items-center justify-between">
+                <div>
+                    <div className="text-[10px] text-slate-400 uppercase font-bold tracking-widest mb-1">Objectif du jour</div>
+                    <div className="text-3xl font-black text-emerald-600">{getCompletionRate()}% <span className="text-xs text-slate-400 font-medium">accompli</span></div>
+                </div>
+                <div className="p-4 bg-emerald-50 text-emerald-600 rounded-2xl group-hover:scale-110 transition-transform">
+                    <BarChart3 className="w-6 h-6" />
+                </div>
+            </button>
 
-            <PrayerTracker logs={prayerLogs} setLogs={setPrayerLogs} currentDate={currentDate} onUpdateXP={handleUpdateXP} prayerTimes={prayerTimes} prayerLoading={prayerLoading} prayerError={prayerError} userProfile={userProfile} onToggleNotification={() => {}} />
+            <PrayerTracker 
+              logs={prayerLogs} 
+              setLogs={setPrayerLogs} 
+              currentDate={currentDate} 
+              onUpdateXP={handleUpdateXP} 
+              prayerTimes={prayerTimes} 
+              prayerLoading={prayerLoading} 
+              prayerError={prayerError} 
+              userProfile={userProfile} 
+              onToggleNotification={() => {}} 
+              onOpenQibla={() => setView('qibla')} // Passé ici pour le bouton discret
+            />
           </div>
         )}
 
         {view === 'levels' && <LevelInfo currentLevel={userProfile.level} currentXP={userProfile.xp} onBack={() => setView('home')} />}
-        {view === 'qibla' && <QiblaCompass userLocation={currentLocation} />}
+        {view === 'qibla' && (
+          <div className="space-y-4">
+             <button onClick={() => setView('home')} className="flex items-center gap-2 text-slate-400 font-bold px-2 py-1 hover:text-slate-600 transition-colors">
+                <ChevronLeft className="w-5 h-5" /> Retour
+             </button>
+             <QiblaCompass userLocation={currentLocation} />
+          </div>
+        )}
         {view === 'tracker' && <HabitTracker habits={habits} logs={logs} setHabits={setHabits} setLogs={setLogs} currentDate={currentDate} onUpdateXP={handleUpdateXP} />}
         {view === 'invocations' && <InvocationLibrary />}
         {view === 'tasbih' && <TasbihCounter />}
