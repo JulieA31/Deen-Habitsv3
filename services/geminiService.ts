@@ -2,8 +2,17 @@
 import { GoogleGenAI, Chat } from "@google/genai";
 
 export const createChatSession = (userName: string): Chat => {
-  // Use process.env.API_KEY exclusively as per guidelines to resolve the ImportMeta error.
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+
+  const apiKey = import.meta.env.VITE_API_KEY;
+  if (!apiKey) {
+
+    throw new Error("Clé API manquante dans l'environnement (process.env.API_KEY)");
+
+  }
+
+
+
+  const ai = new GoogleGenAI({ apiKey });
   
   const systemInstruction = `
     Tu es "Coach Deen", un assistant spirituel musulman bienveillant, sage et empathique.
