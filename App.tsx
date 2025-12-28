@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { LayoutGrid, BarChart3, MessageSquare, BookOpen, Home, Trophy, Star, User, Zap, ChevronLeft, Loader2 } from 'lucide-react';
+import { LayoutGrid, BarChart3, MessageSquare, BookOpen, Home, Trophy, Star, User, Zap, ChevronLeft, Loader2, ChevronRight } from 'lucide-react';
 
 import { Habit, HabitLog, ViewMode, PrayerLog, UserProfile } from './types';
 import HabitTracker from './components/HabitTracker';
@@ -126,7 +126,7 @@ const App: React.FC = () => {
   };
 
   const NavButton = ({ target, icon: Icon, label }: { target: ViewMode, icon: any, label: string }) => (
-    <button onClick={() => setView(target)} className={`flex flex-col items-center gap-1 p-2 px-3 rounded-2xl transition-all shrink-0 min-w-[80px] ${view === target ? 'text-emerald-600 bg-emerald-50 scale-105 shadow-sm border border-emerald-100/50' : 'text-slate-400 hover:text-slate-600'}`}>
+    <button onClick={() => setView(target)} className={`flex flex-col items-center gap-1 p-2 px-3 rounded-2xl transition-all shrink-0 min-w-[85px] ${view === target ? 'text-emerald-600 bg-emerald-50 scale-105 shadow-sm border border-emerald-100/50' : 'text-slate-400 hover:text-slate-600'}`}>
       <Icon className={`w-5 h-5 ${view === target ? 'stroke-[2px]' : ''}`} />
       <span className={`text-[10px] uppercase tracking-tighter text-center leading-none ${view === target ? 'font-bold' : 'font-semibold'}`}>{label}</span>
     </button>
@@ -180,17 +180,18 @@ const App: React.FC = () => {
                <p className="text-lg italic mt-3 font-serif leading-relaxed">"{currentHadith}"</p>
             </div>
 
-            {/* Section Progression XP - Mise à jour avec barre */}
+            {/* Section Progression XP */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <button onClick={() => setView('levels')} className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm text-left group">
                     <div className="flex justify-between items-end mb-2">
                         <div>
                             <div className="text-[10px] text-slate-400 uppercase font-bold mb-1 tracking-widest">Grade actuel</div>
-                            <div className="text-2xl font-black text-emerald-600">Niveau {userProfile?.level || 1}</div>
+                            {/* Police allégée (semibold au lieu de black) */}
+                            <div className="text-2xl font-semibold text-emerald-600">Niveau {userProfile?.level || 1}</div>
                         </div>
                         <div className="text-right">
-                             <div className="text-[10px] text-slate-400 uppercase font-bold mb-1 tracking-widest">Progression</div>
-                             <div className="text-sm font-bold text-slate-600">{userProfile?.xp} <span className="text-slate-300">/ {getNextLevelXPThreshold()} XP</span></div>
+                             <div className="text-[10px] text-slate-400 uppercase font-bold mb-1 tracking-widest">Points</div>
+                             <div className="text-sm font-semibold text-slate-600">{userProfile?.xp} <span className="text-slate-300 font-normal">/ {getNextLevelXPThreshold()}</span></div>
                         </div>
                     </div>
                     {/* Barre de progression XP */}
@@ -202,19 +203,20 @@ const App: React.FC = () => {
                     </div>
                     <div className="flex justify-between items-center">
                         <span className="text-[10px] text-slate-400 font-bold uppercase">Prochain Grade</span>
-                        <span className="text-[10px] text-emerald-600 font-black uppercase">-{getNextLevelXPThreshold() - (userProfile?.xp || 0)} XP restants</span>
+                        <span className="text-[10px] text-emerald-600 font-bold uppercase">-{getNextLevelXPThreshold() - (userProfile?.xp || 0)} XP</span>
                     </div>
                 </button>
 
                 <button onClick={() => setView('stats')} className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm text-left flex flex-col justify-center">
                     <div className="text-[10px] text-slate-400 uppercase font-bold mb-1 tracking-widest">Objectif du jour</div>
                     <div className="flex items-center justify-between">
-                        <div className="text-4xl font-black text-emerald-600">{getCompletionRate()}%</div>
+                        {/* Police allégée (medium au lieu de black) */}
+                        <div className="text-4xl font-medium text-emerald-600 tracking-tight">{getCompletionRate()}%</div>
                         <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center">
                             <BarChart3 className="w-6 h-6" />
                         </div>
                     </div>
-                    <p className="text-[10px] text-slate-400 mt-2 font-medium">Validé aujourd'hui</p>
+                    <p className="text-[10px] text-slate-400 mt-2 font-medium">Réussi aujourd'hui</p>
                 </button>
             </div>
 
@@ -236,13 +238,24 @@ const App: React.FC = () => {
         </div>
       </main>
 
-      {/* Barre de navigation mobile scrollable */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xl border-t border-slate-100 p-2 z-50 flex overflow-x-auto no-scrollbar justify-start md:justify-center items-center gap-1 px-4 safe-area-bottom">
-         <NavButton target="home" icon={Home} label="Accueil" />
-         {mainNavItems.map(item => (
-            <NavButton key={item.id} target={item.id as ViewMode} icon={item.icon} label={item.label} />
-         ))}
-      </nav>
+      {/* Barre de navigation mobile scrollable avec indicateur de fondu */}
+      <div className="fixed bottom-0 left-0 right-0 z-50">
+          <div className="relative bg-white/95 backdrop-blur-xl border-t border-slate-100 safe-area-bottom overflow-hidden">
+             <nav className="flex overflow-x-auto no-scrollbar justify-start items-center gap-1 px-4 py-2 relative">
+                <NavButton target="home" icon={Home} label="Accueil" />
+                {mainNavItems.map(item => (
+                   <NavButton key={item.id} target={item.id as ViewMode} icon={item.icon} label={item.label} />
+                ))}
+                {/* Spacer final pour assurer que le dernier élément ne soit pas collé au bord lors du scroll */}
+                <div className="shrink-0 w-8"></div>
+             </nav>
+             
+             {/* Indicateur de défilement (Fondu à droite) */}
+             <div className="absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-white via-white/40 to-transparent pointer-events-none flex items-center justify-end pr-1 opacity-90">
+                <ChevronRight className="w-4 h-4 text-slate-300 animate-pulse mr-1" />
+             </div>
+          </div>
+      </div>
       
       <style>{`
         .no-scrollbar::-webkit-scrollbar { display: none; }
