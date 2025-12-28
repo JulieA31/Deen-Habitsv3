@@ -78,15 +78,29 @@ const PrayerTracker: React.FC<PrayerTrackerProps> = ({
         </div>
       </div>
 
+      {/* Alerte Géolocalisation */}
+      {!prayerTimes && !prayerLoading && (
+        <div className="mb-4 bg-amber-50 border border-amber-100 p-4 rounded-xl flex items-start gap-3 relative z-10">
+            <div className="bg-amber-100 p-2 rounded-lg text-amber-600">
+                <MapPin className="w-5 h-5" />
+            </div>
+            <div>
+                <p className="text-sm font-bold text-amber-900">Activez la géolocalisation</p>
+                <p className="text-xs text-amber-700 mt-0.5 leading-relaxed">
+                    Nous avons besoin de votre position pour calculer précisément les horaires de prière de votre ville.
+                </p>
+            </div>
+        </div>
+      )}
+
       <div className="space-y-3 relative z-10">
-        {PRAYER_NAMES.map((prayer, index) => {
+        {PRAYER_NAMES.map((prayer) => {
           const status = logs[currentDate]?.[prayer] || 'none';
           const time = prayerTimes ? prayerTimes[prayer] : '--:--';
           const isNotificationEnabled = userProfile?.prayerNotifications?.[prayer] || false;
 
           const elements = [];
 
-          // Ajouter Fajr
           elements.push(
             <div key={prayer} className="flex flex-col gap-3 p-3 rounded-xl bg-slate-50 border border-slate-100 hover:border-slate-200 transition-colors">
               <div className="flex items-center justify-between w-full">
@@ -119,7 +133,6 @@ const PrayerTracker: React.FC<PrayerTrackerProps> = ({
             </div>
           );
 
-          // Ajouter le Lever du soleil juste après le Fajr
           if (prayer === 'Fajr' && prayerTimes?.Sunrise) {
             elements.push(
               <div key="sunrise" className="flex items-center justify-between p-3 rounded-xl border border-dashed border-amber-200 bg-amber-50/30">
