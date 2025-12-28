@@ -2,12 +2,7 @@
 import { GoogleGenAI, Chat } from "@google/genai";
 
 export const createChatSession = (userName: string): Chat => {
-  // Check if API key is present
-  if (!process.env.API_KEY) {
-    throw new Error("Clé API manquante dans l'environnement (process.env.API_KEY)");
-  }
-
-  // Use process.env.API_KEY directly when initializing the client instance as required.
+  // Use process.env.API_KEY exclusively as per guidelines to resolve the ImportMeta error.
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   
   const systemInstruction = `

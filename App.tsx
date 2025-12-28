@@ -198,7 +198,7 @@ const App: React.FC = () => {
   const NavButton = ({ target, icon: Icon, label }: { target: ViewMode, icon: any, label: string }) => (
     <button onClick={() => setView(target)} className={`flex flex-col items-center gap-1 p-2 px-3 rounded-2xl transition-all shrink-0 ${view === target ? 'text-emerald-600 bg-emerald-50 scale-105 shadow-sm border border-emerald-100/50' : 'text-slate-400 hover:text-slate-600'}`}>
       <Icon className={`w-5 h-5 ${view === target ? 'stroke-[2.5px]' : ''}`} />
-      <span className={`text-[10px] uppercase tracking-tighter ${view === target ? 'font-black' : 'font-bold'}`}>{label}</span>
+      <span className={`text-[10px] uppercase tracking-tighter ${view === target ? 'font-bold' : 'font-semibold'}`}>{label}</span>
     </button>
   );
 
@@ -254,12 +254,12 @@ const App: React.FC = () => {
       <aside className="hidden md:flex flex-col w-64 fixed left-0 top-0 bottom-0 bg-white border-r border-slate-200 px-4 py-8 z-50">
         <div className="flex items-center gap-3 px-4 mb-12 cursor-pointer group" onClick={() => setView('home')}>
           <div className="bg-emerald-100 p-1.5 rounded-lg group-hover:scale-110 transition-transform"><img src="/logo.png" className="w-6 h-6" /></div>
-          <span className="text-xl font-black tracking-tight">DeenHabits</span>
+          <span className="text-xl font-bold tracking-tight">DeenHabits</span>
         </div>
         <nav className="space-y-1">
           {mainNavItems.map((item) => (
              <button key={item.id} onClick={() => setView(item.id as ViewMode)} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all ${view === item.id ? 'bg-emerald-50 text-emerald-700 shadow-sm border border-emerald-100/50' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'}`}>
-                <item.icon className={`w-5 h-5 ${view === item.id ? 'stroke-[2.5px]' : ''}`} /> {item.label}
+                <item.icon className={`w-5 h-5 ${view === item.id ? 'stroke-[2px]' : ''}`} /> {item.label}
              </button>
           ))}
         </nav>
@@ -268,19 +268,19 @@ const App: React.FC = () => {
       <main className="md:ml-64 p-4 md:p-8 max-w-3xl mx-auto min-h-screen">
         {view === 'home' && (
           <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
-            {/* User Header - Simplifié */}
+            {/* User Header - Simplifié et harmonisé */}
             <div className="flex items-center justify-between px-1">
                 <div>
-                    <h2 className="text-2xl font-black text-slate-800">Salam, {userProfile.name}</h2>
+                    <h2 className="text-2xl font-bold text-slate-800">Salam, {userProfile.name}</h2>
                 </div>
                 <button onClick={() => setView('profile')} className="w-12 h-12 bg-white rounded-2xl border border-slate-100 flex items-center justify-center text-emerald-600 shadow-sm hover:scale-110 transition-transform group">
-                    <User className="w-6 h-6 group-hover:stroke-[2.5px]" />
+                    <User className="w-6 h-6 group-hover:stroke-[2px]" />
                 </button>
             </div>
 
             <div className="bg-gradient-to-r from-emerald-600 to-teal-600 rounded-3xl p-6 text-white shadow-xl relative overflow-hidden group">
                <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:rotate-12 transition-transform duration-500"><Star className="w-24 h-24" /></div>
-               <span className="text-[10px] font-black uppercase opacity-60 tracking-[0.2em]">Hadith du jour</span>
+               <span className="text-[10px] font-bold uppercase opacity-60 tracking-[0.2em]">Hadith du jour</span>
                <p className="text-lg italic mt-3 font-serif leading-relaxed pr-8">"{currentHadith}"</p>
             </div>
 
@@ -295,10 +295,10 @@ const App: React.FC = () => {
                                 <Trophy className="w-6 h-6" />
                             </div>
                             <div>
-                                <h3 className="font-black text-slate-800 text-base">Niveau {userProfile.level}</h3>
+                                <h3 className="font-bold text-slate-800 text-base">Niveau {userProfile.level}</h3>
                                 <div className="mt-1">
-                                    <span className="text-xl font-black text-emerald-600 leading-none">{userProfile.xp}</span>
-                                    <span className="text-[10px] text-slate-400 font-black uppercase tracking-widest ml-1.5">XP acquis</span>
+                                    <span className="text-2xl font-bold text-emerald-600 leading-none">{userProfile.xp}</span>
+                                    <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest ml-1.5">XP acquis</span>
                                 </div>
                             </div>
                         </div>
@@ -313,8 +313,8 @@ const App: React.FC = () => {
                 {/* Accès aux Stats via l'Objectif Quotidien */}
                 <button onClick={() => setView('stats')} className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm hover:border-emerald-300 transition-all text-left group flex items-center justify-between">
                     <div>
-                        <div className="text-[10px] text-slate-400 uppercase font-black tracking-widest mb-1">Objectif Quotidien</div>
-                        <div className="text-3xl font-black text-emerald-600">{getCompletionRate()}% <span className="text-[10px] text-slate-400 font-black uppercase tracking-tight">Fait</span></div>
+                        <div className="text-[10px] text-slate-400 uppercase font-bold tracking-widest mb-1">Objectif Quotidien</div>
+                        <div className="text-3xl font-bold text-emerald-600">{getCompletionRate()}% <span className="text-[10px] text-slate-400 font-bold uppercase tracking-tight">Fait</span></div>
                     </div>
                     <div className="p-4 bg-emerald-50 text-emerald-600 rounded-2xl group-hover:rotate-12 transition-transform shadow-sm shadow-emerald-100">
                         <BarChart3 className="w-6 h-6" />

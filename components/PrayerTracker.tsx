@@ -57,7 +57,7 @@ const PrayerTracker: React.FC<PrayerTrackerProps> = ({
       <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-50 rounded-full -mr-12 -mt-12 opacity-50 -z-0"></div>
 
       <div className="flex items-center justify-between mb-4 relative z-10">
-        <h3 className="font-black text-slate-800 flex items-center gap-2">
+        <h3 className="font-bold text-slate-800 flex items-center gap-2">
             <Clock className="w-5 h-5 text-emerald-600" /> Horaires de Prière
         </h3>
         
@@ -65,7 +65,7 @@ const PrayerTracker: React.FC<PrayerTrackerProps> = ({
             {onOpenQibla && (
                 <button 
                     onClick={onOpenQibla}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-700 rounded-full border border-emerald-100 text-[10px] font-black uppercase tracking-wider hover:bg-emerald-100 transition-colors shadow-sm"
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-700 rounded-full border border-emerald-100 text-[10px] font-bold uppercase tracking-wider hover:bg-emerald-100 transition-colors shadow-sm"
                 >
                     <Compass className="w-3.5 h-3.5" />
                     Boussole
@@ -103,20 +103,20 @@ const PrayerTracker: React.FC<PrayerTrackerProps> = ({
                   <div className="flex items-center gap-3">
                     <div className={`w-1.5 h-8 rounded-full ${status === 'on_time' ? 'bg-emerald-500' : status === 'late' ? 'bg-amber-500' : status === 'missed' ? 'bg-red-500' : 'bg-slate-200'}`}></div>
                     <div>
-                        <span className="font-black text-slate-700 text-sm uppercase tracking-tight">{prayer}</span>
-                        <span className="text-[10px] text-slate-400 font-black block tracking-widest">{time}</span>
+                        <span className="font-bold text-slate-700 text-sm uppercase tracking-tight">{prayer}</span>
+                        <span className="text-[10px] text-slate-400 font-bold block tracking-widest">{time}</span>
                     </div>
                   </div>
               </div>
               
               <div className="grid grid-cols-3 gap-1.5 w-full">
-                <button onClick={() => handlePrayerAction(prayer, 'on_time')} className={`px-1 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-tight transition-all flex items-center justify-center gap-1 whitespace-nowrap ${status === 'on_time' ? 'bg-emerald-600 text-white shadow-md shadow-emerald-100' : 'bg-white text-slate-500 border border-slate-200 hover:border-emerald-200'}`}>
+                <button onClick={() => handlePrayerAction(prayer, 'on_time')} className={`px-1 py-2.5 rounded-xl text-[10px] font-semibold uppercase tracking-tight transition-all flex items-center justify-center gap-1 whitespace-nowrap ${status === 'on_time' ? 'bg-emerald-600 text-white shadow-md shadow-emerald-100' : 'bg-white text-slate-500 border border-slate-200 hover:border-emerald-200'}`}>
                   <CheckCircle2 className="w-3.5 h-3.5" /> À l'heure
                 </button>
-                <button onClick={() => handlePrayerAction(prayer, 'late')} className={`px-1 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-tight transition-all flex items-center justify-center gap-1 whitespace-nowrap ${status === 'late' ? 'bg-amber-500 text-white shadow-md shadow-amber-100' : 'bg-white text-slate-500 border border-slate-200 hover:border-amber-200'}`}>
+                <button onClick={() => handlePrayerAction(prayer, 'late')} className={`px-1 py-2.5 rounded-xl text-[10px] font-semibold uppercase tracking-tight transition-all flex items-center justify-center gap-1 whitespace-nowrap ${status === 'late' ? 'bg-amber-500 text-white shadow-md shadow-amber-100' : 'bg-white text-slate-500 border border-slate-200 hover:border-amber-200'}`}>
                   <AlertCircle className="w-3.5 h-3.5" /> Tard
                 </button>
-                <button onClick={() => handlePrayerAction(prayer, 'missed')} className={`px-1 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-tight transition-all flex items-center justify-center gap-1 whitespace-nowrap ${status === 'missed' ? 'bg-red-500 text-white shadow-md shadow-red-100' : 'bg-white text-slate-500 border border-slate-200 hover:border-red-200'}`}>
+                <button onClick={() => handlePrayerAction(prayer, 'missed')} className={`px-1 py-2.5 rounded-xl text-[10px] font-semibold uppercase tracking-tight transition-all flex items-center justify-center gap-1 whitespace-nowrap ${status === 'missed' ? 'bg-red-500 text-white shadow-md shadow-red-100' : 'bg-white text-slate-500 border border-slate-200 hover:border-red-200'}`}>
                   <XCircle className="w-3.5 h-3.5" /> Ratée
                 </button>
               </div>
@@ -131,11 +131,11 @@ const PrayerTracker: React.FC<PrayerTrackerProps> = ({
                     <Sun className="w-4 h-4" />
                   </div>
                   <div>
-                    <span className="text-[10px] font-black uppercase tracking-tight text-amber-800">Lever du soleil</span>
-                    <span className="text-[10px] text-amber-600 block font-black">{prayerTimes.Sunrise}</span>
+                    <span className="text-[10px] font-bold uppercase tracking-tight text-amber-800">Lever du soleil</span>
+                    <span className="text-[10px] text-amber-600 block font-bold">{prayerTimes.Sunrise}</span>
                   </div>
                 </div>
-                <span className="text-[8px] font-black uppercase tracking-widest text-amber-600/50">Fin Fajr</span>
+                <span className="text-[8px] font-bold uppercase tracking-widest text-amber-600/50">Fin Fajr</span>
               </div>
             );
           }
