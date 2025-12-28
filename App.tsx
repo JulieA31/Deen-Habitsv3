@@ -197,7 +197,7 @@ const App: React.FC = () => {
 
   const NavButton = ({ target, icon: Icon, label }: { target: ViewMode, icon: any, label: string }) => (
     <button onClick={() => setView(target)} className={`flex flex-col items-center gap-1 p-2 px-3 rounded-2xl transition-all shrink-0 ${view === target ? 'text-emerald-600 bg-emerald-50 scale-105 shadow-sm border border-emerald-100/50' : 'text-slate-400 hover:text-slate-600'}`}>
-      <Icon className={`w-5 h-5 ${view === target ? 'stroke-[2.5px]' : ''}`} />
+      <Icon className={`w-5 h-5 ${view === target ? 'stroke-[2px]' : ''}`} />
       <span className={`text-[10px] uppercase tracking-tighter ${view === target ? 'font-bold' : 'font-semibold'}`}>{label}</span>
     </button>
   );
@@ -239,9 +239,8 @@ const App: React.FC = () => {
     );
   }
 
-  // Liste épurée des onglets de navigation (Sidebar & Mobile)
+  // Liste épurée pour la navigation (sans Home car il passe dans le header)
   const mainNavItems = [
-    { id: 'home', icon: Home, label: 'Accueil' },
     { id: 'coach', icon: MessageSquare, label: 'Coach IA' },
     { id: 'tracker', icon: LayoutGrid, label: 'Habitudes' },
     { id: 'invocations', icon: BookOpen, label: 'Douas' },
@@ -257,6 +256,9 @@ const App: React.FC = () => {
           <span className="text-xl font-bold tracking-tight">DeenHabits</span>
         </div>
         <nav className="space-y-1">
+          <button onClick={() => setView('home')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all ${view === 'home' ? 'bg-emerald-50 text-emerald-700 shadow-sm border border-emerald-100/50' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'}`}>
+            <Home className={`w-5 h-5 ${view === 'home' ? 'stroke-[2px]' : ''}`} /> Accueil
+          </button>
           {mainNavItems.map((item) => (
              <button key={item.id} onClick={() => setView(item.id as ViewMode)} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all ${view === item.id ? 'bg-emerald-50 text-emerald-700 shadow-sm border border-emerald-100/50' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'}`}>
                 <item.icon className={`w-5 h-5 ${view === item.id ? 'stroke-[2px]' : ''}`} /> {item.label}
@@ -266,18 +268,29 @@ const App: React.FC = () => {
       </aside>
 
       <main className="md:ml-64 p-4 md:p-8 max-w-3xl mx-auto min-h-screen">
+        {/* Header Unifié - Avec bouton Home et Profile */}
+        <div className="flex items-center justify-between px-1 mb-6">
+            <div className="flex items-center gap-3">
+                <button 
+                  onClick={() => setView('home')} 
+                  className={`w-12 h-12 rounded-2xl border flex items-center justify-center transition-all shadow-sm active:scale-95 ${view === 'home' ? 'bg-emerald-600 text-white border-emerald-500 shadow-emerald-100' : 'bg-white text-emerald-600 border-slate-100 hover:border-emerald-100'}`}
+                >
+                    <Home className="w-6 h-6" />
+                </button>
+                {view === 'home' && (
+                    <h2 className="text-xl font-bold text-slate-800 hidden sm:block">Salam, {userProfile.name}</h2>
+                )}
+            </div>
+            <button 
+                onClick={() => setView('profile')} 
+                className={`w-12 h-12 rounded-2xl border flex items-center justify-center transition-all shadow-sm active:scale-95 group ${view === 'profile' ? 'bg-slate-800 text-white border-slate-700 shadow-slate-100' : 'bg-white text-slate-500 border-slate-100 hover:border-slate-200'}`}
+            >
+                <User className="w-6 h-6" />
+            </button>
+        </div>
+
         {view === 'home' && (
           <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
-            {/* User Header - Simplifié et harmonisé */}
-            <div className="flex items-center justify-between px-1">
-                <div>
-                    <h2 className="text-2xl font-bold text-slate-800">Salam, {userProfile.name}</h2>
-                </div>
-                <button onClick={() => setView('profile')} className="w-12 h-12 bg-white rounded-2xl border border-slate-100 flex items-center justify-center text-emerald-600 shadow-sm hover:scale-110 transition-transform group">
-                    <User className="w-6 h-6 group-hover:stroke-[2px]" />
-                </button>
-            </div>
-
             <div className="bg-gradient-to-r from-emerald-600 to-teal-600 rounded-3xl p-6 text-white shadow-xl relative overflow-hidden group">
                <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:rotate-12 transition-transform duration-500"><Star className="w-24 h-24" /></div>
                <span className="text-[10px] font-bold uppercase opacity-60 tracking-[0.2em]">Hadith du jour</span>
@@ -354,8 +367,8 @@ const App: React.FC = () => {
         {view === 'profile' && <Profile userProfile={userProfile} setUserProfile={setUserProfile} onBack={() => setView('home')} />}
       </main>
 
-      {/* Barre de navigation mobile simplifiée à 6 éléments */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-lg border-t border-slate-100 p-2 z-50 shadow-[0_-8px_30px_rgb(0,0,0,0.08)] flex justify-between items-center gap-1 px-4 safe-area-bottom">
+      {/* Barre de navigation mobile épurée avec 5 éléments (Défis inclus) */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-lg border-t border-slate-100 p-2 z-50 shadow-[0_-8px_30px_rgb(0,0,0,0.08)] flex justify-around items-center gap-1 px-4 safe-area-bottom">
          {mainNavItems.map(item => (
             <NavButton key={item.id} target={item.id as ViewMode} icon={item.icon} label={item.label} />
          ))}
