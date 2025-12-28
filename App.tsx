@@ -1,29 +1,22 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { LayoutGrid, BarChart3, MessageSquare, BookOpen, Home, Trophy, Star, LogIn, ArrowRight, User, Trash2, Bell, Shield, Volume2, Play, CreditCard, Loader2, GripHorizontal, CloudOff, Cloud, Mail, Lock, AlertCircle, ChevronLeft, Eye, EyeOff, Share2, RefreshCw, Edit2, Save, X, Compass, Zap, ChevronRight, Award } from 'lucide-react';
+import { LayoutGrid, BarChart3, MessageSquare, BookOpen, Home, Trophy, Star, LogIn, User, Bell, Compass, Zap, ChevronLeft, Eye, EyeOff, ChevronRight, Loader2 } from 'lucide-react';
 
-import { Habit, HabitLog, ViewMode, PrayerLog, UserProfile, PRAYER_NAMES, Challenge } from './types';
+import { Habit, HabitLog, ViewMode, PrayerLog, UserProfile, PRAYER_NAMES } from './types';
 import HabitTracker from './components/HabitTracker';
 import DeenCoach from './components/DeenCoach';
 import Analytics from './components/Analytics';
 import PrayerTracker from './components/PrayerTracker';
 import InvocationLibrary from './components/InvocationLibrary';
 import TasbihCounter from './components/TasbihCounter';
-import PremiumModal from './components/PremiumModal';
-import PrivacyPolicy from './components/PrivacyPolicy';
 import Challenges from './components/Challenges';
 import QiblaCompass from './components/QiblaCompass';
 import LevelInfo from './components/LevelInfo';
+import Profile from './components/Profile';
 import { getPrayerTimes, PrayerTimes } from './services/prayerService';
 
 // Firebase Imports
-import { auth, db, firebase } from './services/firebase';
-
-// Audio Assets
-const SOUND_URLS = {
-  beep: 'https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3',
-  adhan: 'https://www.islamcan.com/audio/adhan/azan1.mp3' 
-};
+import { auth, db } from './services/firebase';
 
 const HADITHS = [
   "La pureté est la moitié de la foi.",
@@ -48,12 +41,6 @@ const DEFAULT_HABITS: Habit[] = [
 
 const App: React.FC = () => {
   const [currentHadith, setCurrentHadith] = useState('');
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const [isPlayingSound, setIsPlayingSound] = useState(false);
-  
-  const [showPremiumModal, setShowPremiumModal] = useState(false);
-  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
-  
   const [habits, setHabits] = useState<Habit[]>(DEFAULT_HABITS);
   const [logs, setLogs] = useState<HabitLog>({});
   const [prayerLogs, setPrayerLogs] = useState<PrayerLog>({});
@@ -155,6 +142,7 @@ const App: React.FC = () => {
     e.preventDefault();
     if (!auth) return;
     setIsDataLoading(true);
+    setAuthError('');
     try {
         if (isSignUpMode) {
             const userCredential = await auth.createUserWithEmailAndPassword(authEmail, authPassword);
@@ -171,7 +159,9 @@ const App: React.FC = () => {
             await auth.signInWithEmailAndPassword(authEmail, authPassword);
         }
         setView('home');
-    } catch (error: any) { setAuthError("Erreur d'authentification."); }
+    } catch (error: any) { 
+        setAuthError(error.message || "Erreur d'authentification."); 
+    }
     finally { setIsDataLoading(false); }
   };
 
@@ -229,6 +219,7 @@ const App: React.FC = () => {
                 <div className="z-10 bg-white p-8 rounded-3xl shadow-2xl w-full max-w-sm border border-slate-100">
                     <button onClick={() => setShowWelcomeScreen(true)} className="text-xs font-bold mb-4 uppercase flex items-center gap-1 text-slate-500"><ChevronLeft className="w-4 h-4"/> Retour</button>
                     <h1 className="text-2xl font-bold mb-6 text-slate-800">{isSignUpMode ? 'Inscription' : 'Connexion'}</h1>
+                    {authError && <div className="p-3 mb-4 bg-red-50 text-red-600 text-xs rounded-xl border border-red-100">{authError}</div>}
                     <form onSubmit={handleAuthAction} className="space-y-4">
                         {isSignUpMode && <input type="text" required value={authName} onChange={(e) => setAuthName(e.target.value)} className="w-full p-3 border rounded-xl text-slate-800" placeholder="Prénom" />}
                         <input type="email" required value={authEmail} onChange={(e) => setAuthEmail(e.target.value)} className="w-full p-3 border rounded-xl text-slate-800" placeholder="Email" />
@@ -255,10 +246,11 @@ const App: React.FC = () => {
         <nav className="space-y-1">
           {[
             { id: 'home', icon: Home, label: 'Accueil' },
+            { id: 'coach', icon: MessageSquare, label: 'Coach IA' },
             { id: 'tracker', icon: LayoutGrid, label: 'Habitudes' },
             { id: 'qibla', icon: Compass, label: 'Qibla' },
             { id: 'invocations', icon: BookOpen, label: 'Invocations' },
-            { id: 'tasbih', icon: GripHorizontal, label: 'Tasbih' },
+            { id: 'tasbih', icon: Zap, label: 'Tasbih' },
             { id: 'challenges', icon: Trophy, label: 'Défis' },
             { id: 'stats', icon: BarChart3, label: 'Stats' },
             { id: 'profile', icon: User, label: 'Profil' }
@@ -279,7 +271,6 @@ const App: React.FC = () => {
                <p className="text-lg italic mt-3 font-serif leading-relaxed">"{currentHadith}"</p>
             </div>
 
-            {/* Dashboard cliquable */}
             <button 
                 onClick={() => setView('levels')}
                 className="w-full bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-4 text-left hover:border-emerald-300 transition-all group"
@@ -297,9 +288,6 @@ const App: React.FC = () => {
                             <p className="text-xs text-slate-400 font-medium">{userProfile.xp} XP au total</p>
                         </div>
                     </div>
-                    <div className="text-right">
-                        <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-lg uppercase tracking-wider">Voir les grades</span>
-                    </div>
                 </div>
                 
                 <div className="space-y-2">
@@ -313,7 +301,6 @@ const App: React.FC = () => {
                 </div>
             </button>
 
-            {/* Grille d'accueil simplifiée : la complétion prend toute la largeur */}
             <button onClick={() => setView('stats')} className="w-full bg-white p-6 rounded-2xl border border-slate-100 shadow-sm hover:bg-slate-50 transition-all text-left group flex items-center justify-between">
                 <div>
                     <div className="text-[10px] text-slate-400 uppercase font-bold tracking-widest mb-1">Objectif du jour</div>
@@ -334,7 +321,7 @@ const App: React.FC = () => {
               prayerError={prayerError} 
               userProfile={userProfile} 
               onToggleNotification={() => {}} 
-              onOpenQibla={() => setView('qibla')} // Passé ici pour le bouton discret
+              onOpenQibla={() => setView('qibla')}
             />
           </div>
         )}
@@ -348,25 +335,21 @@ const App: React.FC = () => {
              <QiblaCompass userLocation={currentLocation} />
           </div>
         )}
+        {view === 'coach' && <DeenCoach userProfile={userProfile} onSubscribe={() => {}} />}
         {view === 'tracker' && <HabitTracker habits={habits} logs={logs} setHabits={setHabits} setLogs={setLogs} currentDate={currentDate} onUpdateXP={handleUpdateXP} />}
         {view === 'invocations' && <InvocationLibrary />}
         {view === 'tasbih' && <TasbihCounter />}
         {view === 'challenges' && <Challenges userProfile={userProfile} onUpdateXP={handleUpdateXP} onToggleChallenge={() => {}} onStartChallenge={() => {}} onCreateChallenge={() => {}} onDeleteChallenge={() => {}} />}
         {view === 'stats' && <Analytics habits={habits} logs={logs} prayerLogs={prayerLogs} userProfile={userProfile} />}
-        {view === 'profile' && (
-            <div className="max-w-lg mx-auto space-y-6">
-                 <button onClick={() => setView('home')} className="w-full p-4 bg-white border rounded-xl flex items-center gap-3 text-slate-600 font-bold"><Home className="w-5 h-5" /> Retour à l'accueil</button>
-                 <button onClick={() => auth?.signOut()} className="w-full p-4 bg-white border rounded-xl flex items-center gap-3 text-red-600 font-bold"><LogIn className="w-5 h-5 rotate-180" /> Déconnexion</button>
-            </div>
-        )}
+        {view === 'profile' && <Profile userProfile={userProfile} setUserProfile={setUserProfile} onBack={() => setView('home')} />}
       </main>
 
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t p-2 flex justify-around items-center z-50 shadow-md">
          <NavButton target="home" icon={Home} label="Accueil" />
+         <NavButton target="coach" icon={MessageSquare} label="Coach" />
          <NavButton target="tracker" icon={LayoutGrid} label="Habitudes" />
          <NavButton target="invocations" icon={BookOpen} label="Douas" />
-         <NavButton target="challenges" icon={Trophy} label="Défis" />
-         <NavButton target="tasbih" icon={GripHorizontal} label="Tasbih" />
+         <NavButton target="profile" icon={User} label="Profil" />
       </nav>
     </div>
   );
