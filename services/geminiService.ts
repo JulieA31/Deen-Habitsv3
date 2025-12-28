@@ -2,13 +2,14 @@
 import { GoogleGenAI, Chat } from "@google/genai";
 
 export const createChatSession = (userName: string): Chat => {
-
-  const apiKey = import.meta.env.VITE_API_KEY;
+  // Utilisation de process.env.API_KEY pour assurer la compatibilité avec l'environnement de déploiement
+  const apiKey = process.env.API_KEY;
+  
   if (!apiKey) {
-
     throw new Error("Clé API manquante dans l'environnement (process.env.API_KEY)");
-
   }
+
+  const ai = new GoogleGenAI({ apiKey });
   
   const systemInstruction = `
     Tu es "Coach Deen", un assistant spirituel musulman bienveillant, sage et empathique.
@@ -23,6 +24,8 @@ export const createChatSession = (userName: string): Chat => {
     6. Tu peux utiliser des émojis pour rendre la conversation chaleureuse.
   `;
 
+  // Fix: Removed the incorrect and asynchronous call to ai.models.generateContent which was missing the required 'contents' property.
+  // Instead, we directly create and return a chat session using ai.chats.create, which is the standard way to handle chat states.
   return ai.chats.create({
     model: 'gemini-3-flash-preview',
     config: {

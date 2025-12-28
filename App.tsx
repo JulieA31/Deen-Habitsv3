@@ -268,25 +268,35 @@ const App: React.FC = () => {
       </aside>
 
       <main className="md:ml-64 p-4 md:p-8 max-w-3xl mx-auto min-h-screen">
-        {/* Header Unifié - Avec bouton Home et Profile */}
+        {/* Header Unifié - Conditionnel selon la vue */}
         <div className="flex items-center justify-between px-1 mb-6">
             <div className="flex items-center gap-3">
-                <button 
-                  onClick={() => setView('home')} 
-                  className={`w-12 h-12 rounded-2xl border flex items-center justify-center transition-all shadow-sm active:scale-95 ${view === 'home' ? 'bg-emerald-600 text-white border-emerald-500 shadow-emerald-100' : 'bg-white text-emerald-600 border-slate-100 hover:border-emerald-100'}`}
-                >
-                    <Home className="w-6 h-6" />
-                </button>
-                {view === 'home' && (
-                    <h2 className="text-xl font-bold text-slate-800 hidden sm:block">Salam, {userProfile.name}</h2>
+                {view === 'home' ? (
+                    <button 
+                      onClick={() => setView('home')} 
+                      className="text-2xl font-bold text-emerald-600 tracking-tight hover:opacity-80 transition-opacity"
+                    >
+                      Deen Habits
+                    </button>
+                ) : (
+                    <button 
+                      onClick={() => setView('home')} 
+                      className="flex items-center gap-2 text-emerald-600 font-bold hover:bg-emerald-50 px-3 py-2 rounded-xl transition-all active:scale-95"
+                    >
+                        <ChevronLeft className="w-5 h-5" />
+                        <span>revenir à l'accueil</span>
+                    </button>
                 )}
             </div>
-            <button 
-                onClick={() => setView('profile')} 
-                className={`w-12 h-12 rounded-2xl border flex items-center justify-center transition-all shadow-sm active:scale-95 group ${view === 'profile' ? 'bg-slate-800 text-white border-slate-700 shadow-slate-100' : 'bg-white text-slate-500 border-slate-100 hover:border-slate-200'}`}
-            >
-                <User className="w-6 h-6" />
-            </button>
+            
+            {view === 'home' && (
+                <button 
+                    onClick={() => setView('profile')} 
+                    className="w-12 h-12 rounded-2xl border bg-white text-slate-500 border-slate-100 hover:border-emerald-200 flex items-center justify-center transition-all shadow-sm active:scale-95 group"
+                >
+                    <User className="w-6 h-6" />
+                </button>
+            )}
         </div>
 
         {view === 'home' && (
