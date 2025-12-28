@@ -196,7 +196,7 @@ const App: React.FC = () => {
   };
 
   const NavButton = ({ target, icon: Icon, label }: { target: ViewMode, icon: any, label: string }) => (
-    <button onClick={() => setView(target)} className={`flex flex-col items-center gap-1 p-2 px-4 rounded-2xl transition-all shrink-0 ${view === target ? 'text-emerald-600 bg-emerald-50 scale-105' : 'text-slate-400 hover:text-slate-600'}`}>
+    <button onClick={() => setView(target)} className={`flex flex-col items-center gap-1 p-2 px-3 rounded-2xl transition-all shrink-0 ${view === target ? 'text-emerald-600 bg-emerald-50 scale-105 shadow-sm border border-emerald-100/50' : 'text-slate-400 hover:text-slate-600'}`}>
       <Icon className={`w-5 h-5 ${view === target ? 'stroke-[2.5px]' : ''}`} />
       <span className={`text-[10px] uppercase tracking-tighter ${view === target ? 'font-black' : 'font-bold'}`}>{label}</span>
     </button>
@@ -239,6 +239,16 @@ const App: React.FC = () => {
     );
   }
 
+  // Liste épurée des onglets de navigation (Sidebar & Mobile)
+  const mainNavItems = [
+    { id: 'home', icon: Home, label: 'Accueil' },
+    { id: 'coach', icon: MessageSquare, label: 'Coach IA' },
+    { id: 'tracker', icon: LayoutGrid, label: 'Habitudes' },
+    { id: 'invocations', icon: BookOpen, label: 'Douas' },
+    { id: 'tasbih', icon: Zap, label: 'Tasbih' },
+    { id: 'challenges', icon: Trophy, label: 'Défis' }
+  ];
+
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 pb-24 md:pb-0 font-sans">
       <aside className="hidden md:flex flex-col w-64 fixed left-0 top-0 bottom-0 bg-white border-r border-slate-200 px-4 py-8 z-50">
@@ -247,17 +257,7 @@ const App: React.FC = () => {
           <span className="text-xl font-black tracking-tight">DeenHabits</span>
         </div>
         <nav className="space-y-1">
-          {[
-            { id: 'home', icon: Home, label: 'Accueil' },
-            { id: 'coach', icon: MessageSquare, label: 'Coach IA' },
-            { id: 'tracker', icon: LayoutGrid, label: 'Habitudes' },
-            { id: 'qibla', icon: Compass, label: 'Qibla' },
-            { id: 'invocations', icon: BookOpen, label: 'Invocations' },
-            { id: 'tasbih', icon: Zap, label: 'Tasbih' },
-            { id: 'challenges', icon: Trophy, label: 'Défis' },
-            { id: 'stats', icon: BarChart3, label: 'Stats' },
-            { id: 'profile', icon: User, label: 'Mon Profil' }
-          ].map((item) => (
+          {mainNavItems.map((item) => (
              <button key={item.id} onClick={() => setView(item.id as ViewMode)} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all ${view === item.id ? 'bg-emerald-50 text-emerald-700 shadow-sm border border-emerald-100/50' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'}`}>
                 <item.icon className={`w-5 h-5 ${view === item.id ? 'stroke-[2.5px]' : ''}`} /> {item.label}
              </button>
@@ -268,14 +268,13 @@ const App: React.FC = () => {
       <main className="md:ml-64 p-4 md:p-8 max-w-3xl mx-auto min-h-screen">
         {view === 'home' && (
           <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
-            {/* User Header */}
+            {/* User Header - Simplifié */}
             <div className="flex items-center justify-between px-1">
                 <div>
                     <h2 className="text-2xl font-black text-slate-800">Salam, {userProfile.name}</h2>
-                    <p className="text-slate-400 text-sm font-medium">Bon retour parmi nous.</p>
                 </div>
-                <button onClick={() => setView('profile')} className="w-12 h-12 bg-white rounded-2xl border border-slate-100 flex items-center justify-center text-emerald-600 shadow-sm hover:scale-110 transition-transform">
-                    <User className="w-6 h-6" />
+                <button onClick={() => setView('profile')} className="w-12 h-12 bg-white rounded-2xl border border-slate-100 flex items-center justify-center text-emerald-600 shadow-sm hover:scale-110 transition-transform group">
+                    <User className="w-6 h-6 group-hover:stroke-[2.5px]" />
                 </button>
             </div>
 
@@ -297,7 +296,10 @@ const App: React.FC = () => {
                             </div>
                             <div>
                                 <h3 className="font-black text-slate-800 text-base">Niveau {userProfile.level}</h3>
-                                <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">{userProfile.xp} XP acquis</p>
+                                <div className="mt-1">
+                                    <span className="text-xl font-black text-emerald-600 leading-none">{userProfile.xp}</span>
+                                    <span className="text-[10px] text-slate-400 font-black uppercase tracking-widest ml-1.5">XP acquis</span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -308,6 +310,7 @@ const App: React.FC = () => {
                     </div>
                 </button>
 
+                {/* Accès aux Stats via l'Objectif Quotidien */}
                 <button onClick={() => setView('stats')} className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm hover:border-emerald-300 transition-all text-left group flex items-center justify-between">
                     <div>
                         <div className="text-[10px] text-slate-400 uppercase font-black tracking-widest mb-1">Objectif Quotidien</div>
@@ -351,16 +354,11 @@ const App: React.FC = () => {
         {view === 'profile' && <Profile userProfile={userProfile} setUserProfile={setUserProfile} onBack={() => setView('home')} />}
       </main>
 
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-lg border-t border-slate-100 p-2 z-50 shadow-[0_-8px_30px_rgb(0,0,0,0.08)] flex overflow-x-auto scrollbar-hide flex-nowrap gap-2 px-4 safe-area-bottom">
-         <NavButton target="home" icon={Home} label="Accueil" />
-         <NavButton target="coach" icon={MessageSquare} label="Coach" />
-         <NavButton target="tracker" icon={LayoutGrid} label="Habitudes" />
-         <NavButton target="invocations" icon={BookOpen} label="Douas" />
-         <NavButton target="tasbih" icon={Zap} label="Tasbih" />
-         <NavButton target="challenges" icon={Trophy} label="Défis" />
-         <NavButton target="qibla" icon={Compass} label="Qibla" />
-         <NavButton target="stats" icon={BarChart3} label="Stats" />
-         <NavButton target="profile" icon={User} label="Profil" />
+      {/* Barre de navigation mobile simplifiée à 6 éléments */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-lg border-t border-slate-100 p-2 z-50 shadow-[0_-8px_30px_rgb(0,0,0,0.08)] flex justify-between items-center gap-1 px-4 safe-area-bottom">
+         {mainNavItems.map(item => (
+            <NavButton key={item.id} target={item.id as ViewMode} icon={item.icon} label={item.label} />
+         ))}
       </nav>
     </div>
   );
