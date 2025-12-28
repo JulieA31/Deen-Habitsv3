@@ -196,9 +196,9 @@ const App: React.FC = () => {
   };
 
   const NavButton = ({ target, icon: Icon, label }: { target: ViewMode, icon: any, label: string }) => (
-    <button onClick={() => setView(target)} className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all min-w-[60px] ${view === target ? 'text-emerald-600 bg-emerald-50 scale-105 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}>
+    <button onClick={() => setView(target)} className={`flex flex-col items-center gap-1 p-2 px-4 rounded-2xl transition-all shrink-0 ${view === target ? 'text-emerald-600 bg-emerald-50 scale-105' : 'text-slate-400 hover:text-slate-600'}`}>
       <Icon className={`w-5 h-5 ${view === target ? 'stroke-[2.5px]' : ''}`} />
-      <span className={`text-[10px] ${view === target ? 'font-black' : 'font-medium'}`}>{label}</span>
+      <span className={`text-[10px] uppercase tracking-tighter ${view === target ? 'font-black' : 'font-bold'}`}>{label}</span>
     </button>
   );
 
@@ -328,7 +328,6 @@ const App: React.FC = () => {
               prayerLoading={prayerLoading} 
               prayerError={prayerError} 
               userProfile={userProfile} 
-              onToggleNotification={() => {}} 
               onOpenQibla={() => setView('qibla')}
             />
           </div>
@@ -352,11 +351,15 @@ const App: React.FC = () => {
         {view === 'profile' && <Profile userProfile={userProfile} setUserProfile={setUserProfile} onBack={() => setView('home')} />}
       </main>
 
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-lg border-t border-slate-100 p-2 flex justify-around items-center z-50 shadow-2xl safe-area-bottom">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-lg border-t border-slate-100 p-2 z-50 shadow-[0_-8px_30px_rgb(0,0,0,0.08)] flex overflow-x-auto scrollbar-hide flex-nowrap gap-2 px-4 safe-area-bottom">
          <NavButton target="home" icon={Home} label="Accueil" />
          <NavButton target="coach" icon={MessageSquare} label="Coach" />
          <NavButton target="tracker" icon={LayoutGrid} label="Habitudes" />
          <NavButton target="invocations" icon={BookOpen} label="Douas" />
+         <NavButton target="tasbih" icon={Zap} label="Tasbih" />
+         <NavButton target="challenges" icon={Trophy} label="Défis" />
+         <NavButton target="qibla" icon={Compass} label="Qibla" />
+         <NavButton target="stats" icon={BarChart3} label="Stats" />
          <NavButton target="profile" icon={User} label="Profil" />
       </nav>
     </div>
