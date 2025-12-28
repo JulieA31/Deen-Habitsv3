@@ -8,10 +8,6 @@ import { Chat } from '@google/genai';
 interface DeenCoachProps {
   userProfile: UserProfile;
   onSubscribe: () => void;
-  habits?: any;
-  logs?: any;
-  prayerLogs?: any;
-  currentDate?: string;
 }
 
 const DeenCoach: React.FC<DeenCoachProps> = ({ userProfile, onSubscribe }) => {
@@ -30,7 +26,6 @@ const DeenCoach: React.FC<DeenCoachProps> = ({ userProfile, onSubscribe }) => {
   const chatSessionRef = useRef<Chat | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Initialisation du chat pour TOUS les utilisateurs (Mode Test)
   useEffect(() => {
     if (!chatSessionRef.current) {
       try {
@@ -38,12 +33,11 @@ const DeenCoach: React.FC<DeenCoachProps> = ({ userProfile, onSubscribe }) => {
         setInitError(null);
       } catch (error: any) {
         console.error("Erreur d'initialisation du Coach:", error);
-        setInitError("Impossible de démarrer le Coach IA. Vérifiez que la clé API (VITE_API_KEY) est bien configurée dans Vercel.");
+        setInitError("Le Coach IA est actuellement indisponible. Vérifiez la configuration de la clé API sur le serveur.");
       }
     }
   }, [userProfile.name]);
 
-  // Scroll automatique vers le bas
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
@@ -51,8 +45,7 @@ const DeenCoach: React.FC<DeenCoachProps> = ({ userProfile, onSubscribe }) => {
   const handleSendMessage = async (e?: React.FormEvent) => {
     e?.preventDefault();
 
-    if (!inputValue.trim()) return;
-    if (initError) return;
+    if (!inputValue.trim() || initError || isLoading) return;
 
     const newUserMessage: ChatMessage = {
       id: Date.now().toString(),
@@ -68,7 +61,6 @@ const DeenCoach: React.FC<DeenCoachProps> = ({ userProfile, onSubscribe }) => {
     try {
       if (chatSessionRef.current) {
         const result = await chatSessionRef.current.sendMessage({ message: newUserMessage.text });
-        
         const aiResponseText = result.text || "Désolé, je n'ai pas pu formuler de réponse. Réessayez plus tard.";
 
         const newAiMessage: ChatMessage = {
@@ -80,7 +72,7 @@ const DeenCoach: React.FC<DeenCoachProps> = ({ userProfile, onSubscribe }) => {
 
         setMessages(prev => [...prev, newAiMessage]);
       } else {
-        throw new Error("Session de chat non initialisée");
+        throw new Error("Session non initialisée");
       }
     } catch (error) {
       console.error("Erreur Chat:", error);
@@ -97,37 +89,34 @@ const DeenCoach: React.FC<DeenCoachProps> = ({ userProfile, onSubscribe }) => {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-120px)] md:h-[600px] md:max-h-[800px] bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-200 relative">
+    <div className="flex flex-col h-[calc(100vh-140px)] md:h-[650px] bg-white rounded-3xl shadow-xl overflow-hidden border border-slate-100 relative">
       
       {/* Header */}
-      <div className="bg-emerald-900 p-4 flex items-center justify-between shadow-md z-10">
+      <div className="bg-emerald-900 p-4 flex items-center justify-between shadow-lg z-10">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-emerald-700 rounded-full flex items-center justify-center border-2 border-emerald-500">
+          <div className="w-10 h-10 bg-emerald-700 rounded-2xl flex items-center justify-center border border-emerald-500/30">
             <Sparkles className="w-5 h-5 text-yellow-300" />
           </div>
           <div>
-            <h2 className="text-white font-bold flex items-center gap-2">
-              Coach Deen IA
-            </h2>
-            <p className="text-emerald-200 text-xs">Basé sur le Coran & la Sunna</p>
+            <h2 className="text-white font-bold text-sm md:text-base">Coach Deen IA</h2>
+            <p className="text-emerald-300 text-[10px] uppercase tracking-wider font-bold">Expertise Spirituelle</p>
           </div>
         </div>
         {!userProfile.isPremium && (
-          <button onClick={onSubscribe} className="text-xs bg-yellow-400 text-emerald-900 px-3 py-1.5 rounded-full font-bold flex items-center gap-1 hover:bg-yellow-300 transition-colors opacity-80" title="Abonnement optionnel">
-            <Crown className="w-3 h-3" /> Premium
+          <button onClick={onSubscribe} className="text-[10px] bg-white/10 text-white px-3 py-1.5 rounded-full font-bold flex items-center gap-1 hover:bg-white/20 transition-colors">
+            <Crown className="w-3 h-3 text-yellow-400" /> PRO
           </button>
         )}
       </div>
 
       {/* Messages Area */}
       <div className="flex-1 overflow-y-auto p-4 bg-slate-50 space-y-4">
-        
         {initError && (
-          <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex items-start gap-3 text-red-700">
+          <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-start gap-3 text-amber-800">
              <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5" />
              <div>
-               <h3 className="font-bold text-sm">Erreur de Configuration</h3>
-               <p className="text-xs mt-1">{initError}</p>
+               <h3 className="font-bold text-sm">Service indisponible</h3>
+               <p className="text-xs mt-1 leading-relaxed">{initError}</p>
              </div>
           </div>
         )}
@@ -135,10 +124,10 @@ const DeenCoach: React.FC<DeenCoachProps> = ({ userProfile, onSubscribe }) => {
         {messages.map((msg) => {
           const isUser = msg.role === 'user';
           return (
-            <div key={msg.id} className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
-                <div className={`max-w-[90%] md:max-w-[85%] p-3.5 rounded-2xl text-sm leading-relaxed shadow-sm ${
+            <div key={msg.id} className={`flex ${isUser ? 'justify-end' : 'justify-start'} animate-in slide-in-from-bottom-2`}>
+                <div className={`max-w-[85%] p-4 rounded-2xl text-sm leading-relaxed shadow-sm ${
                   isUser 
-                    ? 'bg-slate-800 text-white rounded-tr-none' 
+                    ? 'bg-emerald-600 text-white rounded-tr-none' 
                     : 'bg-white text-slate-800 border border-slate-100 rounded-tl-none'
                 }`}>
                   {msg.text}
@@ -150,7 +139,7 @@ const DeenCoach: React.FC<DeenCoachProps> = ({ userProfile, onSubscribe }) => {
         {isLoading && (
           <div className="flex justify-start">
               <div className="bg-white p-4 rounded-2xl rounded-tl-none border border-slate-100 shadow-sm">
-                <div className="flex gap-1">
+                <div className="flex gap-1.5">
                   <span className="w-2 h-2 bg-emerald-400 rounded-full animate-bounce [animation-delay:-0.3s]"></span>
                   <span className="w-2 h-2 bg-emerald-400 rounded-full animate-bounce [animation-delay:-0.15s]"></span>
                   <span className="w-2 h-2 bg-emerald-400 rounded-full animate-bounce"></span>
@@ -168,20 +157,20 @@ const DeenCoach: React.FC<DeenCoachProps> = ({ userProfile, onSubscribe }) => {
             type="text"
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
-            placeholder={initError ? "Service indisponible" : "Posez une question spirituelle..."}
+            placeholder={initError ? "Coach hors-ligne" : "Écrivez votre message..."}
             disabled={isLoading || !!initError}
-            className="flex-1 p-3 pr-12 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed text-slate-800 placeholder:text-slate-400"
+            className="flex-1 p-3.5 pr-14 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-emerald-500 disabled:opacity-50 text-slate-800"
           />
           <button
             type="submit"
             disabled={isLoading || !inputValue.trim() || !!initError}
-            className="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 disabled:bg-slate-300 disabled:cursor-not-allowed transition-colors"
+            className="absolute right-2 top-1/2 -translate-y-1/2 p-2.5 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 disabled:bg-slate-300 transition-all active:scale-95"
           >
-            {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+            {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
           </button>
         </form>
-        <p className="text-[10px] text-center text-slate-400 mt-2">
-          L'IA peut commettre des erreurs. Vérifiez toujours les informations importantes auprès d'un savant.
+        <p className="text-[10px] text-center text-slate-400 mt-3">
+          Conseils spirituels basés sur la sagesse islamique.
         </p>
       </div>
     </div>

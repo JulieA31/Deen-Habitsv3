@@ -177,8 +177,11 @@ const App: React.FC = () => {
 
   const getCompletionRate = () => {
       if (!userProfile) return 0;
-      const total = habits.filter(h => h.frequency.length === 0 || h.frequency.includes(new Date().getDay())).length + 5;
-      const done = habits.filter(h => logs[currentDate]?.[h.id]).length + (prayerLogs[currentDate] ? Object.values(prayerLogs[currentDate]).filter(s => s === 'on_time' || s === 'late').length : 0);
+      const todayHabitsCount = habits.filter(h => h.frequency.length === 0 || h.frequency.includes(new Date().getDay())).length;
+      const total = todayHabitsCount + 5; // Habitudes + 5 prières
+      const doneHabits = habits.filter(h => logs[currentDate]?.[h.id]).length;
+      const donePrayers = prayerLogs[currentDate] ? Object.values(prayerLogs[currentDate]).filter(s => s === 'on_time' || s === 'late').length : 0;
+      const done = doneHabits + donePrayers;
       return Math.round((done / total) * 100) || 0;
   };
 
@@ -193,13 +196,13 @@ const App: React.FC = () => {
   };
 
   const NavButton = ({ target, icon: Icon, label }: { target: ViewMode, icon: any, label: string }) => (
-    <button onClick={() => setView(target)} className={`flex flex-col items-center gap-1 p-2 rounded-lg transition-colors min-w-[55px] ${view === target ? 'text-emerald-600 bg-emerald-50' : 'text-slate-400 hover:text-slate-600'}`}>
-      <Icon className="w-5 h-5" />
-      <span className="text-[10px] font-medium">{label}</span>
+    <button onClick={() => setView(target)} className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all min-w-[60px] ${view === target ? 'text-emerald-600 bg-emerald-50 scale-105 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}>
+      <Icon className={`w-5 h-5 ${view === target ? 'stroke-[2.5px]' : ''}`} />
+      <span className={`text-[10px] ${view === target ? 'font-black' : 'font-medium'}`}>{label}</span>
     </button>
   );
 
-  if (isDataLoading) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="animate-spin text-emerald-600" /></div>;
+  if (isDataLoading) return <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-slate-50"><Loader2 className="animate-spin text-emerald-600 w-10 h-10" /><p className="text-slate-400 font-medium">Chargement de votre Deen...</p></div>;
 
   if (!userProfile || view === 'auth') {
     return (
@@ -210,26 +213,26 @@ const App: React.FC = () => {
                     <img src="/logo.png" alt="Logo" className="w-20 h-20 mx-auto mb-6" />
                     <h1 className="text-2xl font-bold text-center mb-6 text-slate-800">Salam Alaykum</h1>
                     <form onSubmit={(e) => { e.preventDefault(); if (authName.trim()) setShowWelcomeScreen(false); setIsSignUpMode(true); }} className="space-y-4">
-                        <input type="text" required value={authName} onChange={(e) => setAuthName(e.target.value)} className="w-full p-3 border rounded-xl text-slate-800" placeholder="Ton Prénom" />
-                        <button type="submit" className="w-full bg-emerald-600 text-white py-3 rounded-xl font-bold">C'est parti</button>
+                        <input type="text" required value={authName} onChange={(e) => setAuthName(e.target.value)} className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-slate-800" placeholder="Ton Prénom" />
+                        <button type="submit" className="w-full bg-emerald-600 text-white py-4 rounded-2xl font-bold shadow-lg shadow-emerald-100 hover:bg-emerald-700 transition-all">C'est parti</button>
                     </form>
-                    <button onClick={() => { setShowWelcomeScreen(false); setIsSignUpMode(false); }} className="w-full mt-4 text-sm text-slate-400">J'ai déjà un compte</button>
+                    <button onClick={() => { setShowWelcomeScreen(false); setIsSignUpMode(false); }} className="w-full mt-6 text-sm text-slate-400 font-medium hover:text-emerald-600 transition-colors">J'ai déjà un compte</button>
                  </div>
             ) : (
                 <div className="z-10 bg-white p-8 rounded-3xl shadow-2xl w-full max-w-sm border border-slate-100">
-                    <button onClick={() => setShowWelcomeScreen(true)} className="text-xs font-bold mb-4 uppercase flex items-center gap-1 text-slate-500"><ChevronLeft className="w-4 h-4"/> Retour</button>
+                    <button onClick={() => setShowWelcomeScreen(true)} className="text-xs font-bold mb-6 uppercase flex items-center gap-1 text-slate-500 hover:text-emerald-600 transition-colors"><ChevronLeft className="w-4 h-4"/> Retour</button>
                     <h1 className="text-2xl font-bold mb-6 text-slate-800">{isSignUpMode ? 'Inscription' : 'Connexion'}</h1>
                     {authError && <div className="p-3 mb-4 bg-red-50 text-red-600 text-xs rounded-xl border border-red-100">{authError}</div>}
                     <form onSubmit={handleAuthAction} className="space-y-4">
-                        {isSignUpMode && <input type="text" required value={authName} onChange={(e) => setAuthName(e.target.value)} className="w-full p-3 border rounded-xl text-slate-800" placeholder="Prénom" />}
-                        <input type="email" required value={authEmail} onChange={(e) => setAuthEmail(e.target.value)} className="w-full p-3 border rounded-xl text-slate-800" placeholder="Email" />
+                        {isSignUpMode && <input type="text" required value={authName} onChange={(e) => setAuthName(e.target.value)} className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-slate-800" placeholder="Prénom" />}
+                        <input type="email" required value={authEmail} onChange={(e) => setAuthEmail(e.target.value)} className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-slate-800" placeholder="Email" />
                         <div className="relative">
-                            <input type={showPassword ? "text" : "password"} required value={authPassword} onChange={(e) => setAuthPassword(e.target.value)} className="w-full p-3 border rounded-xl text-slate-800" placeholder="Mot de passe" />
-                            <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">{showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}</button>
+                            <input type={showPassword ? "text" : "password"} required value={authPassword} onChange={(e) => setAuthPassword(e.target.value)} className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-slate-800" placeholder="Mot de passe" />
+                            <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400">{showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}</button>
                         </div>
-                        <button type="submit" className="w-full bg-emerald-600 text-white py-3 rounded-xl font-bold shadow-lg">{isSignUpMode ? 'Créer mon compte' : 'Se connecter'}</button>
+                        <button type="submit" className="w-full bg-emerald-600 text-white py-4 rounded-2xl font-bold shadow-lg shadow-emerald-100 hover:bg-emerald-700 transition-all">{isSignUpMode ? 'Créer mon compte' : 'Se connecter'}</button>
                     </form>
-                    <button onClick={() => setIsSignUpMode(!isSignUpMode)} className="w-full mt-6 text-sm text-slate-500">{isSignUpMode ? "Déjà un compte ?" : "Pas encore de compte ?"}</button>
+                    <button onClick={() => setIsSignUpMode(!isSignUpMode)} className="w-full mt-6 text-sm text-slate-500 font-medium hover:text-emerald-600 transition-colors">{isSignUpMode ? "Déjà un compte ?" : "Pas encore de compte ?"}</button>
                 </div>
             )}
         </div>
@@ -239,9 +242,9 @@ const App: React.FC = () => {
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 pb-24 md:pb-0 font-sans">
       <aside className="hidden md:flex flex-col w-64 fixed left-0 top-0 bottom-0 bg-white border-r border-slate-200 px-4 py-8 z-50">
-        <div className="flex items-center gap-3 px-4 mb-12 cursor-pointer" onClick={() => setView('home')}>
-          <img src="/logo.png" className="w-8 h-8" />
-          <span className="text-xl font-bold">DeenHabits</span>
+        <div className="flex items-center gap-3 px-4 mb-12 cursor-pointer group" onClick={() => setView('home')}>
+          <div className="bg-emerald-100 p-1.5 rounded-lg group-hover:scale-110 transition-transform"><img src="/logo.png" className="w-6 h-6" /></div>
+          <span className="text-xl font-black tracking-tight">DeenHabits</span>
         </div>
         <nav className="space-y-1">
           {[
@@ -253,10 +256,10 @@ const App: React.FC = () => {
             { id: 'tasbih', icon: Zap, label: 'Tasbih' },
             { id: 'challenges', icon: Trophy, label: 'Défis' },
             { id: 'stats', icon: BarChart3, label: 'Stats' },
-            { id: 'profile', icon: User, label: 'Profil' }
+            { id: 'profile', icon: User, label: 'Mon Profil' }
           ].map((item) => (
-             <button key={item.id} onClick={() => setView(item.id as ViewMode)} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium ${view === item.id ? 'bg-emerald-50 text-emerald-700' : 'text-slate-500 hover:bg-slate-50'}`}>
-                <item.icon className="w-5 h-5" /> {item.label}
+             <button key={item.id} onClick={() => setView(item.id as ViewMode)} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all ${view === item.id ? 'bg-emerald-50 text-emerald-700 shadow-sm border border-emerald-100/50' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'}`}>
+                <item.icon className={`w-5 h-5 ${view === item.id ? 'stroke-[2.5px]' : ''}`} /> {item.label}
              </button>
           ))}
         </nav>
@@ -264,52 +267,57 @@ const App: React.FC = () => {
 
       <main className="md:ml-64 p-4 md:p-8 max-w-3xl mx-auto min-h-screen">
         {view === 'home' && (
-          <div className="space-y-6 animate-in fade-in duration-300">
-            <div className="bg-gradient-to-r from-emerald-600 to-teal-600 rounded-2xl p-6 text-white shadow-lg relative overflow-hidden">
-               <div className="absolute top-0 right-0 p-4 opacity-10"><Star className="w-20 h-20" /></div>
-               <span className="text-xs font-bold uppercase opacity-80 tracking-widest">Hadith du jour</span>
-               <p className="text-lg italic mt-3 font-serif leading-relaxed">"{currentHadith}"</p>
+          <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+            {/* User Header */}
+            <div className="flex items-center justify-between px-1">
+                <div>
+                    <h2 className="text-2xl font-black text-slate-800">Salam, {userProfile.name}</h2>
+                    <p className="text-slate-400 text-sm font-medium">Bon retour parmi nous.</p>
+                </div>
+                <button onClick={() => setView('profile')} className="w-12 h-12 bg-white rounded-2xl border border-slate-100 flex items-center justify-center text-emerald-600 shadow-sm hover:scale-110 transition-transform">
+                    <User className="w-6 h-6" />
+                </button>
             </div>
 
-            <button 
-                onClick={() => setView('levels')}
-                className="w-full bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-4 text-left hover:border-emerald-300 transition-all group"
-            >
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 bg-yellow-50 text-yellow-600 rounded-xl flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
-                            <Trophy className="w-6 h-6" />
-                        </div>
-                        <div>
-                            <h3 className="font-bold text-slate-800 text-lg flex items-center gap-2">
-                                Niveau {userProfile.level} 
-                                <ChevronRight className="w-4 h-4 text-slate-300" />
-                            </h3>
-                            <p className="text-xs text-slate-400 font-medium">{userProfile.xp} XP au total</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <div className="space-y-2">
-                    <div className="flex justify-between text-[10px] font-bold text-slate-400 uppercase tracking-wider px-1">
-                        <span>XP du niveau actuel</span>
-                        <span>{getLevelProgress()}%</span>
-                    </div>
-                    <div className="h-4 bg-slate-100 rounded-full overflow-hidden border border-slate-50">
-                        <div className="h-full bg-gradient-to-r from-yellow-400 to-amber-500 transition-all duration-700 ease-out shadow-inner" style={{ width: `${getLevelProgress()}%` }}></div>
-                    </div>
-                </div>
-            </button>
+            <div className="bg-gradient-to-r from-emerald-600 to-teal-600 rounded-3xl p-6 text-white shadow-xl relative overflow-hidden group">
+               <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:rotate-12 transition-transform duration-500"><Star className="w-24 h-24" /></div>
+               <span className="text-[10px] font-black uppercase opacity-60 tracking-[0.2em]">Hadith du jour</span>
+               <p className="text-lg italic mt-3 font-serif leading-relaxed pr-8">"{currentHadith}"</p>
+            </div>
 
-            <button onClick={() => setView('stats')} className="w-full bg-white p-6 rounded-2xl border border-slate-100 shadow-sm hover:bg-slate-50 transition-all text-left group flex items-center justify-between">
-                <div>
-                    <div className="text-[10px] text-slate-400 uppercase font-bold tracking-widest mb-1">Objectif du jour</div>
-                    <div className="text-3xl font-black text-emerald-600">{getCompletionRate()}% <span className="text-xs text-slate-400 font-medium">accompli</span></div>
-                </div>
-                <div className="p-4 bg-emerald-50 text-emerald-600 rounded-2xl group-hover:scale-110 transition-transform">
-                    <BarChart3 className="w-6 h-6" />
-                </div>
-            </button>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <button 
+                    onClick={() => setView('levels')}
+                    className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm space-y-4 text-left hover:border-emerald-300 transition-all group"
+                >
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                            <div className="w-12 h-12 bg-yellow-50 text-yellow-600 rounded-2xl flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
+                                <Trophy className="w-6 h-6" />
+                            </div>
+                            <div>
+                                <h3 className="font-black text-slate-800 text-base">Niveau {userProfile.level}</h3>
+                                <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">{userProfile.xp} XP acquis</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="space-y-2">
+                        <div className="h-3 bg-slate-50 rounded-full overflow-hidden border border-slate-100 shadow-inner">
+                            <div className="h-full bg-gradient-to-r from-yellow-400 to-amber-500 transition-all duration-1000 ease-out" style={{ width: `${getLevelProgress()}%` }}></div>
+                        </div>
+                    </div>
+                </button>
+
+                <button onClick={() => setView('stats')} className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm hover:border-emerald-300 transition-all text-left group flex items-center justify-between">
+                    <div>
+                        <div className="text-[10px] text-slate-400 uppercase font-black tracking-widest mb-1">Objectif Quotidien</div>
+                        <div className="text-3xl font-black text-emerald-600">{getCompletionRate()}% <span className="text-[10px] text-slate-400 font-black uppercase tracking-tight">Fait</span></div>
+                    </div>
+                    <div className="p-4 bg-emerald-50 text-emerald-600 rounded-2xl group-hover:rotate-12 transition-transform shadow-sm shadow-emerald-100">
+                        <BarChart3 className="w-6 h-6" />
+                    </div>
+                </button>
+            </div>
 
             <PrayerTracker 
               logs={prayerLogs} 
@@ -344,7 +352,7 @@ const App: React.FC = () => {
         {view === 'profile' && <Profile userProfile={userProfile} setUserProfile={setUserProfile} onBack={() => setView('home')} />}
       </main>
 
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t p-2 flex justify-around items-center z-50 shadow-md">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-lg border-t border-slate-100 p-2 flex justify-around items-center z-50 shadow-2xl safe-area-bottom">
          <NavButton target="home" icon={Home} label="Accueil" />
          <NavButton target="coach" icon={MessageSquare} label="Coach" />
          <NavButton target="tracker" icon={LayoutGrid} label="Habitudes" />
