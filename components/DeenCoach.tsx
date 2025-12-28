@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Sparkles, Send, Loader2, Crown, AlertTriangle } from 'lucide-react';
+import { Sparkles, Send, Loader2, AlertTriangle } from 'lucide-react';
 import { UserProfile, ChatMessage } from '../types';
 import { createChatSession } from '../services/geminiService';
 import { Chat } from '@google/genai';
@@ -65,7 +65,7 @@ const DeenCoach: React.FC<DeenCoachProps> = ({ userProfile, onSubscribe }) => {
 
   return (
     <div className="flex flex-col h-[calc(100vh-140px)] md:h-[650px] bg-white rounded-3xl shadow-xl overflow-hidden border border-slate-100">
-      <div className="bg-emerald-900 p-4 flex items-center justify-between z-10">
+      <div className="bg-emerald-900 p-4 flex items-center justify-between z-10 shrink-0">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-emerald-700 rounded-2xl flex items-center justify-center">
             <Sparkles className="w-5 h-5 text-yellow-300" />
@@ -95,14 +95,21 @@ const DeenCoach: React.FC<DeenCoachProps> = ({ userProfile, onSubscribe }) => {
         <div ref={messagesEndRef} />
       </div>
 
-      <div className="p-4 bg-white border-t border-slate-100">
+      <div className="p-4 bg-white border-t border-slate-100 shrink-0">
         <form onSubmit={handleSendMessage} className="flex gap-2 relative">
-          <input type="text" value={inputValue} onChange={(e) => setInputValue(e.target.value)} placeholder="Posez votre question..." disabled={isLoading || !!initError} className="flex-1 p-3.5 pr-14 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-emerald-500 disabled:opacity-50 text-slate-800" />
+          <input 
+            type="text" 
+            value={inputValue} 
+            onChange={(e) => setInputValue(e.target.value)} 
+            placeholder="Posez votre question..." 
+            disabled={isLoading || !!initError} 
+            className="flex-1 p-3.5 pr-14 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-emerald-500 disabled:opacity-50 text-slate-800 text-sm" 
+          />
           <button type="submit" disabled={isLoading || !inputValue.trim() || !!initError} className="absolute right-2 top-1/2 -translate-y-1/2 p-2.5 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition-all active:scale-95"><Send className="w-5 h-5" /></button>
         </form>
         <div className="mt-3 px-2">
-            <p className="text-[9px] leading-tight text-center text-slate-400">
-                Avertissement : Ce coach est une IA conçue pour l'accompagnement spirituel général. Pour toute question juridique ou religieuse spécifique (Fiqh/Fatwa), veuillez vous référer à des savants qualifiés ou à votre Imam local.
+            <p className="text-[9px] leading-tight text-center text-slate-400 italic">
+                Note : Ce coach est une IA conçue pour l'accompagnement spirituel. Il est impératif de se référer à des savants qualifiés ou à votre imam local pour toute question spécifique de jurisprudence (Fiqh) ou Fatwa.
             </p>
         </div>
       </div>

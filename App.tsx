@@ -44,13 +44,6 @@ const App: React.FC = () => {
   const [view, setView] = useState<ViewMode>('auth');
   const [isDataLoading, setIsDataLoading] = useState(true);
   
-  const [showWelcomeScreen, setShowWelcomeScreen] = useState(true);
-  const [isSignUpMode, setIsSignUpMode] = useState(false);
-  const [authName, setAuthName] = useState('');
-  const [authEmail, setAuthEmail] = useState('');
-  const [authPassword, setAuthPassword] = useState('');
-  const [authError, setAuthError] = useState('');
-
   const [prayerTimes, setPrayerTimes] = useState<PrayerTimes | null>(null);
   const [prayerLoading, setPrayerLoading] = useState(false);
   const [prayerError, setPrayerError] = useState<string | null>(null);
@@ -108,6 +101,21 @@ const App: React.FC = () => {
     });
   };
 
+  const getLevelProgress = () => {
+    if (!userProfile) return 0;
+    const currentLevel = userProfile.level;
+    const currentLevelXP = Math.pow(currentLevel - 1, 2) * 100;
+    const nextLevelXP = Math.pow(currentLevel, 2) * 100;
+    const range = nextLevelXP - currentLevelXP;
+    if (range === 0) return 0;
+    return Math.min(Math.max(Math.round(((userProfile.xp - currentLevelXP) / range) * 100), 0), 100);
+  };
+
+  const getNextLevelXPThreshold = () => {
+    if (!userProfile) return 100;
+    return Math.pow(userProfile.level, 2) * 100;
+  };
+
   const getCompletionRate = () => {
       if (!userProfile) return 0;
       const todayHabitsCount = habits.filter(h => h.frequency.length === 0 || h.frequency.includes(new Date().getDay())).length;
@@ -118,7 +126,7 @@ const App: React.FC = () => {
   };
 
   const NavButton = ({ target, icon: Icon, label }: { target: ViewMode, icon: any, label: string }) => (
-    <button onClick={() => setView(target)} className={`flex flex-col items-center gap-1 p-2 px-3 rounded-2xl transition-all shrink-0 min-w-[70px] ${view === target ? 'text-emerald-600 bg-emerald-50 scale-105 shadow-sm border border-emerald-100/50' : 'text-slate-400 hover:text-slate-600'}`}>
+    <button onClick={() => setView(target)} className={`flex flex-col items-center gap-1 p-2 px-3 rounded-2xl transition-all shrink-0 min-w-[80px] ${view === target ? 'text-emerald-600 bg-emerald-50 scale-105 shadow-sm border border-emerald-100/50' : 'text-slate-400 hover:text-slate-600'}`}>
       <Icon className={`w-5 h-5 ${view === target ? 'stroke-[2px]' : ''}`} />
       <span className={`text-[10px] uppercase tracking-tighter text-center leading-none ${view === target ? 'font-bold' : 'font-semibold'}`}>{label}</span>
     </button>
@@ -134,7 +142,6 @@ const App: React.FC = () => {
                 <img src="/logo.png" alt="Logo" className="w-20 h-20 mx-auto mb-6" />
                 <h1 className="text-2xl font-bold mb-6 text-slate-800">Deen Habits</h1>
                 <button onClick={() => setView('home')} className="w-full bg-emerald-600 text-white py-4 rounded-2xl font-bold shadow-lg shadow-emerald-100">Entrer dans l'app</button>
-                <p className="mt-4 text-xs text-slate-400">Connectez-vous pour sauvegarder votre progression</p>
             </div>
         </div>
     );
@@ -143,18 +150,18 @@ const App: React.FC = () => {
   const mainNavItems = [
     { id: 'tracker', icon: LayoutGrid, label: 'Habitudes' },
     { id: 'challenges', icon: Trophy, label: 'Défis' },
-    { id: 'invocations', icon: BookOpen, label: 'Douas' },
+    { id: 'invocations', icon: BookOpen, label: 'Invocations' },
     { id: 'coach', icon: MessageSquare, label: 'Coach' },
     { id: 'tasbih', icon: Zap, label: 'Tasbih' },
-    { id: 'stats', icon: BarChart3, label: 'Stats' }
+    { id: 'stats', icon: BarChart3, label: 'Statistiques' }
   ];
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 pb-24 md:pb-0 font-sans">
       <main className="max-w-3xl mx-auto p-4 md:p-8 min-h-screen">
-        {/* Header - Affiché uniquement sur l'accueil */}
+        {/* Header - Affiché UNIQUEMENT sur l'accueil */}
         {view === 'home' && (
-            <div className="flex items-center justify-between px-1 mb-8">
+            <div className="flex items-center justify-between px-1 mb-6 animate-in fade-in duration-300">
                 <div className="flex items-center gap-3">
                     <img src="/logo.png" className="w-10 h-10" alt="Logo" />
                     <h1 className="text-2xl font-bold text-emerald-600 tracking-tight">Deen Habits</h1>
@@ -167,46 +174,80 @@ const App: React.FC = () => {
 
         {view === 'home' && (
           <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+            {/* Carte Hadith */}
             <div className="bg-gradient-to-r from-emerald-600 to-teal-600 rounded-3xl p-6 text-white shadow-xl relative overflow-hidden">
                <span className="text-[10px] font-bold uppercase opacity-60 tracking-widest">Hadith du jour</span>
                <p className="text-lg italic mt-3 font-serif leading-relaxed">"{currentHadith}"</p>
             </div>
-            <div className="grid grid-cols-2 gap-4">
-                <button onClick={() => setView('levels')} className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm text-left">
-                    <div className="text-[10px] text-slate-400 uppercase font-bold mb-1">Progression</div>
-                    <div className="text-2xl font-bold text-emerald-600">Niveau {userProfile?.level || 1}</div>
+
+            {/* Section Progression XP - Mise à jour avec barre */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <button onClick={() => setView('levels')} className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm text-left group">
+                    <div className="flex justify-between items-end mb-2">
+                        <div>
+                            <div className="text-[10px] text-slate-400 uppercase font-bold mb-1 tracking-widest">Grade actuel</div>
+                            <div className="text-2xl font-black text-emerald-600">Niveau {userProfile?.level || 1}</div>
+                        </div>
+                        <div className="text-right">
+                             <div className="text-[10px] text-slate-400 uppercase font-bold mb-1 tracking-widest">Progression</div>
+                             <div className="text-sm font-bold text-slate-600">{userProfile?.xp} <span className="text-slate-300">/ {getNextLevelXPThreshold()} XP</span></div>
+                        </div>
+                    </div>
+                    {/* Barre de progression XP */}
+                    <div className="h-2.5 bg-slate-100 rounded-full overflow-hidden mb-2">
+                        <div 
+                          className="h-full bg-gradient-to-r from-emerald-500 to-yellow-400 transition-all duration-1000 ease-out" 
+                          style={{ width: `${getLevelProgress()}%` }}
+                        ></div>
+                    </div>
+                    <div className="flex justify-between items-center">
+                        <span className="text-[10px] text-slate-400 font-bold uppercase">Prochain Grade</span>
+                        <span className="text-[10px] text-emerald-600 font-black uppercase">-{getNextLevelXPThreshold() - (userProfile?.xp || 0)} XP restants</span>
+                    </div>
                 </button>
-                <button onClick={() => setView('stats')} className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm text-left">
-                    <div className="text-[10px] text-slate-400 uppercase font-bold mb-1">Aujourd'hui</div>
-                    <div className="text-2xl font-bold text-emerald-600">{getCompletionRate()}%</div>
+
+                <button onClick={() => setView('stats')} className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm text-left flex flex-col justify-center">
+                    <div className="text-[10px] text-slate-400 uppercase font-bold mb-1 tracking-widest">Objectif du jour</div>
+                    <div className="flex items-center justify-between">
+                        <div className="text-4xl font-black text-emerald-600">{getCompletionRate()}%</div>
+                        <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center">
+                            <BarChart3 className="w-6 h-6" />
+                        </div>
+                    </div>
+                    <p className="text-[10px] text-slate-400 mt-2 font-medium">Validé aujourd'hui</p>
                 </button>
             </div>
+
             <PrayerTracker logs={prayerLogs} setLogs={setPrayerLogs} currentDate={currentDate} onUpdateXP={handleUpdateXP} prayerTimes={prayerTimes} prayerLoading={prayerLoading} prayerError={prayerError} userProfile={userProfile} onOpenQibla={() => setView('qibla')} />
           </div>
         )}
 
-        {view === 'levels' && <LevelInfo currentLevel={userProfile?.level || 1} currentXP={userProfile?.xp || 0} onBack={() => setView('home')} />}
-        {view === 'qibla' && <div className="space-y-4"><button onClick={() => setView('home')} className="flex items-center gap-2 text-slate-400 font-bold"><ChevronLeft className="w-5 h-5" /> Retour</button><QiblaCompass userLocation={currentLocation} /></div>}
-        {view === 'coach' && <DeenCoach userProfile={userProfile!} onSubscribe={() => {}} />}
-        {view === 'tracker' && <HabitTracker habits={habits} logs={logs} setHabits={setHabits} setLogs={setLogs} currentDate={currentDate} onUpdateXP={handleUpdateXP} />}
-        {view === 'invocations' && <InvocationLibrary />}
-        {view === 'tasbih' && <TasbihCounter />}
-        {view === 'challenges' && <Challenges userProfile={userProfile!} onUpdateXP={handleUpdateXP} onToggleChallenge={() => {}} onStartChallenge={() => {}} onCreateChallenge={() => {}} onDeleteChallenge={() => {}} />}
-        {view === 'stats' && <Analytics habits={habits} logs={logs} prayerLogs={prayerLogs} userProfile={userProfile!} />}
-        {view === 'profile' && <Profile userProfile={userProfile!} setUserProfile={setUserProfile} onBack={() => setView('home')} />}
+        {/* Vues de l'application */}
+        <div className={view === 'home' ? '' : 'pt-2 animate-in fade-in duration-300'}>
+            {view === 'levels' && <LevelInfo currentLevel={userProfile?.level || 1} currentXP={userProfile?.xp || 0} onBack={() => setView('home')} />}
+            {view === 'qibla' && <div className="space-y-4"><QiblaCompass userLocation={currentLocation} /></div>}
+            {view === 'coach' && <DeenCoach userProfile={userProfile!} onSubscribe={() => {}} />}
+            {view === 'tracker' && <HabitTracker habits={habits} logs={logs} setHabits={setHabits} setLogs={setLogs} currentDate={currentDate} onUpdateXP={handleUpdateXP} />}
+            {view === 'invocations' && <InvocationLibrary />}
+            {view === 'tasbih' && <TasbihCounter />}
+            {view === 'challenges' && <Challenges userProfile={userProfile!} onUpdateXP={handleUpdateXP} onToggleChallenge={() => {}} onStartChallenge={() => {}} onCreateChallenge={() => {}} onDeleteChallenge={() => {}} />}
+            {view === 'stats' && <Analytics habits={habits} logs={logs} prayerLogs={prayerLogs} userProfile={userProfile!} />}
+            {view === 'profile' && <Profile userProfile={userProfile!} setUserProfile={setUserProfile} onBack={() => setView('home')} />}
+        </div>
       </main>
 
-      {/* Barre de navigation mobile défilable horizontalement */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xl border-t border-slate-100 p-2 z-50 flex overflow-x-auto no-scrollbar justify-start md:justify-around items-center gap-1 px-4 safe-area-bottom">
-         <button onClick={() => setView('home')} className={`flex flex-col items-center gap-1 p-2 px-3 rounded-2xl transition-all shrink-0 min-w-[70px] ${view === 'home' ? 'text-emerald-600 bg-emerald-50 scale-105 shadow-sm border border-emerald-100/50' : 'text-slate-400 hover:text-slate-600'}`}>
-            <Home className="w-5 h-5" />
-            <span className="text-[10px] uppercase tracking-tighter font-semibold">Accueil</span>
-         </button>
+      {/* Barre de navigation mobile scrollable */}
+      <nav className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xl border-t border-slate-100 p-2 z-50 flex overflow-x-auto no-scrollbar justify-start md:justify-center items-center gap-1 px-4 safe-area-bottom">
+         <NavButton target="home" icon={Home} label="Accueil" />
          {mainNavItems.map(item => (
             <NavButton key={item.id} target={item.id as ViewMode} icon={item.icon} label={item.label} />
          ))}
       </nav>
-      <style>{`.no-scrollbar::-webkit-scrollbar { display: none; } .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }`}</style>
+      
+      <style>{`
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      `}</style>
     </div>
   );
 };
