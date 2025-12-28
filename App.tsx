@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { LayoutGrid, BarChart3, MessageSquare, BookOpen, Home, Trophy, Star, User, Zap, ChevronLeft, Loader2, ChevronRight } from 'lucide-react';
 
-import { Habit, HabitLog, ViewMode, PrayerLog, UserProfile } from './types';
+import { Habit, HabitLog, ViewMode, PrayerLog, UserProfile, Challenge } from './types';
 import HabitTracker from './components/HabitTracker';
 import DeenCoach from './components/DeenCoach';
 import Analytics from './components/Analytics';
@@ -90,6 +90,54 @@ const App: React.FC = () => {
     });
     return () => unsubscribe();
   }, []);
+
+  // Handlers pour les Défis
+  const handleToggleChallenge = (challengeId: string) => {
+    if (!userProfile) return;
+    setUserProfile(prev => {
+      if (!prev) return null;
+      const newCompleted = { ...(prev.completedChallenges || {}) };
+      const newActive = { ...(prev.activeChallenges || {}) };
+
+      if (newCompleted[challengeId]) {
+        // Mode "Recommencer" : on retire du statut terminé
+        delete newCompleted[challengeId];
+      } else if (newActive[challengeId]) {
+        // Mode "Valider" : on retire de actif et on ajoute à terminé
+        delete newActive[challengeId];
+        newCompleted[challengeId] = Date.now();
+      }
+
+      return { ...prev, completedChallenges: newCompleted, activeChallenges: newActive };
+    });
+  };
+
+  const handleStartChallenge = (challengeId: string) => {
+    if (!userProfile) return;
+    setUserProfile(prev => {
+      if (!prev) return null;
+      const newActive = { ...(prev.activeChallenges || {}), [challengeId]: Date.now() };
+      return { ...prev, activeChallenges: newActive };
+    });
+  };
+
+  const handleCreateChallenge = (challenge: Challenge) => {
+    if (!userProfile) return;
+    setUserProfile(prev => {
+      if (!prev) return null;
+      const custom = [...(prev.customChallenges || []), challenge];
+      return { ...prev, customChallenges: custom };
+    });
+  };
+
+  const handleDeleteChallenge = (challengeId: string) => {
+    if (!userProfile) return;
+    setUserProfile(prev => {
+      if (!prev) return null;
+      const custom = (prev.customChallenges || []).filter(c => c.id !== challengeId);
+      return { ...prev, customChallenges: custom };
+    });
+  };
 
   const handleUpdateXP = (points: number) => {
     if (!userProfile) return;
@@ -186,7 +234,6 @@ const App: React.FC = () => {
                     <div className="flex justify-between items-end mb-2">
                         <div>
                             <div className="text-[10px] text-slate-400 uppercase font-bold mb-1 tracking-widest">Grade actuel</div>
-                            {/* Police allégée (semibold au lieu de black) */}
                             <div className="text-2xl font-semibold text-emerald-600">Niveau {userProfile?.level || 1}</div>
                         </div>
                         <div className="text-right">
@@ -210,7 +257,6 @@ const App: React.FC = () => {
                 <button onClick={() => setView('stats')} className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm text-left flex flex-col justify-center">
                     <div className="text-[10px] text-slate-400 uppercase font-bold mb-1 tracking-widest">Objectif du jour</div>
                     <div className="flex items-center justify-between">
-                        {/* Police allégée (medium au lieu de black) */}
                         <div className="text-4xl font-medium text-emerald-600 tracking-tight">{getCompletionRate()}%</div>
                         <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center">
                             <BarChart3 className="w-6 h-6" />
@@ -232,7 +278,16 @@ const App: React.FC = () => {
             {view === 'tracker' && <HabitTracker habits={habits} logs={logs} setHabits={setHabits} setLogs={setLogs} currentDate={currentDate} onUpdateXP={handleUpdateXP} />}
             {view === 'invocations' && <InvocationLibrary />}
             {view === 'tasbih' && <TasbihCounter />}
-            {view === 'challenges' && <Challenges userProfile={userProfile!} onUpdateXP={handleUpdateXP} onToggleChallenge={() => {}} onStartChallenge={() => {}} onCreateChallenge={() => {}} onDeleteChallenge={() => {}} />}
+            {view === 'challenges' && (
+              <Challenges 
+                userProfile={userProfile!} 
+                onUpdateXP={handleUpdateXP} 
+                onToggleChallenge={handleToggleChallenge} 
+                onStartChallenge={handleStartChallenge} 
+                onCreateChallenge={handleCreateChallenge} 
+                onDeleteChallenge={handleDeleteChallenge} 
+              />
+            )}
             {view === 'stats' && <Analytics habits={habits} logs={logs} prayerLogs={prayerLogs} userProfile={userProfile!} />}
             {view === 'profile' && <Profile userProfile={userProfile!} setUserProfile={setUserProfile} onBack={() => setView('home')} />}
         </div>
@@ -246,11 +301,9 @@ const App: React.FC = () => {
                 {mainNavItems.map(item => (
                    <NavButton key={item.id} target={item.id as ViewMode} icon={item.icon} label={item.label} />
                 ))}
-                {/* Spacer final pour assurer que le dernier élément ne soit pas collé au bord lors du scroll */}
                 <div className="shrink-0 w-8"></div>
              </nav>
              
-             {/* Indicateur de défilement (Fondu à droite) */}
              <div className="absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-white via-white/40 to-transparent pointer-events-none flex items-center justify-end pr-1 opacity-90">
                 <ChevronRight className="w-4 h-4 text-slate-300 animate-pulse mr-1" />
              </div>
