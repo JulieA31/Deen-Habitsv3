@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { LayoutGrid, BarChart3, MessageSquare, BookOpen, Home, Trophy, Star, User, Zap, ChevronLeft, Loader2, ChevronRight } from 'lucide-react';
 
 import { Habit, HabitLog, ViewMode, PrayerLog, UserProfile, Challenge } from './types';
@@ -52,6 +52,7 @@ const App: React.FC = () => {
   const now = new Date();
   const currentDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
 
+  // Initialisation
   useEffect(() => {
     setCurrentHadith(HADITHS[Math.floor(Math.random() * HADITHS.length)]);
     if (navigator.geolocation) {
@@ -69,6 +70,7 @@ const App: React.FC = () => {
     }
   }, []);
 
+  // Chargement initial depuis Firebase
   useEffect(() => {
     if (!auth) { setIsDataLoading(false); return; }
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
@@ -78,18 +80,60 @@ const App: React.FC = () => {
           const docSnap = await db.collection("users").doc(user.uid).get();
           if (docSnap.exists) {
             const data = docSnap.data();
-            setUserProfile(data?.profile as UserProfile);
-            setHabits(data?.habits || DEFAULT_HABITS);
-            setLogs(data?.logs || {});
-            setPrayerLogs(data?.prayerLogs || {});
+            if (data?.profile) setUserProfile(data.profile as UserProfile);
+            if (data?.habits) setHabits(data.habits);
+            if (data?.logs) setLogs(data.logs);
+            if (data?.prayerLogs) setPrayerLogs(data.prayerLogs);
+            setView('home');
+          } else {
+            // Premier utilisateur
+            const initialProfile: UserProfile = {
+                name: user.displayName || "Utilisateur",
+                email: user.email || "",
+                uid: user.uid,
+                xp: 0,
+                level: 1,
+                isPremium: false,
+                joinedAt: Date.now(),
+                notificationsEnabled: true,
+                prayerNotifications: {},
+                notificationSound: 'beep'
+            };
+            setUserProfile(initialProfile);
             setView('home');
           }
-        } catch (error) { console.error(error); }
+        } catch (error) { console.error("Erreur chargement Firebase:", error); }
       } else { setView('auth'); }
       setIsDataLoading(false);
     });
     return () => unsubscribe();
   }, []);
+
+  // SAUVEGARDE AUTOMATIQUE VERS FIREBASE
+  useEffect(() => {
+    const saveToFirebase = async () => {
+      const user = auth?.currentUser;
+      if (user && db && !isDataLoading && userProfile) {
+        try {
+          await db.collection("users").doc(user.uid).set({
+            profile: userProfile,
+            habits: habits,
+            logs: logs,
+            prayerLogs: prayerLogs,
+            lastSync: Date.now()
+          }, { merge: true });
+        } catch (error) {
+          console.error("Erreur lors de la sauvegarde auto:", error);
+        }
+      }
+    };
+
+    // On ne sauvegarde que si on n'est pas en train de charger
+    if (!isDataLoading) {
+      const timeoutId = setTimeout(saveToFirebase, 1000); // Debounce de 1s pour éviter trop d'écritures
+      return () => clearTimeout(timeoutId);
+    }
+  }, [habits, logs, prayerLogs, userProfile, isDataLoading]);
 
   // Handlers pour les Défis
   const handleToggleChallenge = (challengeId: string) => {
@@ -100,10 +144,8 @@ const App: React.FC = () => {
       const newActive = { ...(prev.activeChallenges || {}) };
 
       if (newCompleted[challengeId]) {
-        // Mode "Recommencer" : on retire du statut terminé
         delete newCompleted[challengeId];
       } else if (newActive[challengeId]) {
-        // Mode "Valider" : on retire de actif et on ajoute à terminé
         delete newActive[challengeId];
         newCompleted[challengeId] = Date.now();
       }
@@ -170,10 +212,12 @@ const App: React.FC = () => {
       const total = todayHabitsCount + 5;
       const doneHabits = habits.filter(h => logs[currentDate]?.[h.id]).length;
       const donePrayers = prayerLogs[currentDate] ? Object.values(prayerLogs[currentDate]).filter(s => s === 'on_time' || s === 'late').length : 0;
-      return Math.round(((doneHabits + donePrayers) / total) * 100) || 0;
+      const rate = Math.round(((doneHabits + donePrayers) / total) * 100) || 0;
+      return Math.min(rate, 100);
   };
 
-  const NavButton = ({ target, icon: Icon, label }: { target: ViewMode, icon: any, label: string }) => (
+  // Fixed TypeScript error: Added key to NavButton props type for list rendering
+  const NavButton = ({ target, icon: Icon, label }: { target: ViewMode, icon: any, label: string, key?: string }) => (
     <button onClick={() => setView(target)} className={`flex flex-col items-center gap-1 p-2 px-3 rounded-2xl transition-all shrink-0 min-w-[85px] ${view === target ? 'text-emerald-600 bg-emerald-50 scale-105 shadow-sm border border-emerald-100/50' : 'text-slate-400 hover:text-slate-600'}`}>
       <Icon className={`w-5 h-5 ${view === target ? 'stroke-[2px]' : ''}`} />
       <span className={`text-[10px] uppercase tracking-tighter text-center leading-none ${view === target ? 'font-bold' : 'font-semibold'}`}>{label}</span>
@@ -207,7 +251,7 @@ const App: React.FC = () => {
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 pb-24 md:pb-0 font-sans">
       <main className="max-w-3xl mx-auto p-4 md:p-8 min-h-screen">
-        {/* Header - Affiché UNIQUEMENT sur l'accueil */}
+        {/* Header - Accueil */}
         {view === 'home' && (
             <div className="flex items-center justify-between px-1 mb-6 animate-in fade-in duration-300">
                 <div className="flex items-center gap-3">
@@ -293,7 +337,7 @@ const App: React.FC = () => {
         </div>
       </main>
 
-      {/* Barre de navigation mobile scrollable avec indicateur de fondu */}
+      {/* Navigation Mobile */}
       <div className="fixed bottom-0 left-0 right-0 z-50">
           <div className="relative bg-white/95 backdrop-blur-xl border-t border-slate-100 safe-area-bottom overflow-hidden">
              <nav className="flex overflow-x-auto no-scrollbar justify-start items-center gap-1 px-4 py-2 relative">
