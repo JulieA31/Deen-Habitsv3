@@ -90,10 +90,10 @@ const CHALLENGES_LIST: Challenge[] = [
     id: 'qiyam_night',
     title: 'Qiyam al-Layl',
     description: "Lève-toi 15min avant le Fajr pour prier 2 rakats dans le calme.",
-    xp: 150,
+    xp: 50,
     icon: '🌌',
     category: 'faith',
-    difficulty: 'hard'
+    difficulty: 'medium'
   },
   {
     id: 'rawatib_12',
