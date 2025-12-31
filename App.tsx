@@ -1,10 +1,8 @@
-
 import React, { useState, useEffect } from 'react';
-import { LayoutGrid, BarChart3, MessageSquare, BookOpen, Home, Trophy, User, Zap, Loader2, ChevronRight, Mail, Lock, LogIn } from 'lucide-react';
+import { LayoutGrid, BarChart3, BookOpen, Home, Trophy, User, Zap, Loader2, ChevronRight, Mail, Lock, LogIn } from 'lucide-react';
 
 import { Habit, HabitLog, ViewMode, PrayerLog, UserProfile, Challenge } from './types';
 import HabitTracker from './components/HabitTracker';
-import DeenCoach from './components/DeenCoach';
 import Analytics from './components/Analytics';
 import PrayerTracker from './components/PrayerTracker';
 import InvocationLibrary from './components/InvocationLibrary';
@@ -325,7 +323,6 @@ const App: React.FC = () => {
     { id: 'tracker', icon: LayoutGrid, label: 'Habitudes' },
     { id: 'challenges', icon: Trophy, label: 'Défis' },
     { id: 'invocations', icon: BookOpen, label: 'Invocations' },
-    { id: 'coach', icon: MessageSquare, label: 'Coach' },
     { id: 'tasbih', icon: Zap, label: 'Tasbih' },
     { id: 'stats', icon: BarChart3, label: 'Statistiques' }
   ];
@@ -385,7 +382,6 @@ const App: React.FC = () => {
         <div className={view === 'home' ? '' : 'pt-2 animate-in fade-in duration-300'}>
             {view === 'levels' && <LevelInfo currentLevel={userProfile?.level || 1} currentXP={userProfile?.xp || 0} onBack={() => setView('home')} />}
             {view === 'qibla' && <QiblaCompass userLocation={currentLocation} />}
-            {view === 'coach' && <DeenCoach userProfile={userProfile!} onSubscribe={() => {}} />}
             {view === 'tracker' && <HabitTracker habits={habits} logs={logs} setHabits={setHabits} setLogs={setLogs} currentDate={currentDate} onUpdateXP={handleUpdateXP} />}
             {view === 'invocations' && <InvocationLibrary />}
             {view === 'tasbih' && <TasbihCounter />}
