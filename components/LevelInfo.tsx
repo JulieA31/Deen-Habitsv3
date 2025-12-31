@@ -34,7 +34,7 @@ const LevelInfo: React.FC<LevelInfoProps> = ({ currentLevel, currentXP, onBack }
   const currentGrade = GRADES.find(g => g.level === currentLevel);
 
   const handleShare = () => {
-    const text = `Alhamdulillah ! Je viens d'atteindre le grade "${currentGrade?.name || 'Croyant'}" (Niveau ${currentLevel}) sur Deen Habits. 🌙✨ Rejoins-moi pour améliorer tes habitudes spirituelles ensemble !`;
+    const text = `Alhamdulillah ! Je viens d'atteindre le grade "${currentGrade?.name || 'Croyant'}" (Niveau ${currentLevel}) sur Deen Habits. 🌙✨ Rejoins-moi pour améliorer nos habitudes spirituelles ensemble !`;
     if (navigator.share) {
       navigator.share({
         title: 'Ma Progression Deen Habits',
