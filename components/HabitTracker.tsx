@@ -466,8 +466,3 @@ const HabitTracker: React.FC<HabitTrackerProps> = ({
 };
 
 export default HabitTracker;
-
-  );
-};
-
-export default HabitTracker;
