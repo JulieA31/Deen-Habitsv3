@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { LayoutGrid, BarChart3, BookOpen, Home, Trophy, User, Zap, Loader2, ChevronRight, Mail, Lock, LogIn } from 'lucide-react';
+import { LayoutGrid, BarChart3, BookOpen, Home, Trophy, User, Zap, Loader2, ChevronRight, Mail, Lock, LogIn, AlertTriangle } from 'lucide-react';
 
 import { Habit, HabitLog, ViewMode, PrayerLog, UserProfile, Challenge } from './types';
 import HabitTracker from './components/HabitTracker';
@@ -257,7 +257,16 @@ const App: React.FC = () => {
                 <img src="/logo.png" alt="Logo" className="w-20 h-20 mb-6 drop-shadow-md" />
                 <h1 className="text-3xl font-black text-slate-800 mb-2">Deen Habits</h1>
                 <p className="text-slate-400 text-sm mb-8 text-center px-4 font-medium">Ton compagnon quotidien pour une vie spirituelle épanouie.</p>
-                
+                               
+                {!auth && (
+                  <div className="w-full bg-amber-50 text-amber-700 p-4 rounded-xl text-xs mb-6 border border-amber-100 font-medium flex gap-3">
+                    <AlertTriangle className="w-5 h-5 shrink-0" />
+                    <div>
+                      <strong className="block mb-1">Configuration manquante</strong>
+                      L'authentification est indisponible car les clés Firebase ne sont pas configurées. Veuillez vérifier vos variables d'environnement.
+                    </div>
+                  </div>
+                )}
                 {authError && (
                   <div className="w-full bg-red-50 text-red-600 p-3 rounded-xl text-xs mb-4 border border-red-100 font-medium">
                     {authError}
@@ -272,8 +281,9 @@ const App: React.FC = () => {
                       placeholder="Email" 
                       required
                       value={email}
+                      disabled={!auth}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none text-slate-800 text-sm"
+                      className="w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none text-slate-800 text-sm disabled:opacity-50"
                     />
                   </div>
                   <div className="relative">
@@ -283,13 +293,14 @@ const App: React.FC = () => {
                       placeholder="Mot de passe" 
                       required
                       value={password}
+                      disabled={!auth}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none text-slate-800 text-sm"
+                      className="w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none text-slate-800 text-sm disabled:opacity-50"
                     />
                   </div>
                   <button 
-                    disabled={isAuthProcessing}
-                    className="w-full bg-emerald-600 text-white py-4 rounded-2xl font-bold shadow-lg shadow-emerald-100 hover:bg-emerald-700 transition-all flex items-center justify-center gap-2"
+                    disabled={isAuthProcessing || !auth}
+                    className="w-full bg-emerald-600 text-white py-4 rounded-2xl font-bold shadow-lg shadow-emerald-100 hover:bg-emerald-700 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:shadow-none"
                   >
                     {isAuthProcessing ? <Loader2 className="w-5 h-5 animate-spin" /> : <><LogIn className="w-5 h-5" /> {authMode === 'login' ? 'Se connecter' : "S'inscrire"}</>}
                   </button>
@@ -303,8 +314,8 @@ const App: React.FC = () => {
 
                 <button 
                   onClick={handleGoogleSignIn}
-                  disabled={isAuthProcessing}
-                  className="w-full border border-slate-200 text-slate-600 py-3.5 rounded-2xl font-bold hover:bg-slate-50 transition-all flex items-center justify-center gap-3 text-sm"
+                  disabled={isAuthProcessing || !auth}
+                  className="w-full border border-slate-200 text-slate-600 py-3.5 rounded-2xl font-bold hover:bg-slate-50 transition-all flex items-center justify-center gap-3 text-sm disabled:opacity-50"
                 >
                   <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/pjax-loader.gif" className="hidden" alt="" />
                   <svg className="w-5 h-5" viewBox="0 0 24 24"><path fill="#EA4335" d="M5.266 9.765A7.077 7.077 0 0 1 12 4.909c1.69 0 3.218.6 4.418 1.582L19.91 3C17.782 1.145 15.055 0 12 0 7.27 0 3.198 2.698 1.24 6.65l4.026 3.115z"/><path fill="#34A853" d="M16.04 18.013c-1.09.613-2.346.956-3.682.956-3.414 0-6.288-2.321-7.092-5.454l-4.04 3.114C3.18 21.053 7.243 24 12 24c3.055 0 5.794-1.145 7.922-3.045l-3.882-2.942z"/><path fill="#4A90E2" d="M19.922 20.955c1.474-1.32 2.454-3.23 2.454-5.605 0-.416-.041-.82-.123-1.22H12v4.61h5.666c-.244 1.332-1 2.455-2.022 3.157l3.922 3.003c.01-.001.344-.251.356-.251v-.01z"/><path fill="#FBBC05" d="M5.266 14.235A7.088 7.088 0 0 1 4.909 12c0-.783.123-1.538.357-2.235L1.24 6.65A11.962 11.962 0 0 0 0 12c0 1.92.455 3.733 1.248 5.345l4.018-3.11z"/></svg>
@@ -313,10 +324,15 @@ const App: React.FC = () => {
 
                 <button 
                   onClick={() => setAuthMode(authMode === 'login' ? 'register' : 'login')}
-                  className="mt-6 text-sm text-emerald-600 font-bold hover:underline"
+                  disabled={!auth}
+                  className="mt-6 text-sm text-emerald-600 font-bold hover:underline disabled:opacity-50"
                 >
                   {authMode === 'login' ? "Pas encore de compte ? S'inscrire" : "Déjà un compte ? Se connecter"}
                 </button>
+            </div>
+             
+            <div className="absolute bottom-4 text-[10px] text-slate-400">
+               <a href="/privacy.html" target="_blank" className="hover:text-emerald-600 hover:underline">Politique de confidentialité</a>
             </div>
         </div>
     );
