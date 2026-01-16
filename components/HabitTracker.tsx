@@ -77,7 +77,7 @@ const HabitTracker: React.FC<HabitTrackerProps> = ({
 
   const [newHabitTitle, setNewHabitTitle] = useState('');
   const [newHabitCategory, setNewHabitCategory] = useState<Habit['category']>('deen');
-  const [newHabitXP, setNewHabitXP] = useState(10);
+  const [newHabitXP, setNewHabitXP] = useState<number | string>(10);
   const [frequency, setFrequency] = useState<number[]>([]);
 
   const toggleHabit = (habitId: string, xpValue: number) => {
@@ -103,8 +103,17 @@ const HabitTracker: React.FC<HabitTrackerProps> = ({
     if (e) e.preventDefault();
     const title = suggestion ? suggestion.title : newHabitTitle;
     const category = suggestion ? (suggestion.category as Habit['category']) : newHabitCategory;
-    const xp = suggestion ? suggestion.xp : newHabitXP;
-
+       
+    // Gestion robuste de l'XP : si c'est une chaîne vide ou invalide, on met 0 ou 10 par défaut
+    let xpVal = 10;
+    if (suggestion) {
+        xpVal = suggestion.xp;
+    } else {
+        const parsed = parseInt(String(newHabitXP));
+        if (!isNaN(parsed)) {
+            xpVal = parsed;
+        }
+    }
     if (!title.trim()) return;
 
     const newHabit: Habit = {
@@ -117,7 +126,7 @@ const HabitTracker: React.FC<HabitTrackerProps> = ({
       icon: CATEGORY_ICONS[category as keyof typeof CATEGORY_ICONS] || (suggestion?.icon ?? '✨'),
       createdAt: Date.now(),
       frequency,
-      xp,
+      xp: xpVal,
     };
 
     setHabits((prev) => [...prev, newHabit]);
