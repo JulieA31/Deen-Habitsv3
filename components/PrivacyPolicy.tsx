@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { ArrowLeft, Shield, Lock, Database, Eye } from 'lucide-react';
+import { ArrowLeft, Shield, Lock, Database, Eye, MapPin, Trash2 } from 'lucide-react';
 import { ViewMode } from '../types';
 
 interface PrivacyPolicyProps {
@@ -35,11 +35,21 @@ const PrivacyPolicy: React.FC<PrivacyPolicyProps> = ({ onBack }) => {
                 Chez Deen Habits, nous minimisons la collecte de données. Les informations que nous stockons sont strictement nécessaires au fonctionnement de l'application :
             </p>
             <ul className="list-disc pl-5 space-y-1 text-sm">
-                <li>Votre prénom et adresse email (pour l'authentification).</li>
+                <li>Votre prénom et adresse email (pour l'authentification sécurisée).</li>
                 <li>Vos habitudes et leur suivi (logs).</li>
                 <li>Vos données de suivi des prières.</li>
-                <li>Votre niveau d'expérience (XP) et vos préférences (notifications).</li>
+                <li>Votre niveau d'expérience (XP).</li>
             </ul>
+        </section>
+
+        <section>
+            <h2 className="text-lg font-bold text-slate-800 mb-3 flex items-center gap-2">
+                <MapPin className="w-5 h-5 text-red-500" /> Géolocalisation
+            </h2>
+            <p>
+                L'accès à votre position géographique peut être demandé uniquement lorsque vous souhaitez mettre à jour les horaires de prière en fonction de votre lieu actuel.
+                Ces coordonnées ne sont utilisées que pour interroger l'API de calcul d'horaires et ne sont <strong>pas stockées</strong> sur nos serveurs.
+            </p>
         </section>
 
         <section>
@@ -49,33 +59,23 @@ const PrivacyPolicy: React.FC<PrivacyPolicyProps> = ({ onBack }) => {
             <p>
                 Vos données sont stockées de manière sécurisée sur <strong>Google Firebase</strong> (Firestore), un leader mondial en matière d'infrastructure cloud sécurisée. 
                 L'authentification est gérée par Firebase Auth, garantissant que vous seul avez accès à votre compte.
-                Nous ne vendons, ne louons et ne partageons <strong>jamais</strong> vos données personnelles à des tiers à des fins publicitaires.
+                Nous ne vendons, ne louons et ne partageons <strong>jamais</strong> vos données personnelles à des tiers.
             </p>
         </section>
 
         <section>
             <h2 className="text-lg font-bold text-slate-800 mb-3 flex items-center gap-2">
-                <Eye className="w-5 h-5 text-purple-500" /> Intelligence Artificielle (Coach Deen)
+                <Trash2 className="w-5 h-5 text-slate-500" /> Suppression de compte
             </h2>
-            <p>
-                Lorsque vous discutez avec le Coach IA, vos messages sont envoyés à l'API de Google Gemini pour générer une réponse. 
-                Ces données sont transitoires et ne sont pas utilisées pour entraîner les modèles publics de manière à vous identifier. 
-                Nous vous conseillons de ne jamais partager d'informations sensibles (bancaires, mots de passe, secrets intimes) avec l'IA.
-            </p>
-        </section>
-
-        <section>
-            <h2 className="text-lg font-bold text-slate-800 mb-3">Vos Droits</h2>
-            <p className="mb-2">Conformément au RGPD et aux lois sur la protection des données, vous disposez des droits suivants :</p>
+            <p className="mb-2">Vous disposez d'un droit total sur vos données. Pour supprimer votre compte et toutes les données associées :</p>
             <ul className="list-disc pl-5 space-y-1 text-sm">
-                <li>Droit d'accès à vos données.</li>
-                <li>Droit de rectification.</li>
-                <li>Droit à l'effacement (Suppression du compte disponible dans le profil).</li>
+                <li>Utilisez le bouton <strong>"Supprimer mon compte"</strong> situé en bas de la page de votre Profil.</li>
+                <li>Ou contactez-nous directement par email à : <strong className="text-emerald-600">studio@deenhabits.app</strong></li>
             </ul>
         </section>
 
         <div className="pt-6 border-t border-slate-100 text-xs text-slate-400">
-            Dernière mise à jour : Octobre 2023. Pour toute question, contactez-nous via le support de l'application.
+            Dernière mise à jour : Octobre 2023. L'application est gratuite.
         </div>
       </div>
     </div>
