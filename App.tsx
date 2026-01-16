@@ -119,13 +119,16 @@ const App: React.FC = () => {
       const user = auth?.currentUser;
       if (user && db && !isDataLoading && userProfile) {
         try {
+           // On retire { merge: true } pour forcer l'écrasement du document.
+          // Cela permet de gérer correctement les suppressions (clés retirées des objets/maps),
+          // comme par exemple la réinitialisation d'un défi.
           await db.collection("users").doc(user.uid).set({
             profile: userProfile,
             habits: habits,
             logs: logs,
             prayerLogs: prayerLogs,
             lastSync: Date.now()
-          }, { merge: true });
+          });
         } catch (error) { console.error(error); }
       }
     };
