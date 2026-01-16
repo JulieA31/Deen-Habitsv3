@@ -22,7 +22,7 @@ const SUNNAH_HABITS = [
   { title: 'Tasbih post-prière', category: 'deen', icon: '☝️', description: "33x SubhanAllah, Alhamdulillah, Allahu Akbar.", xp: 10 },
   { title: 'Istighfar quotidien', category: 'deen', icon: '💧', description: "Demander pardon à Allah régulièrement.", xp: 10 },
   { title: 'Lire Sourate Al-Mulk', category: 'deen', icon: '📖', description: "Chaque soir pour la protection de la tombe.", xp: 20 },
-  { title: 'Lire Sourate Al-Kahf', category: 'deen', icon: '🔦', description: "Le Vendredi (Lumière entre deux vendredis).", xp: 50 },
+  { title: 'Lire Sourate Al-Kahf', category: 'deen', icon: '🔦', description: "Le Vendredi (Lumière entre deux vendredis).", xp: 30 },
   { title: 'Jeûner Lundi/Jeudi', category: 'deen', icon: '📅', description: "Jeûner comme le Prophète (sws).", xp: 50 },
   { title: 'Jeûner Jours Blancs', category: 'deen', icon: '🌕', description: "13, 14 et 15ème jour du mois lunaire.", xp: 50 },
   
@@ -77,7 +77,9 @@ const HabitTracker: React.FC<HabitTrackerProps> = ({
 
   const [newHabitTitle, setNewHabitTitle] = useState('');
   const [newHabitCategory, setNewHabitCategory] = useState<Habit['category']>('deen');
-  const [newHabitXP, setNewHabitXP] = useState<number | string>(10);
+  
+  // On initialise à vide pour ne pas afficher de "0" ou "10" par défaut
+  const [newHabitXP, setNewHabitXP] = useState<number | string>('');
   const [frequency, setFrequency] = useState<number[]>([]);
 
   const toggleHabit = (habitId: string, xpValue: number) => {
@@ -103,9 +105,9 @@ const HabitTracker: React.FC<HabitTrackerProps> = ({
     if (e) e.preventDefault();
     const title = suggestion ? suggestion.title : newHabitTitle;
     const category = suggestion ? (suggestion.category as Habit['category']) : newHabitCategory;
-       
-    // Gestion robuste de l'XP : si c'est une chaîne vide ou invalide, on met 0 ou 10 par défaut
-    let xpVal = 10;
+    
+    // Si c'est vide lors de la validation, on met 0 par défaut (ou 10 si vous préférez)
+    let xpVal = 0;
     if (suggestion) {
         xpVal = suggestion.xp;
     } else {
@@ -114,6 +116,7 @@ const HabitTracker: React.FC<HabitTrackerProps> = ({
             xpVal = parsed;
         }
     }
+
     if (!title.trim()) return;
 
     const newHabit: Habit = {
@@ -132,7 +135,7 @@ const HabitTracker: React.FC<HabitTrackerProps> = ({
     setHabits((prev) => [...prev, newHabit]);
 
     setNewHabitTitle('');
-    setNewHabitXP(10);
+    setNewHabitXP(''); // On remet à vide après l'ajout
     setFrequency([]);
     setIsAdding(false);
     setShowSuggestions(false);
@@ -353,10 +356,11 @@ const HabitTracker: React.FC<HabitTrackerProps> = ({
                 <Trophy className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <input
                   type="number"
-                  min={1}
-                  max={100}
+                  min="0"
+                  max="100"
                   value={newHabitXP}
-                  onChange={(e) => setNewHabitXP(parseInt(e.target.value) || 0)}
+                  placeholder="0"
+                  onChange={(e) => setNewHabitXP(e.target.value)}
                   className="w-full pl-10 p-3 border border-slate-200 bg-white text-slate-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 />
               </div>
@@ -458,6 +462,11 @@ const HabitTracker: React.FC<HabitTrackerProps> = ({
         </div>
       )}
     </div>
+  );
+};
+
+export default HabitTracker;
+
   );
 };
 
