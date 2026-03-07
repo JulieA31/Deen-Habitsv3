@@ -1,0 +1,15 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls",
+      "delegate_permission/common.get_login_creds"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "deenhabits.app",
+      "sha256_cert_fingerprints": [
+        "68:78:7E:6F:E5:4C:39:78:60:EF:1B:8E:E1:E9:81:1B:83:80:15:48:60:73:DB:4F:ED:A1:4E:BE:EF:0E:1A:D3"
+      ]
+    }
+  }
+]
